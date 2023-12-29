@@ -1,5 +1,5 @@
 /**
- * @file kbpoll.c
+ * @file kbsig.c
  * @author Derek Huang
  * @brief Expert C Programming (p217): signal-driven input handling program
  * @copyright MIT License

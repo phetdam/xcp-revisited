@@ -100,7 +100,7 @@ $(BUILDDIR)/sigcatch \
 $(BUILDDIR)/locapprox \
 $(BUILDDIR)/sigbus \
 $(BUILDDIR)/sigsegv \
-$(BUILDDIR)/kbpoll \
+$(BUILDDIR)/kbsig \
 segsizes
 	@echo "All targets built"
 
@@ -135,8 +135,8 @@ $(BUILDDIR)/sigsegv: $(BUILDDIR)/src/sigsegv.o
 	@echo "Linking $@..."
 	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 
-# kbpoll: interrupt-driven input handling program
-$(BUILDDIR)/kbpoll: $(BUILDDIR)/src/kbpoll.o
+# kbsig: signal-driven input handling program
+$(BUILDDIR)/kbsig: $(BUILDDIR)/src/kbsig.o
 	@echo "Linking $@..."
 	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 
