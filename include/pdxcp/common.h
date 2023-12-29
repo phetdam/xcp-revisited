@@ -12,6 +12,10 @@
 #define PDXCP_STRINGIFY_I(x) #x
 #define PDXCP_STRINGIFY(x) PDXCP_STRINGIFY_I(x)
 
+// concatenation macros
+#define PDXCP_CONCAT_I(x, y) x ## y
+#define PDXCP_CONCAT(x, y) PDXCP_CONCAT_I(x, y)
+
 // extern "C" guards
 #if defined(__cplusplus)
 #define PDXCP_EXTERN_C_BEGIN extern "C" {
