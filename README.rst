@@ -68,5 +68,4 @@ To enable AddressSanitizer and specify a different compiler, one can use
 
 .. code:: bash
 
-   cmake -S . -B build -DCMAKE_C_COMPILER=clang -DENABLE_ASAN=1 &&
-   cmake --build build -j
+   cmake -S . -B build -DCMAKE_C_COMPILER=clang -DENABLE_ASAN=1 && cmake --build build -j
