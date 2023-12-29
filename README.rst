@@ -6,12 +6,15 @@ xcp-revisited
 Exercises from Peter van der Linden's *Expert C Programming*.
 
 A revisiting of a book I'd purchased some time ago but had never gotten around
-to really digging through.
+to really reading through.
 
 About
 -----
 
-TBD.
+TBD. Although the book is somewhat dated, it's fun to read and still useful. In
+fact, I actually started reading and doing the book's programming exercises
+during my 2023 year-end vacation, so at least to me there is both educational
+and entertainment value to be found.
 
 Building from source
 --------------------
