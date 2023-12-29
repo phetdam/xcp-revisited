@@ -10,6 +10,8 @@ add_executable(locapprox locapprox.c)
 add_executable(sigbus sigbus.c)
 # sigsegv: creates and catches segmentation fault caused by null pointer use
 add_executable(sigsegv sigsegv.c)
+# kbpoll: signal-driven input handling program
+add_executable(kbpoll kbpoll.c)
 
 # segsize1: program to get segment sizes (1)
 add_executable(segsize1 segsize.c)
