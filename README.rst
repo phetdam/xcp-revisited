@@ -19,9 +19,10 @@ and entertainment value to be found. Can't say no to having fun while learning.
 Building from source
 --------------------
 
-TBD. Currently requires Make_ although adding a CMake_ config is a must.
+Make
+~~~~
 
-For Make, one can build a debugging, i.e. no optimization build, with
+For Make_, one can build a debugging, i.e. no optimization build, with
 
 .. code:: bash
 
@@ -33,14 +34,12 @@ To build with optimization, one can specify ``CONFIG=Release``, e.g.
 
    make CONFIG=Release
 
-Other variables can be used to control the build, e.g. to enable
-AddressSanitizer_ and specify a different compiler, in this case Clang_, one
-can use
+Other variables can be used, e.g. to enable AddressSanitizer_ and specify a
+different compiler, in this case Clang_, one can use
 
 .. code:: bash
 
    make CC=clang ENABLE_ASAN=1
-
 
 .. _Make: https://www.gnu.org/software/make/
 
@@ -49,3 +48,25 @@ can use
 .. _AddressSanitizer: https://github.com/google/sanitizers/wiki/AddressSanitizer
 
 .. _Clang: https://clang.llvm.org/
+
+CMake
+~~~~~
+
+TBD. Currently one can build a debugging build with
+
+.. code:: bash
+
+   cmake -S . -B build && cmake --build build -j
+
+To build a release build, use
+
+.. code:: bash
+
+   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
+
+To enable AddressSanitizer and specify a different compiler, one can use
+
+.. code:: bash
+
+   cmake -S . -B build -DCMAKE_C_COMPILER=clang -DENABLE_ASAN=1 &&
+   cmake --build build -j
