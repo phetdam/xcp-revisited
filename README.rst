@@ -34,8 +34,8 @@ To build with optimization, one can specify ``CONFIG=Release``, e.g.
 
    make CONFIG=Release
 
-Other variables can be used, e.g. to enable AddressSanitizer_ and specify a
-different compiler, in this case Clang_, one can use
+To enable AddressSanitizer_ and specify a different compiler, in this case
+Clang_, one can use
 
 .. code:: bash
 
