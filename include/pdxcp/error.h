@@ -1,0 +1,61 @@
+/**
+ * @file error.h
+ * @author Derek Huang
+ * @brief C/C++ header for error helpers
+ * @copyright MIT License
+ */
+
+#ifndef PDXCP_ERROR_H_
+#define PDXCP_ERROR_H_
+
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "pdxcp/common.h"
+
+PDXCP_EXTERN_C_BEGIN
+
+/**
+ * Print message for the error code and exit with `exit(EXIT_FAILURE)`.
+ *
+ * @param err Error code, e.g. from `errno`
+ */
+PDXCP_INLINE void
+pdxcp_error_exit(int err)
+{
+  fprintf(stderr, "Error: %s\n", strerror(err));
+  exit(EXIT_FAILURE);
+}
+
+/**
+ * Print message for the error code and exit with `_exit(EXIT_FAILURE)`.
+ *
+ * @param err Error code, e.g. from `errno`
+ */
+PDXCP_INLINE void
+pdxcp_error_exit_now(int err)
+{
+  fprintf(stderr, "Error: %s\n", strerror(err));
+  _exit(EXIT_FAILURE);
+}
+
+/**
+ * Exit using `pdxcp_error_exit(errno)` if `expr` is `false`.
+ *
+ * @param expr Expression to evaluate
+ */
+#define PDXCP_ERRNO_EXIT_IF(expr) if (expr) pdxcp_error_exit(errno)
+
+/**
+ * Exit using `pdxcp_error_exit_now(errno)` if `expr` is `false`.
+ *
+ * @param expr Expression to evaluate
+ */
+#define PDXCP_ERRNO_EXIT_NOW_IF(expr) if (expr) pdxcp_error_exit_now(errno)
+
+PDXCP_EXTERN_C_END
+
+#endif  // PDXCP_ERROR_H_
