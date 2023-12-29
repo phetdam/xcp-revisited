@@ -20,7 +20,8 @@
 // program name set from argv[0]. needed by execv
 const char *progname = NULL;
 
-// SIGBREAK is only available on Windows/MinGW
+// SIGBREAK is only available on Windows/MinGW. seems that there is also no
+// need to reinstall the handler on upon signal receipt
 #ifdef _WIN32
 /**
  * `SIGBREAK` handler that prints a message.
