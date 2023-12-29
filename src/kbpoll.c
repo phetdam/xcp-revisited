@@ -1,7 +1,7 @@
 /**
  * @file kbpoll.c
  * @author Derek Huang
- * @brief Expert C Programming (p217): event-driven input handling program
+ * @brief Expert C Programming (p217): signal-driven input handling program
  * @copyright MIT License
  */
 
@@ -89,7 +89,8 @@ main()
   PDXCP_ERRNO_EXIT_IF(sigaction(SIGPOLL, &sigpoll_action, NULL));
   //
   // no I_SETSIG ioctl on Linux since the (obsolete) POSIX STREAMS is not
-  // implemented. the standard way to achieve the same result is using fcntl.
+  // implemented. the standard way to achieve the same result is using fcntl;
+  // see https://stackoverflow.com/a/45376104/14227825 for an example.
   //
   // get current stdin file status flags
   int flags = fcntl(STDIN_FILENO, F_GETFL);
