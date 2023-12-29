@@ -36,9 +36,10 @@ main()
   free(sniff_heap);
 #endif  // !defined(_DEFAULT_SOURCE) && !defined(_BSD_SOURCE)
   // make stack grow by initializing a buffer
-  char buf[BUFSIZ] = "my message";
+  char buf[BUFSIZ] = {'h', 'e', 'l', 'l', 'o'};
   // note that buf is same as &buf here since arrays decay to pointers
-  printf("Approx. top of stack: 0x%p (+ char[%d])\n", buf, sizeof buf);
+  // TODO: addresses seem to be increasing... oops?
+  printf("Approx. top of stack: 0x%p (+ char[%ld])\n", buf, sizeof buf);
   // grow stack some more
   unsigned long long longbuf[BUFSIZ * 2] = {8888};
   printf(

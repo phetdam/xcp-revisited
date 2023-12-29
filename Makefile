@@ -1,6 +1,6 @@
 # File: Makefile
 # Author: Derek Huang
-# Brief: Makefile for the Expert C Programming exercises 
+# Brief: Makefile for the Expert C Programming exercises
 # Copyright: MIT License
 #
 # Debug build:
@@ -181,9 +181,9 @@ $(BUILDDIR)/segsize4b: src/segsize.c $(HEADERS)
 # segsize5d: program to get segment sizes (5, 4b compiled with debug flags)
 $(BUILDDIR)/segsize5d: src/segsize.c $(HEADERS)
 	@echo "Building $@..."
-	$(CC) -g -DSEGSIZE_STEPS=5 -o $@ $<
+	$(CC) -Wall -g -DSEGSIZE_STEPS=5 -o $@ $<
 
 # segsize5r: program to get segment sizes (5, 4b compiled with release flags)
 $(BUILDDIR)/segsize5r: src/segsize.c $(HEADERS)
 	@echo "Building $@..."
-	$(CC) -O3 -mtune=native -DSEGSIZE_STEPS=5 -o $@ $<
+	$(CC) -Wall -O3 -mtune=native -DSEGSIZE_STEPS=5 -o $@ $<
