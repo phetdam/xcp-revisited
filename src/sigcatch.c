@@ -71,7 +71,7 @@ main(int argc, char *argv[])
   while (true) {
     printf("Waiting... ");
     fflush(stdout);
-    (void) pause();
+    pause();
   }
   return EXIT_SUCCESS;
 }
