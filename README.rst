@@ -14,7 +14,7 @@ About
 TBD. Although the book is somewhat dated, it's fun to read and still useful. In
 fact, I actually started reading and doing the book's programming exercises
 during my 2023 year-end vacation, so at least to me there is both educational
-and entertainment value to be found.
+and entertainment value to be found. Can't say no to having fun while learning.
 
 Building from source
 --------------------
