@@ -31,10 +31,8 @@ const char *progname = NULL;
 static void
 sigbreak_handler(int signum)
 {
-  switch (signum) {
-    case SIGBREAK:
-      puts("Caught SIGBREAK. Continuing");
-  }
+  if (signum == SIGBREAK)
+    puts("Caught SIGBREAK. Continuing");
 }
 #endif  // _WIN32
 
@@ -48,10 +46,8 @@ sigbreak_handler(int signum)
 static void
 sigint_handler(int signum)
 {
-  switch (signum) {
-    case SIGINT:
-      puts("Caught SIGINT. Restarting");
-  }
+  if (signum == SIGINT)
+    puts("Caught SIGINT. Restarting");
 }
 
 int
