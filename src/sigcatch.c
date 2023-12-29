@@ -77,9 +77,10 @@ main(int argc, char *argv[])
   struct sigaction sigint_action = {.sa_handler = sigint_handler};
   PDXCP_ERRNO_EXIT_IF(sigaction(SIGINT, &sigint_action, NULL));
 #endif  // !defined(_WIN32)
+  printf("Waiting... ");
+  fflush(stdout);
   // block thread. sleep 1 ms to be easier on the CPU
   // note: hangs on WSL, maybe just use setjmp/longjmp?
-  printf("Waiting... ");
   while (true) {
     struct timespec spec = {.tv_nsec = 1000};
     // could be interrupted by signal handlers
