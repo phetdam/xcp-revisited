@@ -100,6 +100,7 @@ $(BUILDDIR)/sigcatch \
 $(BUILDDIR)/locapprox \
 $(BUILDDIR)/sigbus \
 $(BUILDDIR)/sigsegv \
+$(BUILDDIR)/kbpoll \
 segsizes
 	@echo "All targets built"
 
@@ -131,6 +132,11 @@ $(BUILDDIR)/sigbus: $(BUILDDIR)/src/sigbus.o
 
 # sigsegv: creates and catches segmentation fault caused by null pointer use
 $(BUILDDIR)/sigsegv: $(BUILDDIR)/src/sigsegv.o
+	@echo "Linking $@..."
+	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+
+# kbpoll: interrupt-driven input handling program
+$(BUILDDIR)/kbpoll: $(BUILDDIR)/src/kbpoll.o
 	@echo "Linking $@..."
 	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 
