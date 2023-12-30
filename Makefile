@@ -101,6 +101,7 @@ $(BUILDDIR)/locapprox \
 $(BUILDDIR)/sigbus \
 $(BUILDDIR)/sigsegv \
 $(BUILDDIR)/kbsig \
+$(BUILDDIR)/kbpoll \
 segsizes
 	@echo "All targets built"
 
@@ -139,6 +140,11 @@ $(BUILDDIR)/sigsegv: $(BUILDDIR)/src/sigsegv.o
 $(BUILDDIR)/kbsig: $(BUILDDIR)/src/kbsig.o
 	@echo "Linking $@..."
 	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+
+# kbpoll: event-driven input handling program using pthreads
+$(BUILDDIR)/kbpoll: src/kbpoll.c $(HEADERS)
+	@echo "Building $@..."
+	$(CC) $(BASE_CFLAGS) -pthread $(CFLAGS) -o $@ $<
 
 # final ls + size call for showing the segment sizes for segsize[N]. note that
 # on Windows (MinGW), we need to also add the .exe suffix. awk is used to
