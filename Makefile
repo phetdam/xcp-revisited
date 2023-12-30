@@ -10,6 +10,12 @@
 # make CC=gcc BUILD_TYPE=Release
 #
 
+# compiler path + compiler version string
+CC_PATH = $(shell which $(CC))
+$(info CC path: $(CC_PATH))
+CC_VERSION_STRING = $(shell $(CC) --version | head -1)
+$(info CC version: $(CC_VERSION_STRING))
+
 # Debug by default
 CONFIG ?= Debug
 # either Debug or Release only
@@ -23,7 +29,7 @@ endif
 
 # build directory. could use absolute, but relative is shorter
 BUILDDIR ?= build
-$(info Build Directory: $(BUILDDIR))
+$(info Build directory: $(BUILDDIR))
 
 # check if we are on Windows (MinGW). note extra space in sed pattern
 WIN32 = $(shell \
