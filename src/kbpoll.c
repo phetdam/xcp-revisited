@@ -86,10 +86,7 @@ counter_task(void *arg)
   size_t spin_count = timespec_ms(&payload->sleepspec);
   struct timespec spin_spec = {.tv_nsec = 1000000};
   // loop until done or until something is wrong
-  while (
-    !(status = PDXCP_LKABLE_GET(bool)(&payload->stopspec, &stop_loop)) &&
-    !stop_loop
-  ) {
+  while (true) {
     // sleep, checking every 1 ms if we need to break, exiting on error
     for (size_t i = 0; i < spin_count; i++) {
       // break could be due to error or due to actually needing to break
