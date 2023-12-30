@@ -178,7 +178,7 @@ int
 main()
 {
   int status;
-  // worker payload with counter, loop indicator, and timespec struct
+  // worker payload with counter, loop stop indicator, and timespec struct
   worker_payload payload = {
     {0, PTHREAD_MUTEX_INITIALIZER},
     {false, PTHREAD_MUTEX_INITIALIZER},
