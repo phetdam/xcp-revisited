@@ -30,7 +30,7 @@ PDXCP_EXTERN_C_BEGIN
  * @param type Value member type
  */
 #define PDXCP_LKABLE_DEF(type) \
-  typedef struct { \
+  typedef struct PDXCP_LKABLE(type) { \
     type value; \
     pthread_mutex_t mutex; \
   } PDXCP_LKABLE(type);

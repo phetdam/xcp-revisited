@@ -134,7 +134,7 @@ handle_input_events(int fd, PDXCP_LKABLE(size_t) *counter)
   puts("Type 'q' or 'Q' to exit");
   printf("Waiting for input... ");
   fflush(stdout);
-  // begin event loop. wait message only printed again after char is read
+  // begin event loop
   while (true) {
     // poll fd every ms to check for input
     int n_ready = poll(&desc, 1, 1);
@@ -156,7 +156,9 @@ handle_input_events(int fd, PDXCP_LKABLE(size_t) *counter)
     // stop loop if 'q' or 'Q' is received
     if (c == 'q' || c == 'Q')
       return;
-    // if the character is a line feed, print the prompt again
+    // if the character is a line feed, print the prompt again. this has the
+    // benefit of ensuring that the wait message is printed not only after each
+    // non-newline character but also when the user presses enter
     if (c == '\n') {
       printf("Waiting for input... ");
       fflush(stdout);
