@@ -12,6 +12,11 @@ add_executable(sigbus sigbus.c)
 add_executable(sigsegv sigsegv.c)
 # kbsig: signal-driven input handling program
 add_executable(kbsig kbsig.c)
+# kbpoll: event-driven input handling program using pthreads. this is a more
+# realistic implementation of what kbsig is trying to do using poll()
+add_executable(kbpoll kbpoll.c)
+target_compile_options(kbpoll PRIVATE -pthread)
+target_link_options(kbpoll PRIVATE -pthread)
 
 # segsize1: program to get segment sizes (1)
 add_executable(segsize1 segsize.c)

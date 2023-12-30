@@ -141,7 +141,8 @@ $(BUILDDIR)/kbsig: $(BUILDDIR)/src/kbsig.o
 	@echo "Linking $@..."
 	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 
-# kbpoll: event-driven input handling program using pthreads
+# kbpoll: event-driven input handling program using pthreads. this is a more
+# realistic implementation of what kbsig is trying to do using poll()
 $(BUILDDIR)/kbpoll: src/kbpoll.c $(HEADERS)
 	@echo "Building $@..."
 	$(CC) $(BASE_CFLAGS) -pthread $(CFLAGS) -o $@ $<
