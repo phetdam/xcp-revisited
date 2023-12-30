@@ -100,7 +100,7 @@ main()
   // allow us to receive SIGIO signals from stdin
   PDXCP_ERRNO_EXIT_IF(fcntl(STDIN_FILENO, F_SETOWN, getpid()));
   // loop
-  printf("Type 'q' to exit\n");
+  puts("Type 'q' to exit");
   while (true) {
     printf("Waiting for input... ");
     fflush(stdout);  // ensure print is done
