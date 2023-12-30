@@ -80,7 +80,7 @@
 /**
  * Macro for namespacing a call to a lockable type's by-value setter.
  *
- * A corresponding `LOCKABLE_SET_V_DEF` is required to define the getter.
+ * A corresponding `LOCKABLE_SET_V_DEF` is required to define the setter.
  */
 #define LOCKABLE_SET_V(type) PDXCP_CONCAT(LOCKABLE(type), _set_v)
 
