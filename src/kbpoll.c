@@ -97,8 +97,8 @@
   LOCKABLE_SET_V(type)(LOCKABLE(type) *lockable, type in) \
   { \
     int status; \
-    /* args must be non-NULL */ \
-    if (!lockable || !in) \
+    /* lockable must be non-NULL */ \
+    if (!lockable) \
       return -EINVAL; \
     /* attempt lock */ \
     if ((status = pthread_mutex_lock(&lockable->mutex))) \
