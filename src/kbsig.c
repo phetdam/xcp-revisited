@@ -71,7 +71,7 @@ sigpoll_handler(int signum)
     PDXCP_ERRNO_EXIT_IF(n_read < 0);
     // perform write, exiting if there is a failure
     PDXCP_ERRNO_EXIT_IF(!full_write(STDOUT_FILENO, msg, sizeof msg - 1));
-    // quit if 'q' is received
+    // quit if 'q' or 'Q' is received
     if (*out == 'q' || *out == 'Q')
       exit(EXIT_SUCCESS);
   }
@@ -100,7 +100,7 @@ main()
   // allow us to receive SIGIO signals from stdin
   PDXCP_ERRNO_EXIT_IF(fcntl(STDIN_FILENO, F_SETOWN, getpid()));
   // loop
-  puts("Type 'q' to exit");
+  puts("Type 'q' or 'Q' to exit");
   while (true) {
     printf("Waiting for input... ");
     fflush(stdout);  // ensure print is done
