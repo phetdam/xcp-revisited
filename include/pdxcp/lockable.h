@@ -1,5 +1,5 @@
 /**
- * @file lockable.g
+ * @file lockable.h
  * @author Derek Huang
  * @brief C/C++ header for lockable types
  * @copyright MIT License
