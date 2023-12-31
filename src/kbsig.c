@@ -65,7 +65,7 @@ volatile sig_atomic_t global_counter = 0;
  *
  * @param value Value to get string representation for
  */
-const char *
+static const char *
 llong_to_string(long long value)
 {
   // buffer is large enough to hold 2 ^ 256 comfortably
