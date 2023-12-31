@@ -31,6 +31,27 @@ endif
 BUILDDIR ?= build
 $(info Build directory: $(BUILDDIR))
 
+# shared library is on by default
+BUILD_SHARED ?= 1
+
+# determine library config
+ifneq ($(BUILD_SHARED),)
+LIBCONFIG = Shared
+else
+LIBCONFIG = Static
+endif
+$(info Build libraries as: $(LIBCONFIG))
+
+# support library link name, stem, file with suffix
+LIBNAME = pdxcp
+LIBSTEM = lib$(LIBNAME)
+ifneq ($(BUILD_SHARED),)
+LIBFILE = $(LIBSTEM).so
+else
+LIBFILE = $(LIBSTEM).a
+endif
+$(info Support library: $(LIBFILE))
+
 # check if we are on Windows (MinGW). note extra space in sed pattern
 WIN32 = $(shell \
 echo | gcc -dM -E - | grep '\#define _WIN32' | sed 's/\#define _WIN32 //g')
@@ -82,7 +103,14 @@ BASE_LDFLAGS += -pg
 endif
 
 # extra linker flags for shared libraries
-SO_LDFLAGS = -shared -fPIC
+SOFLAGS = -shared -fPIC
+
+# object suffix for PIC objects (to match shared library rule)
+ifneq ($(BUILD_SHARED),)
+LIBOBJSUFFIX = PIC.o
+else
+LIBOBJSUFFIX = o
+endif
 
 # add current location of object to rpath. needed to find shared libraries in
 # the same directory at runtime. we don't set this as a default for now
@@ -104,7 +132,7 @@ $(BUILDDIR)/%.o: %.c $(HEADERS)
 	$(CC) $(BASE_CFLAGS) $(CFLAGS) -o $@ -c $<
 
 # C -fPIC object compile rule (shared library)
-$(BUILDDIR)/%.pic.o: %.c $(HEADERS)
+$(BUILDDIR)/%.PIC.o: %.c $(HEADERS)
 	@mkdir -p $(@D)
 	$(CC) -fPIC $(BASE_CFLAGS) $(CFLAGS) -o $@ -c $<
 
@@ -114,7 +142,7 @@ $(BUILDDIR)/%.pic.o: %.c $(HEADERS)
 # build all targets. segsizes should go last so the print statements are done
 # after all the other targets are built as the final build step.
 all: \
-$(BUILDDIR)/libpdxcp.so \
+$(BUILDDIR)/$(LIBFILE) \
 $(BUILDDIR)/rejmp \
 $(BUILDDIR)/sigcatch \
 $(BUILDDIR)/locapprox \
@@ -131,10 +159,14 @@ clean:
 
 ###############################################################################
 
-# libpdxcp.so: support library with some shared utility code
-$(BUILDDIR)/libpdxcp.so: $(BUILDDIR)/src/pdxcp/lockable.pic.o
+# libpdxcp: support library with some shared utility code
+$(BUILDDIR)/$(LIBFILE): $(BUILDDIR)/src/pdxcp/lockable.$(LIBOBJSUFFIX)
 	@echo "Linking $@..."
-	$(CC) $(SO_LDFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+ifneq ($(BUILD_SHARED),)
+	$(CC) $(LIBFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+else
+	$(AR) crs $@ $^
+endif
 
 # rejmp: uses setjmp/longjmp to restart itself
 $(BUILDDIR)/rejmp: $(BUILDDIR)/src/rejmp.o
@@ -168,9 +200,9 @@ $(BUILDDIR)/kbsig: $(BUILDDIR)/src/kbsig.o
 
 # kbpoll: event-driven input handling program using pthreads. this is a more
 # realistic implementation of what kbsig is trying to do using poll()
-$(BUILDDIR)/kbpoll: src/kbpoll.c $(HEADERS) $(BUILDDIR)/libpdxcp.so
+$(BUILDDIR)/kbpoll: src/kbpoll.c $(HEADERS) $(BUILDDIR)/$(LIBFILE)
 	@echo "Building $@..."
-	$(CC) $(BASE_CFLAGS) -pthread $(CFLAGS) $(RPATH_FLAGS) -o $@ $< -lpdxcp
+	$(CC) $(BASE_CFLAGS) -pthread $(CFLAGS) $(RPATH_FLAGS) -o $@ $< -l$(LIBNAME)
 
 # final ls + size call for showing the segment sizes for segsize[N]. note that
 # on Windows (MinGW), we need to also add the .exe suffix. awk is used to
