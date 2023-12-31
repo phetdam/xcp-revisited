@@ -41,6 +41,12 @@ endif()
 if(NOT PDXCP_IS_MULTI_CONFIG)
     message(STATUS "Config: ${CMAKE_BUILD_TYPE}")
 endif()
+# print library config
+if(BUILD_SHARED_LIBS)
+    message(STATUS "Libraries: Shared")
+else()
+    message(STATUS "Libraries: Static")
+endif()
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)

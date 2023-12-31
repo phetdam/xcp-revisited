@@ -5,13 +5,6 @@ if(WIN32)
     message(FATAL_ERROR "Cannot build project on Windows (yet)")
 endif()
 
-# indicate if building shared or not
-if(BUILD_SHARED_LIBS)
-    message(STATUS "Libraries: Shared")
-else()
-    message(STATUS "Libraries: Static")
-endif()
-
 # whenever MSVC is supported...
 if(MSVC)
     add_compile_options(/Wall)
