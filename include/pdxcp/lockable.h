@@ -45,6 +45,19 @@ PDXCP_EXTERN_C_BEGIN
 #define PDXCP_LKABLE_GET(type) PDXCP_CONCAT(PDXCP_LKABLE(type), _get)
 
 /**
+ * Declare the getter function for a lockable type.
+ *
+ * See `PDXCP_LKABLE_GET_DEF` for more details on the getter functions.
+ *
+ * @note Requires a terminating semicolon.
+ *
+ * @param type Type to declare getter for
+ */
+#define PDXCP_LKABLE_GET_DECL(type) \
+  int \
+  PDXCP_LKABLE_GET(type)(PDXCP_LKABLE(type) *lockable, type *out)
+
+/**
  * Define the getter function for a lockable type.
  *
  * All getters are invoked using `PDXCP_LKABLE_GET(type)` and take two
@@ -55,8 +68,7 @@ PDXCP_EXTERN_C_BEGIN
  * @param type Type to define getter for
  */
 #define PDXCP_LKABLE_GET_DEF(type) \
-  int \
-  PDXCP_LKABLE_GET(type)(PDXCP_LKABLE(type) *lockable, type *out) \
+  PDXCP_LKABLE_GET_DECL(type) \
   { \
     int status; \
     /* args must be non-NULL */ \
@@ -80,16 +92,30 @@ PDXCP_EXTERN_C_BEGIN
 #define PDXCP_LKABLE_SET_V(type) PDXCP_CONCAT(PDXCP_LKABLE(type), _set_v)
 
 /**
+ * Declare the by-value setter function for a lockable type.
+ *
+ * See `PDXCP_LKABLE_SET_V_DEF` for more details on the by-value setter.
+ *
+ * @note Requires a terminating semicolon.
+ *
+ * @param type Type to declare setter for
+ */
+#define PDXCP_LKABLE_SET_V_DECL(type) \
+  int \
+  PDXCP_LKABLE_SET_V(type)(PDXCP_LKABLE(type) *lockable, type in)
+
+/**
  * Define the by-value setter function for a lockable type.
  *
  * All setters are invoked using `PDXCP_LKABLE_SET_V(type)` and take two
  * arguments. The first is a `PDXCP_LKABLE(type) *lockable` input and the
  * second is a `type in` input. Zero is returned on success, `-EINVAL` if any
  * arg is `NULL`, with other negative values for any additional errors.
+ *
+ * @param type Type to define setter for
  */
 #define PDXCP_LKABLE_SET_V_DEF(type) \
-  int \
-  PDXCP_LKABLE_SET_V(type)(PDXCP_LKABLE(type) *lockable, type in) \
+  PDXCP_LKABLE_SET_V_DECL(type) \
   { \
     int status; \
     /* lockable must be non-NULL */ \
@@ -111,16 +137,30 @@ PDXCP_EXTERN_C_BEGIN
 #define PDXCP_LKABLE_SET_P(type) PDXCP_CONCAT(PDXCP_LKABLE(type), _set_p)
 
 /**
+ * Declare the by-pointer setter function for a lockable type.
+ *
+ * See `PDXCP_LKABLE_SET_P_DEF` for more details on the by-value setter.
+ *
+ * @note Requires a terminating semicolon.
+ *
+ * @param type Type to declare setter for
+ */
+#define PDXCP_LKABLE_SET_P_DECL(type) \
+  int \
+  PDXCP_LKABLE_SET_P(type)(PDXCP_LKABLE(type) *lockable, const type *in)
+
+/**
  * Define the by-pointer setter function for a lockable type.
  *
  * All setters are invoked using `PDXCP_LKABLE_SET_P(type)` and take two
  * arguments. The first is a `PDXCP_LKABLE(type) *lockable` input and the
  * second is a `const type *in` input. Zero is returned on success, `-EINVAL`
  * if any arg is `NULL`, with other negative values for any additional errors.
+ *
+ * @param type Type to define setter for
  */
 #define PDXCP_LKABLE_SET_P_DEF(type) \
-  int \
-  PDXCP_LKABLE_SET_P(type)(PDXCP_LKABLE(type) *lockable, const type *in) \
+  PDXCP_LKABLE_SET_P_DECL(type) \
   { \
     int status; \
     /* args must be non-NULL */ \
