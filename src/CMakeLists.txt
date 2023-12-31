@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION ${CMAKE_MINIMUM_REQUIRED_VERSION})
 
+# add pdxcp directory for support library
+add_subdirectory(pdxcp)
+
 # rejmp: uses setjmp/longjmp to restart itself
 add_executable(rejmp rejmp.c)
 # sigcatch: catches and handles SIGBREAK and SIGINT
@@ -17,6 +20,7 @@ add_executable(kbsig kbsig.c)
 add_executable(kbpoll kbpoll.c)
 target_compile_options(kbpoll PRIVATE -pthread)
 target_link_options(kbpoll PRIVATE -pthread)
+target_link_libraries(kbpoll PRIVATE pdxcp)
 
 # segsize1: program to get segment sizes (1)
 add_executable(segsize1 segsize.c)

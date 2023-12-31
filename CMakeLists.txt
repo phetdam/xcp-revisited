@@ -17,6 +17,7 @@ project(
     LANGUAGES C
 )
 
+option(BUILD_SHARED_LIBS "Build libraries as shared" ON)
 option(ENABLE_ASAN "Enable AddressSanitizer instrumentation" OFF)
 
 # check if multi-config generator
