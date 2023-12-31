@@ -114,7 +114,11 @@ endif
 
 # add current location of object to rpath. needed to find shared libraries in
 # the same directory at runtime. we don't set this as a default for now
+ifneq ($(BUILD_SHARED),)
 RPATH_FLAGS = -Wl,-rpath,'$$ORIGIN'
+else
+RPATH_FLAGS =
+endif
 
 # include directory with namespace
 INCLUDENS = include/pdxcp
