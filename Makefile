@@ -50,7 +50,18 @@ LIBFILE = $(LIBSTEM).so
 else
 LIBFILE = $(LIBSTEM).a
 endif
-$(info Support library: $(LIBFILE))
+
+# cdcl support library link name, stem, file with suffix
+CDCL_LIBNAME = $(LIBNAME)_cdcl
+CDCL_LIBSTEM = lib$(CDCL_LIBNAME)
+ifneq ($(BUILD_SHARED),)
+CDCL_LIBFILE = $(CDCL_LIBSTEM).so
+else
+CDCL_LIBFILE = $(CDCL_LIBSTEM).a
+endif
+
+# message about libraries we're building
+$(info Libraries: $(LIBFILE) $(CDCL_LIBFILE))
 
 # check if we are on Windows (MinGW). note extra space in sed pattern
 WIN32 = $(shell \
@@ -165,6 +176,15 @@ clean:
 
 # libpdxcp: support library with some shared utility code
 $(BUILDDIR)/$(LIBFILE): $(BUILDDIR)/src/pdxcp/lockable.$(LIBOBJSUFFIX)
+	@echo "Linking $@..."
+ifneq ($(BUILD_SHARED),)
+	$(CC) $(SOFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+else
+	$(AR) crs $@ $^
+endif
+
+# libpdxcp_cdcl: cdcl C declaration parser support library
+$(BUILDDIR)/$(CDCL_LIBFILE):
 	@echo "Linking $@..."
 ifneq ($(BUILD_SHARED),)
 	$(CC) $(SOFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
