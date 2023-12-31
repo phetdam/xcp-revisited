@@ -167,7 +167,7 @@ clean:
 $(BUILDDIR)/$(LIBFILE): $(BUILDDIR)/src/pdxcp/lockable.$(LIBOBJSUFFIX)
 	@echo "Linking $@..."
 ifneq ($(BUILD_SHARED),)
-	$(CC) $(LIBFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	$(CC) $(SOFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 else
 	$(AR) crs $@ $^
 endif
