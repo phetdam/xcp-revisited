@@ -48,11 +48,12 @@ EXESUFFIX =
 endif
 $(info Executable suffix: $(EXESUFFIX))
 
-# include directories
+# include + link directories
 INCLUDE_FLAGS = -Iinclude
+LIBRARY_FLAGS = -L$(BUILDDIR)
 
 # base compile flags
-BASE_CFLAGS = $(INCLUDE_FLAGS) -Wall
+BASE_CFLAGS = $(INCLUDE_FLAGS) $(LIBRARY_FLAGS) -Wall
 ifeq ($(CONFIG),Release)
 BASE_CFLAGS += -O3 -mtune=native
 else
@@ -60,7 +61,7 @@ BASE_CFLAGS += -g
 endif
 
 # base linker flags
-BASE_LDFLAGS =
+BASE_LDFLAGS = $(LIBRARY_FLAGS)
 
 # enable AddressSanitizer
 ifeq ($(ENABLE_ASAN),)
@@ -80,6 +81,13 @@ BASE_CFLAGS += -pg
 BASE_LDFLAGS += -pg
 endif
 
+# extra linker flags for shared libraries
+SO_LDFLAGS = -shared -fPIC
+
+# add current location of object to rpath. needed to find shared libraries in
+# the same directory at runtime. we don't set this as a default for now
+RPATH_FLAGS = -Wl,-rpath,'$$ORIGIN'
+
 # include directory with namespace
 INCLUDENS = include/pdxcp
 
@@ -95,12 +103,18 @@ $(BUILDDIR)/%.o: %.c $(HEADERS)
 	@mkdir -p $(@D)
 	$(CC) $(BASE_CFLAGS) $(CFLAGS) -o $@ -c $<
 
+# C -fPIC object compile rule (shared library)
+$(BUILDDIR)/%.pic.o: %.c $(HEADERS)
+	@mkdir -p $(@D)
+	$(CC) -fPIC $(BASE_CFLAGS) $(CFLAGS) -o $@ -c $<
+
 # phony targets
 .PHONY: clean
 
 # build all targets. segsizes should go last so the print statements are done
 # after all the other targets are built as the final build step.
 all: \
+$(BUILDDIR)/libpdxcp.so \
 $(BUILDDIR)/rejmp \
 $(BUILDDIR)/sigcatch \
 $(BUILDDIR)/locapprox \
@@ -116,6 +130,11 @@ clean:
 	@$(RM) -rv $(BUILDDIR)
 
 ###############################################################################
+
+# libpdxcp.so: support library with some shared utility code
+$(BUILDDIR)/libpdxcp.so: $(BUILDDIR)/src/pdxcp/lockable.pic.o
+	@echo "Linking $@..."
+	$(CC) $(SO_LDFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 
 # rejmp: uses setjmp/longjmp to restart itself
 $(BUILDDIR)/rejmp: $(BUILDDIR)/src/rejmp.o
@@ -149,9 +168,9 @@ $(BUILDDIR)/kbsig: $(BUILDDIR)/src/kbsig.o
 
 # kbpoll: event-driven input handling program using pthreads. this is a more
 # realistic implementation of what kbsig is trying to do using poll()
-$(BUILDDIR)/kbpoll: src/kbpoll.c $(HEADERS)
+$(BUILDDIR)/kbpoll: src/kbpoll.c $(HEADERS) $(BUILDDIR)/libpdxcp.so
 	@echo "Building $@..."
-	$(CC) $(BASE_CFLAGS) -pthread $(CFLAGS) -o $@ $<
+	$(CC) $(BASE_CFLAGS) -pthread $(CFLAGS) $(RPATH_FLAGS) -o $@ $< -lpdxcp
 
 # final ls + size call for showing the segment sizes for segsize[N]. note that
 # on Windows (MinGW), we need to also add the .exe suffix. awk is used to

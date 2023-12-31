@@ -8,8 +8,11 @@
 #ifndef PDXCP_LOCKABLE_H_
 #define PDXCP_LOCKABLE_H_
 
-#include <errno.h>
 #include <pthread.h>
+
+#include <errno.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #include "pdxcp/common.h"
 
@@ -22,7 +25,7 @@ PDXCP_EXTERN_C_BEGIN
  *
  * @param type Target type
  */
-#define PDXCP_LKABLE(type) PDXCP_CONCAT(lockable_, type)
+#define PDXCP_LKABLE(type) PDXCP_CONCAT(pdxcp_lockable_, type)
 
 /**
  * Define a type encapsulating a type member with a `pthread_mutex_t`.
@@ -64,6 +67,8 @@ PDXCP_EXTERN_C_BEGIN
  * arguments. The first is a `PDXCP_LKABLE(type) *lockable` input and the
  * second is a `type *out` output. Zero is returned on success, `-EINVAL` if
  * any arg is `NULL`, and other negative values for additional errors.
+ *
+ * @note This may be moved to an implementation file to make it non-public.
  *
  * @param type Type to define getter for
  */
@@ -112,6 +117,8 @@ PDXCP_EXTERN_C_BEGIN
  * second is a `type in` input. Zero is returned on success, `-EINVAL` if any
  * arg is `NULL`, with other negative values for any additional errors.
  *
+ * @note This may be moved to an implementation file to make it non-public.
+ *
  * @param type Type to define setter for
  */
 #define PDXCP_LKABLE_SET_V_DEF(type) \
@@ -157,6 +164,8 @@ PDXCP_EXTERN_C_BEGIN
  * second is a `const type *in` input. Zero is returned on success, `-EINVAL`
  * if any arg is `NULL`, with other negative values for any additional errors.
  *
+ * @note This may be moved to an implementation file to make it non-public.
+ *
  * @param type Type to define setter for
  */
 #define PDXCP_LKABLE_SET_P_DEF(type) \
@@ -173,6 +182,52 @@ PDXCP_EXTERN_C_BEGIN
     lockable->value = *in; \
     return -pthread_mutex_unlock(&lockable->mutex); \
   }
+
+/**
+ * Define the lockable type and getter interface.
+ *
+ * @param type Target type
+ */
+#define PDXCP_LKABLE_DEF_INTF_G(type) \
+  PDXCP_LKABLE_DEF(type) \
+  PDXCP_LKABLE_GET_DECL(type);
+
+/**
+ * Define the interface for a lockable type with only a by-value setter.
+ *
+ * @param type Target type
+ */
+#define PDXCP_LKABLE_DEF_INTF_V(type) \
+  PDXCP_LKABLE_DEF_INTF_G(type) \
+  PDXCP_LKABLE_SET_V_DECL(type);
+
+/**
+ * Define the interface for a lockable type with only a by-pointer setter.
+ *
+ * @param type Target type
+ */
+#define PDXCP_LKABLE_DEF_INTF_P(type) \
+  PDXCP_LKABLE_DEF_INTF_G(type) \
+  PDXCP_LKABLE_SET_P_DECL(type);
+
+/**
+ * Define the interface for a lockable type with both setters.
+ *
+ * @param type Target type
+ */
+#define PDXCP_LKABLE_DEF_INTF_PV(type) \
+  PDXCP_LKABLE_DEF_INTF_G(type) \
+  PDXCP_LKABLE_SET_P_DECL(type); \
+  PDXCP_LKABLE_SET_V_DECL(type);
+
+/**
+ * Predefined lockable types with only by-value setters.
+ */
+PDXCP_LKABLE_DEF_INTF_V(bool)
+PDXCP_LKABLE_DEF_INTF_V(int)
+PDXCP_LKABLE_DEF_INTF_V(size_t)
+
+// TODO: maybe undef PDXCP_LKABLE_DEF_INTF_* macros
 
 PDXCP_EXTERN_C_END
 

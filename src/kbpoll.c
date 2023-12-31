@@ -23,24 +23,6 @@
 #include "pdxcp/lockable.h"
 
 /**
- * Lockable type definitions.
- */
-PDXCP_LKABLE_DEF(bool)
-PDXCP_LKABLE_DEF(size_t)
-
-/**
- * Lockable type getter definitions.
- */
-static PDXCP_LKABLE_GET_DEF(bool)
-static PDXCP_LKABLE_GET_DEF(size_t)
-
-/**
- * Lockable type setter definitions.
- */
-static PDXCP_LKABLE_SET_V_DEF(bool)
-static PDXCP_LKABLE_SET_V_DEF(size_t)
-
-/**
  * Struct defining payload used by the worker thread.
  *
  * @param stopspec `PDXCP_LKABLE(bool)` for indicating when to stop looping
