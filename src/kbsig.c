@@ -112,7 +112,7 @@ sigpoll_handler(int signum)
     // pointer to the X; this is overwritten in the read() call
     char *out = msg + 15;
     // attempt to get character from standard input
-    // TODO: most of the time spent in thsi program is blocked by this read
+    // TODO: most of the time spent in this program is blocked by this read
     // call since stdin is sending SIGPOLL as soon as it is ready for I/O, not
     // when there are actually characters written to this stream
     ssize_t n_read = read(STDIN_FILENO, out, 1);
