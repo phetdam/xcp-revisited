@@ -158,6 +158,7 @@ $(BUILDDIR)/%.PIC.o: %.c $(HEADERS)
 # after all the other targets are built as the final build step.
 all: \
 $(BUILDDIR)/$(LIBFILE) \
+$(BUILDDIR)/$(CDCL_LIBFILE) \
 $(BUILDDIR)/rejmp \
 $(BUILDDIR)/sigcatch \
 $(BUILDDIR)/locapprox \
@@ -184,7 +185,7 @@ else
 endif
 
 # libpdxcp_cdcl: cdcl C declaration parser support library
-$(BUILDDIR)/$(CDCL_LIBFILE):
+$(BUILDDIR)/$(CDCL_LIBFILE): $(BUILDDIR)/src/pdxcp_cdp/cdcl_lexer.$(LIBOBJSUFFIX)
 	@echo "Linking $@..."
 ifneq ($(BUILD_SHARED),)
 	$(CC) $(SOFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
