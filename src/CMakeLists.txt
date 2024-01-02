@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION ${CMAKE_MINIMUM_REQUIRED_VERSION})
 
-# add pdxcp directory for support library
+# add support library and C declaration parser library
 add_subdirectory(pdxcp)
+add_subdirectory(pdxcp_cdp)
 
 # rejmp: uses setjmp/longjmp to restart itself
 add_executable(rejmp rejmp.c)
