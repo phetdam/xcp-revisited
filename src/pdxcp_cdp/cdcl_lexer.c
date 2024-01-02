@@ -33,6 +33,9 @@ pdxcp_cdcl_get_iden_text(FILE *in, pdxcp_cdcl_token *token)
   char *text_out = token->text;
   // get first character
   int c = fgetc(in);
+  // if EOF, return
+  if (c == EOF)
+    return pdxcp_cdcl_lexer_status_fgetc_eof;
   // not identifier, in particular, also excludes digits. need to also put the
   // last character read back into the stream, otherwise it is lost
   if (!isalpha(c) && c != '_') {
@@ -46,12 +49,10 @@ pdxcp_cdcl_get_iden_text(FILE *in, pdxcp_cdcl_token *token)
     text_out < token->text + PDXCP_CDCL_MAX_TOKEN_LEN
   )
     *text_out++ = (char) c;
-  // if EOF, error, otherwise write null terminator
-  if (c == EOF)
-    return pdxcp_cdcl_lexer_status_fgetc_eof;
+  // write null terminator. if EOF, this is the last identifier we can read
   *text_out = '\0';
-  // put the last character read back into the stream
-  if (ungetc(c, in) == EOF)
+  // put the last character read back into the stream if not EOF
+  if (c != EOF && ungetc(c, in) == EOF)
     return pdxcp_cdcl_lexer_status_ungetc_fail;
   // if c is a valid identifier character, token is too large
   if (isalnum(c) || c == '_') {
