@@ -75,6 +75,9 @@ pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
   // skip whitespace
   int c;
   while (isspace(c = fgetc(in)));
+  // if EOF, return
+  if (c == EOF)
+    return pdxcp_cdcl_lexer_status_fgetc_eof;
   // if start of an identifier, parse rest of identifier
   if (isalpha(c) || c == '_') {
     // put the last character read back into the stream
