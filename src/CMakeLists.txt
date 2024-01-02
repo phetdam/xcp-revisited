@@ -47,3 +47,32 @@ target_compile_definitions(segsize5r PRIVATE SEGSIZE_STEPS=5)
 set_target_properties(
     segsize5r PROPERTIES COMPILE_OPTIONS "-Wall;-O3;-mtune=native"
 )
+
+# convenience variable for all the segsize.c outputs
+set(
+    PDXCP_SEGSIZE_TARGETS
+    segsize1 segsize2 segsize3 segsize4a segsize4b segsize5d segsize5r
+)
+# final post-build command for printing the disk sizes
+add_custom_target(
+    segsizes ALL
+            echo
+    COMMAND echo "segsize[N] disk sizes"
+    # can't use glob so we run ls -l output through grep. CMake automatically
+    # double quotes the argument so for awk we double quote ourselves so that
+    # the parser knows that there is but a single string argument sent to awk
+    COMMAND ls -l | grep segsize | awk "{print \"  \" $5 \"  \" $9}"
+    COMMAND echo
+    COMMAND echo "segsize[N] image sizes"
+    COMMAND size ${PDXCP_SEGSIZE_TARGETS}
+    COMMAND echo
+    # by depending on kbpoll, we guarantee segsizes is built last. kbpoll also
+    # depends on the pdxcp target so by the time everything is linked there
+    # should be no other worker processes running
+    DEPENDS kbpoll ${PDXCP_SEGSIZE_TARGETS}
+    # this way we don't have to worry about prepending paths to the targets
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Run comparison of segsize[N] disk and image sizes"
+    VERBATIM
+    COMMAND_EXPAND_LISTS
+)
