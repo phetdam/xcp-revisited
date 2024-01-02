@@ -41,6 +41,14 @@ Clang_, one can use
 
    make CC=clang ENABLE_ASAN=1
 
+To build the project's libraries as static instead of shared, one can use
+
+.. code:: bash
+
+   make BUILD_SHARED=
+
+``BUILD_SHARED`` is set by default and results in shared libraries being built.
+
 .. _Make: https://www.gnu.org/software/make/
 
 .. _CMake: https://cmake.org/cmake/help/latest/
@@ -69,3 +77,12 @@ To enable AddressSanitizer and specify a different compiler, one can use
 .. code:: bash
 
    cmake -S . -B build -DCMAKE_C_COMPILER=clang -DENABLE_ASAN=1 && cmake --build build -j
+
+To build the project's libraries as static instead of shared, one can use
+
+.. code:: bash
+
+   cmake -S . -B build -DBUILD_SHARED_LIBS=0 && cmake --build build -j
+
+``BUILD_SHARED_LIBS`` is set by default and results in shared libraries being
+built.
