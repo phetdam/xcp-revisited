@@ -7,14 +7,29 @@
 # make CC=gcc
 #
 # Release build:
-# make CC=gcc BUILD_TYPE=Release
+# make CC=gcc CONFIG=Release
 #
 
-# compiler path + compiler version string
+# C compiler path (required)
 CC_PATH = $(shell which $(CC))
+ifeq ($(CC),)
+$(error Could not find required C compiler)
+endif
 $(info CC path: $(CC_PATH))
+# C compiler version string
 CC_VERSION_STRING = $(shell $(CC) --version | head -1)
 $(info CC version: $(CC_VERSION_STRING))
+# C++ compiler path (optional)
+CXX_PATH = $(shell which $(CXX))
+$(info CXX path: $(CXX_PATH))
+# C++ compiler version string
+ifneq ($(CXX_PATH),)
+CXX_VERSION_STRING = $(shell $(CXX) --version | head -1)
+$(info CXX version: $(CXX_VERSION_STRING))
+else
+CXX_VERSION_STRING =
+$(info CXX version: None)
+endif
 
 # Debug by default
 CONFIG ?= Debug
@@ -80,6 +95,37 @@ EXESUFFIX =
 endif
 $(info Executable suffix: $(EXESUFFIX))
 
+# pkg-config path (for Google Test)
+PKG_CONFIG = $(shell which pkg-config)
+$(info pkg-config: $(PKG_CONFIG))
+# Google Test version (for testing)
+ifneq ($(PKG_CONFIG),)
+GTEST_VERSION = $(shell $(PKG_CONFIG) --modversion gtest)
+else
+GTEST_VERSION =
+endif
+# if empty, could not find using pkg-config
+ifneq ($(GTEST_VERSION),)
+$(info Google Test: $(GTEST_VERSION))
+else
+$(info Google Test: None)
+endif
+# build tests or not. automatically on if Google Test found using pkg-config,
+# but if not found/no C++ compiler, overrides user option specified
+ifeq ($(GTEST_VERSION),)
+BUILD_TESTS =
+else ifeq ($(CXX_PATH),)
+BUILD_TESTS =
+else
+BUILD_TESTS ?= 1
+endif
+# print test build status
+ifneq ($(BUILD_TESTS),)
+$(info Build tests: Yes)
+else
+$(info Build tests: No)
+endif
+
 # include + link directories
 INCLUDE_FLAGS = -Iinclude
 LIBRARY_FLAGS = -L$(BUILDDIR)
@@ -111,6 +157,15 @@ else
 $(info Profile generation: Enabled)
 BASE_CFLAGS += -pg
 BASE_LDFLAGS += -pg
+endif
+
+# Google Test compile/link flags
+ifneq ($(GTEST_VERSION),)
+GTEST_CXXFLAGS = $(shell $(PKG_CONFIG) --cflags)
+GTEST_LDFLAGS = $(shell $(PKG_CONFIG) --libs)
+else
+GTEST_CXXFLAGS =
+GTEST_LDFLAGS =
 endif
 
 # extra linker flags for shared libraries
