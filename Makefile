@@ -130,8 +130,8 @@ endif
 INCLUDE_FLAGS = -Iinclude
 LIBRARY_FLAGS = -L$(BUILDDIR)
 
-# base compile flags
-BASE_CFLAGS = $(INCLUDE_FLAGS) $(LIBRARY_FLAGS) -Wall
+# base C compile flags
+BASE_CFLAGS = $(INCLUDE_FLAGS) -Wall
 ifeq ($(CONFIG),Release)
 BASE_CFLAGS += -O3 -mtune=native
 else
@@ -159,13 +159,19 @@ BASE_CFLAGS += -pg
 BASE_LDFLAGS += -pg
 endif
 
-# Google Test compile/link flags
+# base C++ compile flags
+BASE_CXXFLAGS = $(BASE_CFLAGS)
+
+# Google Test compile/link flags + add to C++ flags
 ifneq ($(GTEST_VERSION),)
-GTEST_CXXFLAGS = $(shell $(PKG_CONFIG) --cflags)
-GTEST_LDFLAGS = $(shell $(PKG_CONFIG) --libs)
+GTEST_CFLAGS = $(shell $(PKG_CONFIG) --cflags gtest)
+GTEST_LIBS = $(shell $(PKG_CONFIG) --libs gtest)
+GTEST_MAIN_LIBS = $(shell $(PKG_CONFIG) --libs gtest_main)
+BASE_CXXFLAGS += $(GTEST_CFLAGS)
 else
-GTEST_CXXFLAGS =
-GTEST_LDFLAGS =
+GTEST_CFLAGS =
+GTEST_LIBS =
+GTEST_MAIN_LIBS =
 endif
 
 # extra linker flags for shared libraries
@@ -209,12 +215,12 @@ $(BUILDDIR)/%.PIC.o: %.c $(HEADERS)
 # C++ object compile rule
 $(BUILDDIR)/%.cc.o: %.cc $(HEADERS)
 	@mkdir -p $(@D)
-	$(CXX) $(BASE_CFLAGS) $(CXXFLAGS) -o $@ -c $<
+	$(CXX) $(BASE_CXXFLAGS) $(CXXFLAGS) -o $@ -c $<
 
 # C++ -fPIC object compile rule (shared library)
 $(BUILDDIR)/%.PIC.cc.o: %.cc $(HEADERS)
 	@mkdir -p ($@D)
-	$(CXX) -fPIC $(BASE_CFLAGS) $(CXXFLAGS) -o $@ -c $<
+	$(CXX) -fPIC $(BASE_CXXFLAGS) $(CXXFLAGS) -o $@ -c $<
 
 # phony targets
 .PHONY: clean
@@ -224,6 +230,7 @@ $(BUILDDIR)/%.PIC.cc.o: %.cc $(HEADERS)
 all: \
 $(BUILDDIR)/$(LIBFILE) \
 $(BUILDDIR)/$(CDCL_LIBFILE) \
+$(BUILDDIR)/pdxcp_test \
 $(BUILDDIR)/rejmp \
 $(BUILDDIR)/sigcatch \
 $(BUILDDIR)/locapprox \
@@ -258,6 +265,20 @@ else
 	$(AR) crs $@ $^
 endif
 
+# pdxcp_test: C++ Google Test executable
+TEST_OBJS = $(BUILDDIR)/test/cdcl_lexer_test.cc.o
+TEST_LIBS = $(GTEST_MAIN_LIBS) -l$(CDCL_LIBNAME)
+TEST_LDFLAGS = $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS)
+$(BUILDDIR)/pdxcp_test: $(BUILDDIR)/$(CDCL_LIBFILE) $(TEST_OBJS)
+ifeq ($(CXX_PATH),)
+	@echo "Skipping $@. No C++ compiler"
+else ifeq ($(GTEST_VERSION),)
+	@echo "Skipping $@. No Google Test"
+else
+	@echo "Linking $@...."
+	$(CXX) $(TEST_LDFLAGS) -o $@ $(TEST_OBJS) $(TEST_LIBS)
+endif
+
 # rejmp: uses setjmp/longjmp to restart itself
 $(BUILDDIR)/rejmp: $(BUILDDIR)/src/rejmp.o
 	@echo "Linking $@..."
@@ -290,14 +311,17 @@ $(BUILDDIR)/kbsig: $(BUILDDIR)/src/kbsig.o
 
 # kbpoll: event-driven input handling program using pthreads. this is a more
 # realistic implementation of what kbsig is trying to do using poll()
+KBPOLL_CFLAGS = $(BASE_CFLAGS) $(LIBRARY_FLAGS) -pthread $(CFLAGS) $(RPATH_FLAGS)
 $(BUILDDIR)/kbpoll: src/kbpoll.c $(HEADERS) $(BUILDDIR)/$(LIBFILE)
 	@echo "Building $@..."
-	$(CC) $(BASE_CFLAGS) -pthread $(CFLAGS) $(RPATH_FLAGS) -o $@ $< -l$(LIBNAME)
+	$(CC) $(KBPOLL_CFLAGS) -o $@ $< -l$(LIBNAME)
 
 # final ls + size call for showing the segment sizes for segsize[N]. note that
 # on Windows (MinGW), we need to also add the .exe suffix. awk is used to
-# filter the ls output so that we only print file name + sizes
+# filter the ls output so that we only print file name + sizes. we also depend
+# on the pdxcp_test unit test runner to ensure this is built last
 segsizes: \
+$(BUILDDIR)/pdxcp_test \
 $(BUILDDIR)/segsize1 \
 $(BUILDDIR)/segsize2 \
 $(BUILDDIR)/segsize3 \
