@@ -52,9 +52,19 @@ typedef enum {
   pdxcp_cdcl_lexer_status_token_null,   // pdxcpl_cdcl_token * is NULL
   pdxcp_cdcl_lexer_status_ungetc_fail,  // couldn't ungetc last char
   pdxcp_cdcl_lexer_status_fgetc_eof,    // fgetc retrieved EOF
-  pdxcp_cdcl_lexer_status_not_iden,     // not an identifier
+  pdxcp_cdcl_lexer_status_not_iden,     // next token not an identifier
   pdxcp_cdcl_lexer_status_bad_token     // bad token, token text has details
 } pdxcp_cdcl_lexer_status;
+
+/**
+ * Return a message for the given lexer status value.
+ *
+ * If the value is unknown, a pointer to `"Unknown lexer status"` is returned.
+ *
+ * @param value Lexer status value
+ */
+const char *
+pdxcp_cdcl_lexer_status_message(pdxcp_cdcl_lexer_status status);
 
 /**
  * Macro for checking if a lexer routine failed.

@@ -19,32 +19,57 @@ const char char_token_error[] = "Unknown character token 'X'";
 // error message template for token that is too long
 const char long_token_error[] = "Token too large: ...";
 
-const char *
-pdxcp_cdcl_token_type_string(pdxcp_cdcl_token_type type)
-{
-  // macro defining a case statement returning the stringified enum value
-#define TOKEN_TYPE_STRING_CASE(value) \
+/**
+ * Macro defining case statement returning the stringified value.
+ *
+ * @param value Enum, integral, etc. value
+ */
+#define ENUM_STRING_CASE(value) \
   case value: \
     return PDXCP_STRINGIFY(value)
 
+const char *
+pdxcp_cdcl_token_type_string(pdxcp_cdcl_token_type type)
+{
   switch (type) {
-    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_error);
-    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_lparen);
-    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_rparen);
-    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_langle);
-    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_rangle);
-    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_comma);
-    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_star);
-    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_struct);
-    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_enum);
-    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_q_const);
-    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_q_volatile);
-    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_iden);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_error);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_lparen);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_rparen);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_langle);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_rangle);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_comma);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_star);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_struct);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_enum);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_q_const);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_q_volatile);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_iden);
     default:
       return "(unknown)";
   }
+}
 
-#undef TOKEN_TYPE_STRING_CASE
+const char *
+pdxcp_cdcl_lexer_status_message(pdxcp_cdcl_lexer_status status)
+{
+  switch (status) {
+    case pdxcp_cdcl_lexer_status_ok:
+      return "Success";
+    case pdxcp_cdcl_lexer_status_stream_null:
+      return "Input stream is NULL";
+    case pdxcp_cdcl_lexer_status_token_null:
+      return "Token output address is NULL";
+    case pdxcp_cdcl_lexer_status_ungetc_fail:
+      return "Failed to put last read char back to stream";
+    case pdxcp_cdcl_lexer_status_fgetc_eof:
+      return "Read EOF from input stream";
+    case pdxcp_cdcl_lexer_status_not_iden:
+      return "Next token to read is not an identifier";
+    case pdxcp_cdcl_lexer_status_bad_token:
+      return "Unable to retrieve valid token, see token text for details";
+    default:
+      return "Unknown lexer status";
+  }
 }
 
 /**
