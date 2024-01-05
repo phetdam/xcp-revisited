@@ -18,7 +18,7 @@ PDXCP_EXTERN_C_BEGIN
  * Token type enumeration.
  */
 typedef enum {
-  pdxcp_cdcl_token_type_error,       // error, unknonwn token
+  pdxcp_cdcl_token_type_error,       // error, unknown token
   pdxcp_cdcl_token_type_lparen,      // (
   pdxcp_cdcl_token_type_rparen,      // )
   pdxcp_cdcl_token_type_langle,      // [
