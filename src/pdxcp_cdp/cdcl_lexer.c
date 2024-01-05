@@ -7,6 +7,8 @@
 
 #include "pdxcp/cdcl_lexer.h"
 
+#include "pdxcp/common.h"
+
 #include <ctype.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -16,6 +18,34 @@
 const char char_token_error[] = "Unknown character token 'X'";
 // error message template for token that is too long
 const char long_token_error[] = "Token too large: ...";
+
+const char *
+pdxcp_cdcl_token_type_string(pdxcp_cdcl_token_type type)
+{
+  // macro defining a case statement returning the stringified enum value
+#define TOKEN_TYPE_STRING_CASE(value) \
+  case value: \
+    return PDXCP_STRINGIFY(value)
+
+  switch (type) {
+    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_error);
+    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_lparen);
+    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_rparen);
+    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_langle);
+    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_rangle);
+    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_comma);
+    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_star);
+    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_struct);
+    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_enum);
+    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_q_const);
+    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_q_volatile);
+    TOKEN_TYPE_STRING_CASE(pdxcp_cdcl_token_type_iden);
+    default:
+      return "(unknown)";
+  }
+
+#undef TOKEN_TYPE_STRING_CASE
+}
 
 /**
  * Get a valid C identifier into the text field of a token.

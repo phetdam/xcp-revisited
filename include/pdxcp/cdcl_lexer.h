@@ -34,6 +34,16 @@ typedef enum {
 } pdxcp_cdcl_token_type;
 
 /**
+ * Return error message string for the given token type value.
+ *
+ * If the token type value is unknown, a pointer to `"(unknown)"` is returned.
+ *
+ * @param type Token type value
+ */
+const char *
+pdxcp_cdcl_token_type_string(pdxcp_cdcl_token_type type);
+
+/**
  * Lexer status codes.
  */
 typedef enum {
