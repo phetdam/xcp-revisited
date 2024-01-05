@@ -34,7 +34,7 @@ typedef enum {
 } pdxcp_cdcl_token_type;
 
 /**
- * Return error message string for the given token type value.
+ * Return a string for the given token type value.
  *
  * If the token type value is unknown, a pointer to `"(unknown)"` is returned.
  *
