@@ -206,6 +206,16 @@ $(BUILDDIR)/%.PIC.o: %.c $(HEADERS)
 	@mkdir -p $(@D)
 	$(CC) -fPIC $(BASE_CFLAGS) $(CFLAGS) -o $@ -c $<
 
+# C++ object compile rule
+$(BUILDDIR)/%.cc.o: %.cc $(HEADERS)
+	@mkdir -p $(@D)
+	$(CXX) $(BASE_CFLAGS) $(CXXFLAGS) -o $@ -c $<
+
+# C++ -fPIC object compile rule (shared library)
+$(BUILDDIR)/%.PIC.cc.o: %.cc $(HEADERS)
+	@mkdir -p ($@D)
+	$(CXX) -fPIC $(BASE_CFLAGS) $(CXXFLAGS) -o $@ -c $<
+
 # phony targets
 .PHONY: clean
 
