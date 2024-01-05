@@ -266,15 +266,17 @@ else
 endif
 
 # pdxcp_test: C++ Google Test executable
+# if not building tests, object list should be empty to prevent compilation
+ifneq ($(BUILD_TESTS),)
 TEST_OBJS = $(BUILDDIR)/test/cdcl_lexer_test.cc.o
+else
+TEST_OBJS =
+endif
 TEST_LIBS = $(GTEST_MAIN_LIBS) -l$(CDCL_LIBNAME)
 TEST_LDFLAGS = $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS)
+# link only if we are building tests, otherwise do nothing
 $(BUILDDIR)/pdxcp_test: $(BUILDDIR)/$(CDCL_LIBFILE) $(TEST_OBJS)
-ifeq ($(CXX_PATH),)
-	@echo "Skipping $@. No C++ compiler"
-else ifeq ($(GTEST_VERSION),)
-	@echo "Skipping $@. No Google Test"
-else
+ifneq ($(BUILD_TESTS),)
 	@echo "Linking $@...."
 	$(CXX) $(TEST_LDFLAGS) -o $@ $(TEST_OBJS) $(TEST_LIBS)
 endif
@@ -320,21 +322,20 @@ $(BUILDDIR)/kbpoll: src/kbpoll.c $(HEADERS) $(BUILDDIR)/$(LIBFILE)
 # on Windows (MinGW), we need to also add the .exe suffix. awk is used to
 # filter the ls output so that we only print file name + sizes. we also depend
 # on the pdxcp_test unit test runner to ensure this is built last
-segsizes: \
-$(BUILDDIR)/pdxcp_test \
-$(BUILDDIR)/segsize1 \
+SEGSIZE_TGTS = $(BUILDDIR)/segsize1 \
 $(BUILDDIR)/segsize2 \
 $(BUILDDIR)/segsize3 \
 $(BUILDDIR)/segsize4a \
 $(BUILDDIR)/segsize4b \
 $(BUILDDIR)/segsize5d \
 $(BUILDDIR)/segsize5r
+segsizes: $(BUILDDIR)/pdxcp_test $(SEGSIZE_TGTS)
 	@echo
 	@echo "segsize[N] disk sizes"
 	@ls -l build/segsize* | awk '{print "  " $$5 "  " $$9}'
 	@echo
 	@echo "segsize[N] image sizes"
-	@size $(^:%=%$(EXESUFFIX))
+	@size $(SEGSIZE_TGTS:%=%$(EXESUFFIX))
 	@echo
 
 # segsize1: program to get segment sizes (1)
