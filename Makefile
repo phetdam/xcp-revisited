@@ -4,10 +4,10 @@
 # Copyright: MIT License
 #
 # Debug build:
-# make CC=gcc
+# make CC=gcc -j
 #
 # Release build:
-# make CC=gcc CONFIG=Release
+# make CC=gcc CONFIG=Release -j
 #
 
 # C compiler path (required)
