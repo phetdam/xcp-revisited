@@ -268,7 +268,7 @@ endif
 # pdxcp_test: C++ Google Test executable
 # if not building tests, object list should be empty to prevent compilation
 ifneq ($(BUILD_TESTS),)
-TEST_OBJS = $(BUILDDIR)/test/cdcl_lexer_test.cc.o
+TEST_OBJS = $(BUILDDIR)/test/string_test.cc.o
 else
 TEST_OBJS =
 endif
