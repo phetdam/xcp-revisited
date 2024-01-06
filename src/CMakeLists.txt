@@ -53,6 +53,14 @@ set(
     PDXCP_SEGSIZE_TARGETS
     segsize1 segsize2 segsize3 segsize4a segsize4b segsize5d segsize5r
 )
+# convenience variable to hold targets we manually pin segsizes to ensure that
+# it ends up being built last. pdxcp_test not added if BUILD_TESTS is false
+set(PDXCP_SEGSIZES_PINS kbpoll)
+# note: when pdxcp_test also ends up depending on the support libraries, it
+# will be the only dependency pin that is needed by segsizes
+if(BUILD_TESTS)
+    set(PDXCP_SEGSIZES_PINS ${PDXCP_SEGSIZES_PINS} pdxcp_test)
+endif()
 # final post-build command for printing the disk sizes
 add_custom_target(
     segsizes ALL
@@ -69,7 +77,7 @@ add_custom_target(
     # by depending on kbpoll + pdxcp_test, we guarantee segsizes is built last.
     # kbpoll also depends on the pdxcp target so by the time everything is
     # linked there should be no other worker processes running
-    DEPENDS kbpoll pdxcp_test ${PDXCP_SEGSIZE_TARGETS}
+    DEPENDS ${PDXCP_SEGSIZES_PINS} ${PDXCP_SEGSIZE_TARGETS}
     # this way we don't have to worry about prepending paths to the targets
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Run comparison of segsize[N] disk and image sizes"
