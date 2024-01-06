@@ -19,6 +19,8 @@ project(
 
 option(BUILD_SHARED_LIBS "Build libraries as shared" ON)
 option(ENABLE_ASAN "Enable AddressSanitizer instrumentation" OFF)
+# note: including CTest module would add a BUILD_TESTING option
+option(BUILD_TESTS "Build unit tests" ON)
 
 # check if multi-config generator
 get_property(PDXCP_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
@@ -51,6 +53,33 @@ endif()
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# check C++ compiler, possibly enable
+include(CheckLanguage)
+check_language(CXX)
+if(CMAKE_CXX_COMPILER)
+    enable_language(CXX)
+endif()
+
+# Google Test used for tests. not required
+find_package(GTest 1.10)
+
+# if BUILD_TESTS is on, turn it off if no C++ compiler or no Google test
+if(BUILD_TESTS)
+    if(NOT CMAKE_CXX_COMPILER)
+        set(BUILD_TESTS OFF)
+        message(STATUS "BUILD_TESTS: No C++ compiler, turned OFF")
+    elseif(NOT GTest_FOUND)
+        set(BUILD_TESTS OFF)
+        message(STATUS "BUILD_TESTS: No Google Test, turned OFF")
+    endif()
+endif()
+# print testing status
+if(BUILD_TESTS)
+    message(STATUS "Build tests: Yes")
+else()
+    message(STATUS "Build tests: No")
+endif()
+
 # eliminate per-configuration subdirs from being appended to build artifact
 # output dirs for multi-config generators, e.g. Visual Studio, while outputting
 # all the artifacts into the top-level build directory
@@ -67,3 +96,6 @@ include(ConfigCompile)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_subdirectory(src)
+if(BUILD_TESTS)
+    add_subdirectory(test)
+endif()

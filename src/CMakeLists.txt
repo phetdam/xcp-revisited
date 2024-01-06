@@ -66,10 +66,10 @@ add_custom_target(
     COMMAND echo "segsize[N] image sizes"
     COMMAND size ${PDXCP_SEGSIZE_TARGETS}
     COMMAND echo
-    # by depending on kbpoll, we guarantee segsizes is built last. kbpoll also
-    # depends on the pdxcp target so by the time everything is linked there
-    # should be no other worker processes running
-    DEPENDS kbpoll ${PDXCP_SEGSIZE_TARGETS}
+    # by depending on kbpoll + pdxcp_test, we guarantee segsizes is built last.
+    # kbpoll also depends on the pdxcp target so by the time everything is
+    # linked there should be no other worker processes running
+    DEPENDS kbpoll pdxcp_test ${PDXCP_SEGSIZE_TARGETS}
     # this way we don't have to worry about prepending paths to the targets
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Run comparison of segsize[N] disk and image sizes"
