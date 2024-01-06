@@ -130,8 +130,8 @@ TYPED_TEST(StringEqualTest, NeqTrailingTest)
   // since we are writing past the null terminator, need to ensure that the
   // array types are large enough using a static_assert for meaningful test.
   // better to catch this at compile time instead of runtime
-  static_assert(std::extent_v<first_type> > input_size, "first_type too small");
-  static_assert(std::extent_v<second_type> > input_size, "second_type too small");
+  static_assert(input_size < std::extent_v<first_type>, "first_type too small");
+  static_assert(input_size < std::extent_v<second_type>, "second_type too small");
   first_type first = {INPUT_STRING};
   second_type second = {INPUT_STRING};
   // fill first and second with differing non-null values after null
