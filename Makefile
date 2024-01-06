@@ -268,11 +268,13 @@ endif
 # pdxcp_test: C++ Google Test executable
 # if not building tests, object list should be empty to prevent compilation
 ifneq ($(BUILD_TESTS),)
-TEST_OBJS = $(BUILDDIR)/test/string_test.cc.o
+TEST_OBJS = \
+$(BUILDDIR)/test/lockable_test.cc.o \
+$(BUILDDIR)/test/string_test.cc.o
 else
 TEST_OBJS =
 endif
-TEST_LIBS = $(GTEST_MAIN_LIBS) -l$(CDCL_LIBNAME)
+TEST_LIBS = $(GTEST_MAIN_LIBS) -l$(LIBNAME)
 TEST_LDFLAGS = $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS)
 # link only if we are building tests, otherwise do nothing
 $(BUILDDIR)/pdxcp_test: $(BUILDDIR)/$(CDCL_LIBFILE) $(TEST_OBJS)
