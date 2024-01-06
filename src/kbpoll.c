@@ -177,8 +177,12 @@ main()
   // halt counter increment
   if ((status = PDXCP_LKABLE_SET_V(pdxcp_bool)(&payload.stopspec, true)))
     PDXCP_ERROR_EXIT_EX(-status, "%s", "Failed to halt worker thread");
-  // join and exit
+  // join, destroy mutexes, exit
   if ((status = pthread_join(worker_thread, NULL)))
     PDXCP_ERROR_EXIT_EX(status, "%s", "Failed to properly join worker thread");
+  if ((status = pthread_mutex_destroy(&payload.stopspec.mutex)))
+    PDXCP_ERROR_EXIT_EX(status, "%s", "Failed to destroy stopspec mutex");
+  if ((status = pthread_mutex_destroy(&payload.counter.mutex)))
+    PDXCP_ERROR_EXIT_EX(status, "%s", "Failed to destroy counter mutex");
   return EXIT_SUCCESS;
 }
