@@ -77,15 +77,18 @@ TEST_F(LockableTest, BoolSetThreadTest)
   pthread_t worker_thread;
   status = pthread_create(&worker_thread, NULL, lkable_bool_task, &payload);
   ASSERT_EQ(0, status) << "Thread creation failed: " << std::strerror(-status);
-  // join thread and clean up
+  // join thread, clean up, check status
   status = pthread_join(worker_thread, NULL);
   ASSERT_EQ(0, status) << "Thread cleanup failed: " << std::strerror(-status);
-  // check thread status + destroy mutex
   ASSERT_EQ(0, payload.status) << "Thread error: " << std::strerror(payload.status);
+  // get value
+  pdxcp_bool value;
+  status = PDXCP_LKABLE_GET(pdxcp_bool)(&payload.lkable, &value);
+  ASSERT_EQ(0, -status) << "Failed to get value: " << std::strerror(-status);
+  // destroy mutex + check value
   status = pthread_mutex_destroy(&payload.lkable.mutex);
   ASSERT_EQ(0, status) << "Failed to destroy mutex: " << std::strerror(status);
-  // value should be true now
-  EXPECT_EQ(true, payload.lkable.value);
+  EXPECT_EQ(true, value);
 }
 
 /**
@@ -128,14 +131,17 @@ TEST_F(LockableTest, SizeTypeSetThreadTest)
   pthread_t worker_thread;
   status = pthread_create(&worker_thread, NULL, lkable_size_t_task, &payload);
   ASSERT_EQ(0, status) << "Thread creation failed: " << std::strerror(-status);
-  // join thread and clean up
+  // join thread, clean up, check status
   status = pthread_join(worker_thread, NULL);
   ASSERT_EQ(0, status) << "Thread cleanup failed: " << std::strerror(-status);
-  // check thread status + destroy mutex
   ASSERT_EQ(0, payload.status) << "Thread error: " << std::strerror(payload.status);
+  // get value
+  std::size_t value;
+  status = PDXCP_LKABLE_GET(size_t)(&payload.lkable, &value);
+  ASSERT_EQ(0, -status) << "Failed to get value: " << std::strerror(-status);
+  // destroy mutex + check value
   status = pthread_mutex_destroy(&payload.lkable.mutex);
   ASSERT_EQ(0, status) << "Failed to destroy mutex: " << std::strerror(status);
-  // value should be new_value now
   EXPECT_EQ(payload.new_value, payload.lkable.value);
 }
 
