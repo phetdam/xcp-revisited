@@ -221,9 +221,17 @@ PDXCP_EXTERN_C_BEGIN
   PDXCP_LKABLE_SET_V_DECL(type);
 
 /**
+ * C/C++ portable boolean.
+ *
+ * This prevents macro expansion of `bool` by GCC into `_Bool` and causing
+ * linker errors when used from C++ code.
+ */
+typedef unsigned short pdxcp_bool;
+
+/**
  * Predefined lockable types with only by-value setters.
  */
-PDXCP_LKABLE_DEF_INTF_V(bool)
+PDXCP_LKABLE_DEF_INTF_V(pdxcp_bool)
 PDXCP_LKABLE_DEF_INTF_V(int)
 PDXCP_LKABLE_DEF_INTF_V(size_t)
 

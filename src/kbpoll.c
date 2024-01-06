@@ -25,12 +25,12 @@
 /**
  * Struct defining payload used by the worker thread.
  *
- * @param stopspec `PDXCP_LKABLE(bool)` for indicating when to stop looping
+ * @param stopspec `PDXCP_LKABLE(pdxcp_bool)` to indicate when to stop looping
  * @param counter `PDXCP_LKABLE(size_t)` providing the locked counter
  * @param sleepspec `nanosleep` sleep specification
  */
 typedef struct {
-  PDXCP_LKABLE(bool) stopspec;
+  PDXCP_LKABLE(pdxcp_bool) stopspec;
   PDXCP_LKABLE(size_t) counter;
   struct timespec sleepspec;
 } worker_payload;
@@ -63,7 +63,7 @@ counter_task(void *arg)
   worker_payload *payload = (worker_payload *) arg;
   // return status and loop indicator value
   int status;
-  bool stop_loop;
+  pdxcp_bool stop_loop;
   // number of 1 ms iterations to loop + 1 ms as a struct timespec
   size_t spin_count = timespec_ms(&payload->sleepspec);
   struct timespec spin_spec = {.tv_nsec = 1000000};
@@ -73,7 +73,7 @@ counter_task(void *arg)
     for (size_t i = 0; i < spin_count; i++) {
       // break could be due to error or due to actually needing to break
       if (
-        (status = PDXCP_LKABLE_GET(bool)(&payload->stopspec, &stop_loop)) ||
+        (status = PDXCP_LKABLE_GET(pdxcp_bool)(&payload->stopspec, &stop_loop)) ||
         stop_loop
       )
         goto check_thread_status;
@@ -175,7 +175,7 @@ main()
   // run event loop to poll stdin for characters to read
   handle_input_events(STDIN_FILENO, &payload.counter);
   // halt counter increment
-  if ((status = PDXCP_LKABLE_SET_V(bool)(&payload.stopspec, true)))
+  if ((status = PDXCP_LKABLE_SET_V(pdxcp_bool)(&payload.stopspec, true)))
     PDXCP_ERROR_EXIT_EX(-status, "%s", "Failed to halt worker thread");
   // join and exit
   if ((status = pthread_join(worker_thread, NULL)))

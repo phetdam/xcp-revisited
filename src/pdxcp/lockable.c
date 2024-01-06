@@ -15,13 +15,13 @@
 /**
  * Predefined lockable type getter definitions.
  */
-PDXCP_LKABLE_GET_DEF(bool)
+PDXCP_LKABLE_GET_DEF(pdxcp_bool)
 PDXCP_LKABLE_GET_DEF(int)
 PDXCP_LKABLE_GET_DEF(size_t)
 
 /**
  * Predefined lockable type by-value setter defintions.
  */
-PDXCP_LKABLE_SET_V_DEF(bool)
+PDXCP_LKABLE_SET_V_DEF(pdxcp_bool)
 PDXCP_LKABLE_SET_V_DEF(int)
 PDXCP_LKABLE_SET_V_DEF(size_t)
