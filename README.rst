@@ -73,29 +73,29 @@ building with
 CMake
 ~~~~~
 
-TBD. Currently one can build a debugging build with
+Using the provided ``build.sh`` script, one can build a debugging build with
 
 .. code:: bash
 
-   cmake -S . -B build && cmake --build build -j
+   ./build.sh
 
 To build a release build, use
 
 .. code:: bash
 
-   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
+   ./build.sh -Ca -DCMAKE_BUILD_TYPE=Release
 
-To enable AddressSanitizer and specify a different compiler, one can use
+To enable AddressSanitizer and specify a different C compiler, one can use
 
 .. code:: bash
 
-   cmake -S . -B build -DCMAKE_C_COMPILER=clang -DENABLE_ASAN=ON && cmake --build build -j
+   ./build.sh -Ca -DCMAKE_C_COMPILER=clang -DENABLE_ASAN=ON
 
 To build the project's libraries as static instead of shared, one can use
 
 .. code:: bash
 
-   cmake -S . -B build -DBUILD_SHARED_LIBS=ON && cmake --build build -j
+   ./build.sh -Ca -DBUILD_SHARED_LIBS=ON
 
 ``BUILD_SHARED_LIBS`` is set by default and results in shared libraries being
 built.
@@ -106,4 +106,4 @@ One can also explicitly choose to disable test building with
 
 .. code:: bash
 
-   cmake -S . -B build -DBUILD_TESTS=OFF && cmake --build build -j
+   ./build.sh -Ca -DBUILD_TESTS=OFF
