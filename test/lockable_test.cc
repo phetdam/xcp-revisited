@@ -142,7 +142,7 @@ TEST_F(LockableTest, SizeTypeSetThreadTest)
   // destroy mutex + check value
   status = pthread_mutex_destroy(&payload.lkable.mutex);
   ASSERT_EQ(0, status) << "Failed to destroy mutex: " << std::strerror(status);
-  EXPECT_EQ(payload.new_value, payload.lkable.value);
+  EXPECT_EQ(payload.new_value, value);
 }
 
 }  // namespace
