@@ -98,23 +98,35 @@ $(info Executable suffix: $(EXESUFFIX))
 # pkg-config path (for Google Test)
 PKG_CONFIG = $(shell which pkg-config)
 $(info pkg-config: $(PKG_CONFIG))
-# Google Test version (for testing)
+# minimum Google Test version, both as version string and integral
+GTEST_MIN_VERSION = 1.10.0
+GTEST_MIN_VERSION_INT = $(shell echo $(GTEST_MIN_VERSION) | sed 's/\./0/g')
+# Google Test version string + integral (for testing)
 ifneq ($(PKG_CONFIG),)
 GTEST_VERSION = $(shell $(PKG_CONFIG) --modversion gtest)
+GTEST_VERSION_INT = $(shell echo $(GTEST_VERSION) | sed 's/\./0/g')
 else
 GTEST_VERSION =
+GTEST_VERSION_INT = 0
 endif
 # if empty, could not find using pkg-config
 ifneq ($(GTEST_VERSION),)
-$(info Google Test: $(GTEST_VERSION))
+$(info Google Test: $(GTEST_VERSION) (req. >=$(GTEST_MIN_VERSION)))
 else
-$(info Google Test: None)
+$(info Google Test: None (req. >=$(GTEST_MIN_VERSION)))
 endif
+# check if Google Test version is greater than the minimum
+GTEST_VERSION_OK = \
+$(shell \
+if [ $(GTEST_VERSION_INT) -ge $(GTEST_MIN_VERSION_INT) ]; \
+then echo 1; else echo; fi)
 # build tests or not. automatically on if Google Test found using pkg-config,
-# but if not found/no C++ compiler, overrides user option specified
-ifeq ($(GTEST_VERSION),)
+# but if no C++ compiler, not found, or version too low, forces BUILD_TESTS=
+ifeq ($(CXX_PATH),)
 BUILD_TESTS =
-else ifeq ($(CXX_PATH),)
+else ifeq ($(GTEST_VERSION),)
+BUILD_TESTS =
+else ifeq ($(GTEST_VERSION_OK),)
 BUILD_TESTS =
 else
 BUILD_TESTS ?= 1
