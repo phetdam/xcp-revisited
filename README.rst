@@ -49,6 +49,15 @@ To build the project's libraries as static instead of shared, one can use
 
 ``BUILD_SHARED`` is set by default and results in shared libraries being built.
 
+By default, if a C++ compiler is available and if `Google Test`_ >=1.10.0 is
+locatable via pkg-config_, unit tests will also be built. If one of these
+components is missing, no tests will be built. One can also explicitly choose
+to disable test building with
+
+.. code:: bash
+
+   make BUILD_TESTS=
+
 .. _Make: https://www.gnu.org/software/make/
 
 .. _CMake: https://cmake.org/cmake/help/latest/
@@ -56,6 +65,10 @@ To build the project's libraries as static instead of shared, one can use
 .. _AddressSanitizer: https://github.com/google/sanitizers/wiki/AddressSanitizer
 
 .. _Clang: https://clang.llvm.org/
+
+.. _Google Test: https://github.com/google/googletest
+
+.. _pkg-config: https://www.freedesktop.org/wiki/Software/pkg-config/
 
 CMake
 ~~~~~
@@ -76,13 +89,21 @@ To enable AddressSanitizer and specify a different compiler, one can use
 
 .. code:: bash
 
-   cmake -S . -B build -DCMAKE_C_COMPILER=clang -DENABLE_ASAN=1 && cmake --build build -j
+   cmake -S . -B build -DCMAKE_C_COMPILER=clang -DENABLE_ASAN=ON && cmake --build build -j
 
 To build the project's libraries as static instead of shared, one can use
 
 .. code:: bash
 
-   cmake -S . -B build -DBUILD_SHARED_LIBS=0 && cmake --build build -j
+   cmake -S . -B build -DBUILD_SHARED_LIBS=ON && cmake --build build -j
 
 ``BUILD_SHARED_LIBS`` is set by default and results in shared libraries being
 built.
+
+If a C++ compiler and Google Test >=1.10.0 are available, unit tests will be
+built by default. If one of these components is missing, no tests will be built.
+One can also explicitly choose to disable test building with
+
+.. code:: bash
+
+   cmake -S . -B build -DBUILD_TESTS=OFF && cmake --build build -j
