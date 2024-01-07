@@ -51,8 +51,8 @@ To build the project's libraries as static instead of shared, one can use
 
 By default, if a C++ compiler is available and if `Google Test`_ >=1.10.0 is
 locatable via pkg-config_, unit tests will also be built. If one of these
-components is missing, no tests will be built. One can also explicitly choose
-to disable test building with
+components is missing, no tests will be built. One can also disable test
+building with
 
 .. code:: bash
 
