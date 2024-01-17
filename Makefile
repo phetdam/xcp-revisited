@@ -222,16 +222,6 @@ else
 RPATH_FLAGS =
 endif
 
-# include directory with namespace
-INCLUDENS = include/pdxcp
-
-# couldn't get automatic header dependency generation using -MMD or other GCC
-# -MM options to work so we track project headers manually here
-HEADERS = $(shell ls $(INCLUDENS))
-# need simple expansion or expansion will be recursive
-HEADERS := $(HEADERS:%.h=$(INCLUDENS)/%.h)
-HEADERS := $(HEADERS:%.hh=$(INCLUDENS)/%.hh)
-
 # C object compile rule
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(@D)
