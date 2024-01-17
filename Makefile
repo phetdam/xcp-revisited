@@ -233,24 +233,24 @@ HEADERS := $(HEADERS:%.h=$(INCLUDENS)/%.h)
 HEADERS := $(HEADERS:%.hh=$(INCLUDENS)/%.hh)
 
 # C object compile rule
-$(BUILDDIR)/%.o: %.c $(HEADERS)
+$(BUILDDIR)/%.o: %.c
 	@mkdir -p $(@D)
-	$(CC) $(BASE_CFLAGS) $(CFLAGS) -o $@ -c $<
+	$(CC) $(BASE_CFLAGS) $(CFLAGS) -MMD -MT $@ -MF $@.d -o $@ -c $<
 
 # C -fPIC object compile rule (shared library)
-$(BUILDDIR)/%.PIC.o: %.c $(HEADERS)
+$(BUILDDIR)/%.PIC.o: %.c
 	@mkdir -p $(@D)
-	$(CC) -fPIC $(BASE_CFLAGS) $(CFLAGS) -o $@ -c $<
+	$(CC) -fPIC $(BASE_CFLAGS) $(CFLAGS) -MMD -MT $@ -MF $@.d -o $@ -c $<
 
 # C++ object compile rule
-$(BUILDDIR)/%.cc.o: %.cc $(HEADERS)
+$(BUILDDIR)/%.cc.o: %.cc
 	@mkdir -p $(@D)
-	$(CXX) $(BASE_CXXFLAGS) $(CXXFLAGS) -o $@ -c $<
+	$(CXX) $(BASE_CXXFLAGS) $(CXXFLAGS) -MMD -MT $@ -MF $@.d -o $@ -c $<
 
 # C++ -fPIC object compile rule (shared library)
-$(BUILDDIR)/%.PIC.cc.o: %.cc $(HEADERS)
-	@mkdir -p ($@D)
-	$(CXX) -fPIC $(BASE_CXXFLAGS) $(CXXFLAGS) -o $@ -c $<
+$(BUILDDIR)/%.PIC.cc.o: %.cc
+	@mkdir -p $(@D)
+	$(CXX) -fPIC $(BASE_CXXFLAGS) $(CXXFLAGS) -MMD -MT $@ -MF $@.d -o $@ -c $<
 
 # phony targets
 .PHONY: clean
@@ -278,7 +278,9 @@ clean:
 ###############################################################################
 
 # libpdxcp: support library with some shared utility code
-$(BUILDDIR)/$(LIBFILE): $(BUILDDIR)/src/pdxcp/lockable.$(LIBOBJSUFFIX)
+LIB_OBJS = $(BUILDDIR)/src/pdxcp/lockable.$(LIBOBJSUFFIX)
+-include $(LIB_OBJS:%=%.d)
+$(BUILDDIR)/$(LIBFILE): $(LIB_OBJS)
 	@echo "Linking $@..."
 ifneq ($(BUILD_SHARED),)
 	$(CC) $(SOFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
@@ -287,7 +289,9 @@ else
 endif
 
 # libpdxcp_cdcl: cdcl C declaration parser support library
-$(BUILDDIR)/$(CDCL_LIBFILE): $(BUILDDIR)/src/pdxcp_cdp/cdcl_lexer.$(LIBOBJSUFFIX)
+CDCL_LIB_OBJS = $(BUILDDIR)/src/pdxcp_cdp/cdcl_lexer.$(LIBOBJSUFFIX)
+-include $(CDCL_LIB_OBJS:%=%.d)
+$(BUILDDIR)/$(CDCL_LIBFILE): $(CDCL_LIB_OBJS)
 	@echo "Linking $@..."
 ifneq ($(BUILD_SHARED),)
 	$(CC) $(SOFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
@@ -301,6 +305,7 @@ ifneq ($(BUILD_TESTS),)
 TEST_OBJS = \
 $(BUILDDIR)/test/lockable_test.cc.o \
 $(BUILDDIR)/test/string_test.cc.o
+-include $(TEST_OBJS:%=%.d)
 else
 TEST_OBJS =
 endif
@@ -314,41 +319,58 @@ ifneq ($(BUILD_TESTS),)
 endif
 
 # rejmp: uses setjmp/longjmp to restart itself
-$(BUILDDIR)/rejmp: $(BUILDDIR)/src/rejmp.o
+REJMP_OBJS = $(BUILDDIR)/src/rejmp.o
+-include $(REJMP_OBJS:%=%.d)
+$(BUILDDIR)/rejmp: $(REJMP_OBJS)
 	@echo "Linking $@..."
 	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 
 # sigcatch: catches and handles SIGBREAK and SIGINT
-$(BUILDDIR)/sigcatch: $(BUILDDIR)/src/sigcatch.o
+SIGCATCH_OBJS = $(BUILDDIR)/src/sigcatch.o
+-include $(SIGCATCH_OBJS:%=%.d)
+$(BUILDDIR)/sigcatch: $(SIGCATCH_OBJS)
 	@echo "Linking $@..."
 	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 
 # locapprox: finds approximate stack, data, text, heap locations
-$(BUILDDIR)/locapprox: $(BUILDDIR)/src/locapprox.o
+LOCAPPROX_OBJS = $(BUILDDIR)/src/locapprox.o
+-include $(LOCAPPROX_OBJS:%=%.d)
+$(BUILDDIR)/locapprox: $(LOCAPPROX_OBJS)
 	@echo "Linking $@..."
 	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 
 # sigbus: creates and catches a bus error caused by misaligned address use
-$(BUILDDIR)/sigbus: $(BUILDDIR)/src/sigbus.o
+SIGBUS_OBJS = $(BUILDDIR)/src/sigbus.o
+-include $(SIGBUS_OBJS:%=%.d)
+$(BUILDDIR)/sigbus: $(SIGBUS_OBJS)
 	@echo "Linking $@..."
 	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 
 # sigsegv: creates and catches segmentation fault caused by null pointer use
-$(BUILDDIR)/sigsegv: $(BUILDDIR)/src/sigsegv.o
+SIGSEGV_OBJS = $(BUILDDIR)/src/sigsegv.o
+-include $(SIGSEGV_OBJS:%=%.d)
+$(BUILDDIR)/sigsegv: $(SIGSEGV_OBJS)
 	@echo "Linking $@..."
 	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 
 # kbsig: signal-driven input handling program
-$(BUILDDIR)/kbsig: $(BUILDDIR)/src/kbsig.o
+KBSIG_OBJS = $(BUILDDIR)/src/kbsig.o
+-include $(KBSIG_OBJS:%=%.d)
+$(BUILDDIR)/kbsig: $(KBSIG_OBJS)
 	@echo "Linking $@..."
 	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 
 # kbpoll: event-driven input handling program using pthreads. this is a more
-# realistic implementation of what kbsig is trying to do using poll()
-KBPOLL_CFLAGS = $(BASE_CFLAGS) $(LIBRARY_FLAGS) -pthread $(CFLAGS) $(RPATH_FLAGS)
-$(BUILDDIR)/kbpoll: src/kbpoll.c $(HEADERS) $(BUILDDIR)/$(LIBFILE)
-	@echo "Building $@..."
-	$(CC) $(KBPOLL_CFLAGS) -o $@ $< -l$(LIBNAME)
+# realistic implementation of what kbsig is trying to do using poll(). although
+# -pthread should technically be used for both compiling and linking, only the
+# oldest C libraries require passing -pthread when compiling. see the man page
+# for feature_test_macros(7) and look for the text on _REENTRANT
+KBPOLL_OBJS = $(BUILDDIR)/src/kbpoll.o
+-include $(KBPOLL_OBJS:%=%.d)
+KBPOLL_LDFLAGS = $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS)
+$(BUILDDIR)/kbpoll: $(KBPOLL_OBJS) $(BUILDDIR)/$(LIBFILE)
+	@echo "Linking $@..."
+	$(CC) $(KBPOLL_LDFLAGS) -o $@ $(KBPOLL_OBJS) -lpthread -l$(LIBNAME)
 
 # final ls + size call for showing the segment sizes for segsize[N]. note that
 # on Windows (MinGW), we need to also add the .exe suffix. awk is used to
@@ -371,36 +393,36 @@ segsizes: $(BUILDDIR)/pdxcp_test $(SEGSIZE_TGTS)
 	@echo
 
 # segsize1: program to get segment sizes (1)
-$(BUILDDIR)/segsize1: src/segsize.c $(HEADERS)
+$(BUILDDIR)/segsize1: src/segsize.c
 	@echo "Building $@..."
 	$(CC) $(BASE_CFLAGS) $(CFLAGS) -o $@ $<
 
 # segsize2: program to get segment sizes (2)
-$(BUILDDIR)/segsize2: src/segsize.c $(HEADERS)
+$(BUILDDIR)/segsize2: src/segsize.c
 	@echo "Building $@..."
 	$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=2 -o $@ $<
 
 # segsize3: program to get segment sizes (3)
-$(BUILDDIR)/segsize3: src/segsize.c $(HEADERS)
+$(BUILDDIR)/segsize3: src/segsize.c
 	@echo "Building $@..."
 	$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=3 -o $@ $<
 
 # segsize4a: program to get segment sizes (4a, uninitialized auto array)
-$(BUILDDIR)/segsize4a: src/segsize.c $(HEADERS)
+$(BUILDDIR)/segsize4a: src/segsize.c
 	@echo "Building $@..."
 	$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=4 -o $@ $<
 
 # segsize4b: program to get segment sizes (4b, initialized auto array)
-$(BUILDDIR)/segsize4b: src/segsize.c $(HEADERS)
+$(BUILDDIR)/segsize4b: src/segsize.c
 	@echo "Building $@..."
 	$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=4 -DSEGSIZE_STEPS_4B -o $@ $<
 
 # segsize5d: program to get segment sizes (5, 4b compiled with debug flags)
-$(BUILDDIR)/segsize5d: src/segsize.c $(HEADERS)
+$(BUILDDIR)/segsize5d: src/segsize.c
 	@echo "Building $@..."
 	$(CC) -Wall -g -DSEGSIZE_STEPS=5 -o $@ $<
 
 # segsize5r: program to get segment sizes (5, 4b compiled with release flags)
-$(BUILDDIR)/segsize5r: src/segsize.c $(HEADERS)
+$(BUILDDIR)/segsize5r: src/segsize.c
 	@echo "Building $@..."
 	$(CC) -Wall -O3 -mtune=native -DSEGSIZE_STEPS=5 -o $@ $<
