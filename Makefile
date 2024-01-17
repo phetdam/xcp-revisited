@@ -19,6 +19,9 @@ $(info CC path: $(CC_PATH))
 # C compiler version string
 CC_VERSION_STRING = $(shell $(CC) --version | head -1)
 $(info CC version: $(CC_VERSION_STRING))
+# C standard, default to C11 with GNU extensions
+C_STANDARD ?= gnu11
+$(info C standard: $(C_STANDARD))
 # C++ compiler path (optional)
 CXX_PATH = $(shell which $(CXX))
 $(info CXX path: $(CXX_PATH))
@@ -29,6 +32,14 @@ $(info CXX version: $(CXX_VERSION_STRING))
 else
 CXX_VERSION_STRING =
 $(info CXX version: None)
+endif
+# C++ standard, default to C++17 with GNU extensions. if no C++ compiler, empty
+ifneq ($(CXX_PATH),)
+CXX_STANDARD ?= gnu++17
+$(info C++ standard: $(CXX_STANDARD))
+else
+CXX_STANDARD =
+$(info C++ standard: None)
 endif
 
 # Debug by default
@@ -171,8 +182,15 @@ BASE_CFLAGS += -pg
 BASE_LDFLAGS += -pg
 endif
 
-# base C++ compile flags
-BASE_CXXFLAGS = $(BASE_CFLAGS)
+# base C++ compile flags. expand simply to avoid picking up further updates
+BASE_CXXFLAGS := $(BASE_CFLAGS)
+
+# add C version flags. need to do this here since base C++ flags inherits it
+BASE_CFLAGS += -std=$(C_STANDARD)
+# add C++ version flags if they exist
+ifneq ($(CXX_STANDARD),)
+BASE_CXXFLAGS += -std=$(CXX_STANDARD)
+endif
 
 # Google Test compile/link flags + add to C++ flags
 ifneq ($(GTEST_VERSION),)
