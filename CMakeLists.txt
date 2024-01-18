@@ -92,6 +92,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}$<$<CONFIG:Debug>:>)
 # update CMake module path for our CMake scripts
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
+# use ORIGIN rpath instead of absolute paths
+set(CMAKE_BUILD_RPATH_USE_ORIGIN ON)
+
 # add compile options
 include(ConfigCompile)
 
