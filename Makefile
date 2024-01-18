@@ -222,25 +222,46 @@ else
 RPATH_FLAGS =
 endif
 
+# check that we have color capabilities
+TERMCOLORS = $(shell tput colors)
+ifneq ($(TERMCOLORS),)
+$(info Terminal colors: $(TERMCOLORS))
+# set colors and normal. F for foreground, I for high-intensity
+TFGREEN = $(shell tput setaf 2)
+TFCYAN = $(shell tput setaf 6)
+TFIGREEN = $(shell tput setaf 10)
+TNORMAL = $(shell tput sgr0)
+else
+$(info Terminal colors: None)
+TFGREEN =
+TFCYAN =
+TFIGREEN =
+TNORMAL =
+endif
+
 # C object compile rule
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(@D)
-	$(CC) $(BASE_CFLAGS) $(CFLAGS) -MMD -MT $@ -MF $@.d -o $@ -c $<
+	@printf "$(TFGREEN)Building C object $@$(TNORMAL)\n"
+	@$(CC) $(BASE_CFLAGS) $(CFLAGS) -MMD -MT $@ -MF $@.d -o $@ -c $<
 
 # C -fPIC object compile rule (shared library)
 $(BUILDDIR)/%.PIC.o: %.c
 	@mkdir -p $(@D)
-	$(CC) -fPIC $(BASE_CFLAGS) $(CFLAGS) -MMD -MT $@ -MF $@.d -o $@ -c $<
+	@printf "$(TFGREEN)Building C object $@$(TNORMAL)\n"
+	@$(CC) -fPIC $(BASE_CFLAGS) $(CFLAGS) -MMD -MT $@ -MF $@.d -o $@ -c $<
 
 # C++ object compile rule
 $(BUILDDIR)/%.cc.o: %.cc
 	@mkdir -p $(@D)
-	$(CXX) $(BASE_CXXFLAGS) $(CXXFLAGS) -MMD -MT $@ -MF $@.d -o $@ -c $<
+	@printf "$(TFGREEN)Building C++ object $@$(TNORMAL)\n"
+	@$(CXX) $(BASE_CXXFLAGS) $(CXXFLAGS) -MMD -MT $@ -MF $@.d -o $@ -c $<
 
 # C++ -fPIC object compile rule (shared library)
 $(BUILDDIR)/%.PIC.cc.o: %.cc
 	@mkdir -p $(@D)
-	$(CXX) -fPIC $(BASE_CXXFLAGS) $(CXXFLAGS) -MMD -MT $@ -MF $@.d -o $@ -c $<
+	@printf "$(TFGREEN)Building C++ object $@$(TNORMAL)\n"
+	@$(CXX) -fPIC $(BASE_CXXFLAGS) $(CXXFLAGS) -MMD -MT $@ -MF $@.d -o $@ -c $<
 
 # phony targets
 .PHONY: clean
@@ -271,23 +292,27 @@ clean:
 LIB_OBJS = $(BUILDDIR)/src/pdxcp/lockable.$(LIBOBJSUFFIX)
 -include $(LIB_OBJS:%=%.d)
 $(BUILDDIR)/$(LIBFILE): $(LIB_OBJS)
-	@echo "Linking $@..."
 ifneq ($(BUILD_SHARED),)
-	$(CC) $(SOFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@printf "$(TFIGREEN)Linking C shared library $@$(TNORMAL)\n"
+	@$(CC) $(SOFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 else
-	$(AR) crs $@ $^
+	@printf "$(TFIGREEN)Linking C static library $@$(TNORMAL)\n"
+	@$(AR) crs $@ $^
 endif
+	@echo "Built target $@"
 
 # libpdxcp_cdcl: cdcl C declaration parser support library
 CDCL_LIB_OBJS = $(BUILDDIR)/src/pdxcp_cdp/cdcl_lexer.$(LIBOBJSUFFIX)
 -include $(CDCL_LIB_OBJS:%=%.d)
 $(BUILDDIR)/$(CDCL_LIBFILE): $(CDCL_LIB_OBJS)
-	@echo "Linking $@..."
 ifneq ($(BUILD_SHARED),)
-	$(CC) $(SOFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@printf "$(TFIGREEN)Linking C shared library $@$(TNORMAL)\n"
+	@$(CC) $(SOFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 else
-	$(AR) crs $@ $^
+	@printf "$(TFIGREEN)Linking C static library $@$(TNORMAL)\n"
+	@$(AR) crs $@ $^
 endif
+	@echo "Built target $@"
 
 # pdxcp_test: C++ Google Test executable
 # if not building tests, object list should be empty to prevent compilation
@@ -304,51 +329,58 @@ TEST_LDFLAGS = $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS)
 # link only if we are building tests, otherwise do nothing
 $(BUILDDIR)/pdxcp_test: $(BUILDDIR)/$(CDCL_LIBFILE) $(TEST_OBJS)
 ifneq ($(BUILD_TESTS),)
-	@echo "Linking $@...."
-	$(CXX) $(TEST_LDFLAGS) -o $@ $(TEST_OBJS) $(TEST_LIBS)
+	@printf "$(TFIGREEN)Linking C++ executable $@$(TNORMAL)\n"
+	@$(CXX) $(TEST_LDFLAGS) -o $@ $(TEST_OBJS) $(TEST_LIBS)
+	@echo "Built target $@"
 endif
 
 # rejmp: uses setjmp/longjmp to restart itself
 REJMP_OBJS = $(BUILDDIR)/src/rejmp.o
 -include $(REJMP_OBJS:%=%.d)
 $(BUILDDIR)/rejmp: $(REJMP_OBJS)
-	@echo "Linking $@..."
-	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
 
 # sigcatch: catches and handles SIGBREAK and SIGINT
 SIGCATCH_OBJS = $(BUILDDIR)/src/sigcatch.o
 -include $(SIGCATCH_OBJS:%=%.d)
 $(BUILDDIR)/sigcatch: $(SIGCATCH_OBJS)
-	@echo "Linking $@..."
-	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
 
 # locapprox: finds approximate stack, data, text, heap locations
 LOCAPPROX_OBJS = $(BUILDDIR)/src/locapprox.o
 -include $(LOCAPPROX_OBJS:%=%.d)
 $(BUILDDIR)/locapprox: $(LOCAPPROX_OBJS)
-	@echo "Linking $@..."
-	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
 
 # sigbus: creates and catches a bus error caused by misaligned address use
 SIGBUS_OBJS = $(BUILDDIR)/src/sigbus.o
 -include $(SIGBUS_OBJS:%=%.d)
 $(BUILDDIR)/sigbus: $(SIGBUS_OBJS)
-	@echo "Linking $@..."
-	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
 
 # sigsegv: creates and catches segmentation fault caused by null pointer use
 SIGSEGV_OBJS = $(BUILDDIR)/src/sigsegv.o
 -include $(SIGSEGV_OBJS:%=%.d)
 $(BUILDDIR)/sigsegv: $(SIGSEGV_OBJS)
-	@echo "Linking $@..."
-	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
 
 # kbsig: signal-driven input handling program
 KBSIG_OBJS = $(BUILDDIR)/src/kbsig.o
 -include $(KBSIG_OBJS:%=%.d)
 $(BUILDDIR)/kbsig: $(KBSIG_OBJS)
-	@echo "Linking $@..."
-	$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
 
 # kbpoll: event-driven input handling program using pthreads. this is a more
 # realistic implementation of what kbsig is trying to do using poll(). although
@@ -359,8 +391,9 @@ KBPOLL_OBJS = $(BUILDDIR)/src/kbpoll.o
 -include $(KBPOLL_OBJS:%=%.d)
 KBPOLL_LDFLAGS = $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS)
 $(BUILDDIR)/kbpoll: $(KBPOLL_OBJS) $(BUILDDIR)/$(LIBFILE)
-	@echo "Linking $@..."
-	$(CC) $(KBPOLL_LDFLAGS) -o $@ $(KBPOLL_OBJS) -lpthread -l$(LIBNAME)
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(KBPOLL_LDFLAGS) -o $@ $(KBPOLL_OBJS) -lpthread -l$(LIBNAME)
+	@echo "Built target $@"
 
 # final ls + size call for showing the segment sizes for segsize[N]. note that
 # on Windows (MinGW), we need to also add the .exe suffix. awk is used to
@@ -384,35 +417,42 @@ segsizes: $(BUILDDIR)/pdxcp_test $(SEGSIZE_TGTS)
 
 # segsize1: program to get segment sizes (1)
 $(BUILDDIR)/segsize1: src/segsize.c
-	@echo "Building $@..."
-	$(CC) $(BASE_CFLAGS) $(CFLAGS) -o $@ $<
+	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_CFLAGS) $(CFLAGS) -o $@ $<
+	@echo "Built target $@"
 
 # segsize2: program to get segment sizes (2)
 $(BUILDDIR)/segsize2: src/segsize.c
-	@echo "Building $@..."
-	$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=2 -o $@ $<
+	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=2 -o $@ $<
+	@echo "Built target $@"
 
 # segsize3: program to get segment sizes (3)
 $(BUILDDIR)/segsize3: src/segsize.c
-	@echo "Building $@..."
-	$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=3 -o $@ $<
+	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=3 -o $@ $<
+	@echo "Built target $@"
 
 # segsize4a: program to get segment sizes (4a, uninitialized auto array)
 $(BUILDDIR)/segsize4a: src/segsize.c
-	@echo "Building $@..."
-	$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=4 -o $@ $<
+	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=4 -o $@ $<
+	@echo "Built target $@"
 
 # segsize4b: program to get segment sizes (4b, initialized auto array)
 $(BUILDDIR)/segsize4b: src/segsize.c
-	@echo "Building $@..."
-	$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=4 -DSEGSIZE_STEPS_4B -o $@ $<
+	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=4 -DSEGSIZE_STEPS_4B -o $@ $<
+	@echo "Built target $@"
 
 # segsize5d: program to get segment sizes (5, 4b compiled with debug flags)
 $(BUILDDIR)/segsize5d: src/segsize.c
-	@echo "Building $@..."
-	$(CC) -Wall -g -DSEGSIZE_STEPS=5 -o $@ $<
+	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
+	@$(CC) -Wall -g -DSEGSIZE_STEPS=5 -o $@ $<
+	@echo "Built target $@"
 
 # segsize5r: program to get segment sizes (5, 4b compiled with release flags)
 $(BUILDDIR)/segsize5r: src/segsize.c
-	@echo "Building $@..."
-	$(CC) -Wall -O3 -mtune=native -DSEGSIZE_STEPS=5 -o $@ $<
+	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
+	@$(CC) -Wall -O3 -mtune=native -DSEGSIZE_STEPS=5 -o $@ $<
+	@echo "Build target $@"
