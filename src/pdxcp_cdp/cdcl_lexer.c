@@ -191,6 +191,7 @@ pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
       token->type = pdxcp_cdcl_token_type_error;
       strcpy(token->text, char_token_error);
       token->text[sizeof char_token_error - 3] = (char) c;
+      token->text[sizeof char_token_error - 1] = '\0';  // terminate string
       return pdxcp_cdcl_lexer_status_bad_token;
   }
   return pdxcp_cdcl_lexer_status_ok;
