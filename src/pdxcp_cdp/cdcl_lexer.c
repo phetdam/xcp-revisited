@@ -86,9 +86,9 @@ pdxcp_cdcl_get_iden_text(FILE *in, pdxcp_cdcl_token *token)
 {
   // pointer to where next read character should be written
   char *text_out = token->text;
-  // get first character
-  int c = fgetc(in);
-  // if EOF, return
+  // skip whitespace. if EOF, return, otherwise first non-space character
+  int c;
+  while (isspace(c = fgetc(in)));
   if (c == EOF)
     return pdxcp_cdcl_lexer_status_fgetc_eof;
   // not identifier, in particular, also excludes digits. need to also put the

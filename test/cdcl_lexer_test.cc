@@ -185,6 +185,26 @@ INSTANTIATE_TEST_SUITE_P(
     LexerParamTestInput{
       "_underscore_1_iden",
       {create_cdcl_token(pdxcp_cdcl_token_type_iden, "_underscore_1_iden")}
+    },
+    LexerParamTestInput{
+      "[",
+      {create_cdcl_token(pdxcp_cdcl_token_type_langle, "")}
+    },
+    LexerParamTestInput{
+      ")",
+      {create_cdcl_token(pdxcp_cdcl_token_type_rparen, "")}
+    },
+    LexerParamTestInput{
+      "struct my_struct_1",
+      {create_cdcl_token(pdxcp_cdcl_token_type_struct, "my_struct_1")}
+    },
+    LexerParamTestInput{
+      "struct       _my_struct_2",
+      {create_cdcl_token(pdxcp_cdcl_token_type_struct, "_my_struct_2")}
+    },
+    LexerParamTestInput{
+      "enum    my_enum_1",
+      {create_cdcl_token(pdxcp_cdcl_token_type_enum, "my_enum_1")}
     }
   )
 );
