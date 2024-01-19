@@ -98,6 +98,8 @@ pdxcp_cdcl_get_iden_text(FILE *in, pdxcp_cdcl_token *token)
       return pdxcp_cdcl_lexer_status_ungetc_fail;
     return pdxcp_cdcl_lexer_status_not_iden;
   }
+  // write c into token text and advance text_out
+  *text_out++ = (char) c;
   // read rest of [a-zA-Z0-9_] string text
   while (
     (isalnum(c = fgetc(in)) || c == '_') && c != EOF &&
