@@ -55,9 +55,9 @@ bool operator==(const pdxcp_cdcl_token& first, const pdxcp_cdcl_token& second)
 void PrintTo(const pdxcp_cdcl_token& token, std::ostream* out)
 {
   // operator<< overload exists for const CharT*; rely on pointer decay here
-  *out << "token(" << pdxcp_cdcl_token_type_string(token.type) << ", \"" <<
+  *out << "{" << pdxcp_cdcl_token_type_string(token.type) << ", \"" <<
     // prevent buffer overflow if text array is not null-terminated
-    pdxcp::safe_stream_wrapper{token.text} << "\")";
+    pdxcp::safe_stream_wrapper{token.text} << "\"}";
 }
 
 namespace {
@@ -170,8 +170,9 @@ TEST_P(LexerParamTest, SingleTokenTest)
 #endif  // !defined(PDXCP_HAS_FMEMOPEN)
 }
 
+// identifiers
 INSTANTIATE_TEST_SUITE_P(
-  Base,
+  IdenTokens,
   LexerParamTest,
   ::testing::Values(
     LexerParamTestInput{
@@ -185,7 +186,15 @@ INSTANTIATE_TEST_SUITE_P(
     LexerParamTestInput{
       "_underscore_1_iden",
       {create_cdcl_token(pdxcp_cdcl_token_type_iden, "_underscore_1_iden")}
-    },
+    }
+  )
+);
+
+// single-char tokens
+INSTANTIATE_TEST_SUITE_P(
+  CharTokens,
+  LexerParamTest,
+  ::testing::Values(
     LexerParamTestInput{
       "[",
       {create_cdcl_token(pdxcp_cdcl_token_type_langle, "")}
@@ -195,16 +204,56 @@ INSTANTIATE_TEST_SUITE_P(
       {create_cdcl_token(pdxcp_cdcl_token_type_rparen, "")}
     },
     LexerParamTestInput{
+      "*",
+      {create_cdcl_token(pdxcp_cdcl_token_type_star, "")}
+    }
+  )
+);
+
+// structs
+INSTANTIATE_TEST_SUITE_P(
+  StructTokens,
+  LexerParamTest,
+  ::testing::Values(
+    LexerParamTestInput{
       "struct my_struct_1",
       {create_cdcl_token(pdxcp_cdcl_token_type_struct, "my_struct_1")}
     },
     LexerParamTestInput{
       "struct       _my_struct_2",
       {create_cdcl_token(pdxcp_cdcl_token_type_struct, "_my_struct_2")}
-    },
+    }
+  )
+);
+
+// enums
+INSTANTIATE_TEST_SUITE_P(
+  EnumTokens,
+  LexerParamTest,
+  ::testing::Values(
     LexerParamTestInput{
       "enum    my_enum_1",
       {create_cdcl_token(pdxcp_cdcl_token_type_enum, "my_enum_1")}
+    },
+    LexerParamTestInput{
+      "enum    _my_enum_2",
+      {create_cdcl_token(pdxcp_cdcl_token_type_enum, "_my_enum_2")}
+    }
+  )
+);
+
+// const + volatile
+INSTANTIATE_TEST_SUITE_P(
+  QualTokens,
+  LexerParamTest,
+  ::testing::Values(
+    LexerParamTestInput{
+      "const",
+      {create_cdcl_token(pdxcp_cdcl_token_type_q_const, "const")}
+    },
+    LexerParamTestInput{
+      "volatile",
+      {create_cdcl_token(pdxcp_cdcl_token_type_q_volatile, "volatile")}
     }
   )
 );
