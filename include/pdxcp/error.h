@@ -12,7 +12,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+// MinGW provides unistd.h
+#if !defined(_WIN32) || defined(__MINGW32__)
 #include <unistd.h>
+#endif  // defined(_WIN32) && !defined(__MINGW32__)
 
 #include "pdxcp/common.h"
 

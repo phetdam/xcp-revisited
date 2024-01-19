@@ -18,7 +18,7 @@
 #endif  // _BSD_SOURCE
 // "default" definitions
 #ifdef _DEFAULT_SOURCE
-#define PDXCP_DEFAULT_SOURCE
+#define PDXCP_DEFAULT
 #endif  // _DEFAULT_SOURCE
 // various POSIX features
 #ifdef _POSIX_C_SOURCE
@@ -49,15 +49,7 @@
 // POSIX.1-2008 features
 #if _POSIX_C_SOURCE >= 200809L
 #define PDXCP_POSIX_C_2008
-#endif  // _POSIX_C_SOOURCE < 200809L
+#endif  // _POSIX_C_SOURCE < 200809L
 #endif  // _POSIX_C_SOURCE
-// MinGW 32-bit
-#if defined(_WIN32) && defined(__MINGW32__)
-#define PDXCP_MINGW32
-#endif  // !defined(_WIN32) || !defined(__MINGW32__)
-// MinGW 64-bit
-#if defined(_WIN32) && defined(__MINGW64__)
-#define PDXCP_MINGW64
-#endif  // !defined(_WIN32) || !defined(__MINGW64__)
 
 #endif  // PDXCP_FEATURES_H_
