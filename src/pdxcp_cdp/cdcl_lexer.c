@@ -15,9 +15,9 @@
 #include <string.h>
 
 // error message template for invalid character tokens
-const char char_token_error[] = "Unknown character token 'X'";
+static const char char_token_error[] = "Unknown character token 'X'";
 // error message template for token that is too long
-const char long_token_error[] = "Token too large: ...";
+static const char long_token_error[] = "Token too large: ...";
 
 /**
  * Macro defining case statement returning the stringified value.
