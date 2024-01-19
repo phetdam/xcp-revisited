@@ -318,13 +318,14 @@ endif
 # if not building tests, object list should be empty to prevent compilation
 ifneq ($(BUILD_TESTS),)
 TEST_OBJS = \
+$(BUILDDIR)/test/cdcl_lexer_test.cc.o \
 $(BUILDDIR)/test/lockable_test.cc.o \
 $(BUILDDIR)/test/string_test.cc.o
 -include $(TEST_OBJS:%=%.d)
 else
 TEST_OBJS =
 endif
-TEST_LIBS = $(GTEST_MAIN_LIBS) -l$(LIBNAME)
+TEST_LIBS = $(GTEST_MAIN_LIBS) -l$(LIBNAME) -l$(CDCL_LIBNAME)
 TEST_LDFLAGS = $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS)
 # link only if we are building tests, otherwise do nothing
 $(BUILDDIR)/pdxcp_test: $(BUILDDIR)/$(CDCL_LIBFILE) $(TEST_OBJS)
