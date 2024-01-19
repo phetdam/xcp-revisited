@@ -148,6 +148,7 @@ class LexerParamTest
  */
 TEST_P(LexerParamTest, SingleTokenTest)
 {
+#if defined(PDXCP_HAS_FMEMOPEN)
   // must contain single token
   ASSERT_EQ(1u, GetParam().tokens.size()) << "Only one token allowed";
   // open memory-backed stream
@@ -160,6 +161,9 @@ TEST_P(LexerParamTest, SingleTokenTest)
     pdxcp_cdcl_lexer_status_message(status);
   // check for token equality
   EXPECT_EQ(GetParam().tokens[0], token);
+#else
+  GTEST_SKIP();
+#endif  // !defined(PDXCP_HAS_FMEMOPEN)
 }
 
 INSTANTIATE_TEST_SUITE_P(
