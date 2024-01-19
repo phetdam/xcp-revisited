@@ -161,6 +161,10 @@ TEST_P(LexerParamTest, SingleTokenTest)
     pdxcp_cdcl_lexer_status_message(status);
   // check for token equality
   EXPECT_EQ(GetParam().tokens[0], token);
+  // get another token; this should result in EOF
+  status = pdxcp_cdcl_get_token(stream, &token);
+  ASSERT_EQ(pdxcp_cdcl_lexer_status_fgetc_eof, status) << "Lexer status: " <<
+    pdxcp_cdcl_lexer_status_message(status);
 #else
   GTEST_SKIP();
 #endif  // !defined(PDXCP_HAS_FMEMOPEN)
