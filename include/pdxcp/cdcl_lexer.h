@@ -30,6 +30,12 @@ typedef enum {
   pdxcp_cdcl_token_type_enum,        // enum <text>
   pdxcp_cdcl_token_type_q_const,     // const
   pdxcp_cdcl_token_type_q_volatile,  // volatile
+  pdxcp_cdcl_token_type_t_void,      // void
+  pdxcp_cdcl_token_type_t_char,      // char
+  pdxcp_cdcl_token_type_t_int,       // signed int
+  pdxcp_cdcl_token_type_t_long,      // signed long
+  pdxcp_cdcl_token_type_t_float,     // float
+  pdxcp_cdcl_token_type_t_double,    // double
   pdxcp_cdcl_token_type_iden,        // <text> (identifier)
   pdxcp_cdcl_token_type_max          // number of valid token types
 } pdxcp_cdcl_token_type;

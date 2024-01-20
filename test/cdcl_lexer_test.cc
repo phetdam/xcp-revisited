@@ -261,6 +261,30 @@ INSTANTIATE_TEST_SUITE_P(
   )
 );
 
+// built-in types
+INSTANTIATE_TEST_SUITE_P(
+  BuiltinTypes,
+  LexerSingleTokenTest,
+  ::testing::Values(
+    LexerParamTestInput{
+      "void",
+      {create_cdcl_token(pdxcp_cdcl_token_type_t_void, "")}
+    },
+    LexerParamTestInput{
+      "char      ",
+      {create_cdcl_token(pdxcp_cdcl_token_type_t_char, "")}
+    },
+    LexerParamTestInput{
+      "   int   ",
+      {create_cdcl_token(pdxcp_cdcl_token_type_t_int, "")}
+    },
+    LexerParamTestInput{
+      "  double     ",
+      {create_cdcl_token(pdxcp_cdcl_token_type_t_double, "")}
+    }
+  )
+);
+
 /**
  * C declaration lexer parametrized test fixture for multi-token tests.
  */
@@ -310,7 +334,7 @@ INSTANTIATE_TEST_SUITE_P(
     LexerParamTestInput{
       "int hello;",
       {
-        create_cdcl_token(pdxcp_cdcl_token_type_iden, "int"),
+        create_cdcl_token(pdxcp_cdcl_token_type_t_int, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_iden, "hello"),
         create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
       }
@@ -318,7 +342,7 @@ INSTANTIATE_TEST_SUITE_P(
     LexerParamTestInput{
       "char *str;",
       {
-        create_cdcl_token(pdxcp_cdcl_token_type_iden, "char"),
+        create_cdcl_token(pdxcp_cdcl_token_type_t_char, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_iden, "str"),
         create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")

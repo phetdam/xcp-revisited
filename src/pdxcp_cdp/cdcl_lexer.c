@@ -45,6 +45,12 @@ pdxcp_cdcl_token_type_string(pdxcp_cdcl_token_type type)
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_q_const);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_q_volatile);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_iden);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_void);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_char);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_int);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_long);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_float);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_double);
     default:
       return "(unknown)";
   }
@@ -166,6 +172,36 @@ pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
       if (!PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_get_iden_text(in, token)))
         return status;
       token->type = pdxcp_cdcl_token_type_enum;
+    }
+    // void
+    else if (!strcmp(token->text, "void")) {
+      token->type = pdxcp_cdcl_token_type_t_void;
+      token->text[0] = '\0';
+    }
+    // char
+    else if (!strcmp(token->text, "char")) {
+      token->type = pdxcp_cdcl_token_type_t_char;
+      token->text[0] = '\0';
+    }
+    // signed int
+    else if (!strcmp(token->text, "int")) {
+      token->type = pdxcp_cdcl_token_type_t_int;
+      token->text[0] = '\0';
+    }
+    // signed long
+    else if (!strcmp(token->text, "long")) {
+      token->type = pdxcp_cdcl_token_type_t_long;
+      token->text[0] = '\0';
+    }
+    // float
+    else if (!strcmp(token->text, "float")) {
+      token->type = pdxcp_cdcl_token_type_t_float;
+      token->text[0] = '\0';
+    }
+    // double
+    else if (!strcmp(token->text, "double")) {
+      token->type = pdxcp_cdcl_token_type_t_double;
+      token->text[0] = '\0';
     }
     // identifier
     else
