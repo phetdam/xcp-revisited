@@ -25,6 +25,7 @@ typedef enum {
   pdxcp_cdcl_token_type_rangle,      // ]
   pdxcp_cdcl_token_type_comma,       // ,
   pdxcp_cdcl_token_type_star,        // *
+  pdxcp_cdcl_token_type_semicolon,   // ;
   pdxcp_cdcl_token_type_struct,      // struct <text>
   pdxcp_cdcl_token_type_enum,        // enum <text>
   pdxcp_cdcl_token_type_q_const,     // const

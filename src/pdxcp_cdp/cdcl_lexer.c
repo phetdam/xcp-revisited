@@ -39,6 +39,7 @@ pdxcp_cdcl_token_type_string(pdxcp_cdcl_token_type type)
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_rangle);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_comma);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_star);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_semicolon);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_struct);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_enum);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_q_const);
@@ -191,6 +192,9 @@ pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
       break;
     case '*':
       token->type = pdxcp_cdcl_token_type_star;
+      break;
+    case ';':
+      token->type = pdxcp_cdcl_token_type_semicolon;
       break;
     // unknown token. copy error template and write the character to text
     default:

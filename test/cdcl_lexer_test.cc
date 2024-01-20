@@ -267,17 +267,6 @@ INSTANTIATE_TEST_SUITE_P(
 class LexerMultipleTokenTest : public LexerParamTest {};
 
 /**
- * Allow `LexerMultipleTokenTest` to be compiled but not instantiated.
- *
- * One cannot disable a `TEST_P` test by using the `DISABLE_` prefix on a test
- * name so we allow the uninstantiated test to stay for now, otherwise Google
- * Test will fail the uninstantiated `TEST_P` test.
- *
- * Note that `LexerMultipleTokenTest.Test` succeeds with single-token inputs.
- */
-GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(LexerMultipleTokenTest);
-
-/**
  * Check that parsing a string of tokens works as expected.
  */
 TEST_P(LexerMultipleTokenTest, Test)
@@ -312,5 +301,40 @@ TEST_P(LexerMultipleTokenTest, Test)
   GTEST_SKIP();
 #endif  // !defined(PDXCP_HAS_FMEMOPEN)
 }
+
+// simple declarations
+INSTANTIATE_TEST_SUITE_P(
+  SimpleDecls,
+  LexerMultipleTokenTest,
+  ::testing::Values(
+    LexerParamTestInput{
+      "int hello;",
+      {
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "int"),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "hello"),
+        create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
+      }
+    },
+    LexerParamTestInput{
+      "char *str;",
+      {
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "char"),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "str"),
+        create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
+      }
+    },
+    LexerParamTestInput{
+      "struct    my_struct  **b;",
+      {
+        create_cdcl_token(pdxcp_cdcl_token_type_struct, "my_struct"),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "b"),
+        create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
+      }
+    }
+  )
+);
 
 }  // namespace
