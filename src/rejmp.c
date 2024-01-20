@@ -47,7 +47,7 @@ ascii_block(FILE *out, unsigned int n_cols, unsigned n_rows)
   // write text body
   for (unsigned int nr = 0; nr < n_rows; nr++) {
     for (unsigned int nc = 0; nc < n_cols; nc++)
-      if (fputc(RANDINT() % 93 + 33, out) == EOF)
+      if (fputc(RANDINT() % 94 + 33, out) == EOF)
         return -errno;
     if (fputc('\n', out) == EOF)
       return -errno;
@@ -70,7 +70,7 @@ static int
 loop_task()
 {
   // jump context buffer. must be volatile to prevent compiler optimizations
-  // from causing indeterminte value: see man 3 setjmp
+  // from causing indeterminate value: see man 3 setjmp
   volatile jmp_buf restore_buf;
   // since setjmp/longjmp is used as a goto, no need for if-else. we can also
   // discard the return value so no logic needs to be run.
