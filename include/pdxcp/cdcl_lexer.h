@@ -67,11 +67,15 @@ const char *
 pdxcp_cdcl_lexer_status_message(pdxcp_cdcl_lexer_status status);
 
 /**
- * Macro for checking if a lexer routine failed.
+ * Macro for checking if a lexer routine exited with ok status.
+ *
+ * Some of the non-ok states may not necessarily be errors, e.g.
+ * `pdxcp_cdcl_lexer_status_fgetc_eof` can be expected if there are no more
+ * tokens to read from the input stream and not considered an error.
  *
  * @param status `pdxcp_cdcl_lexer_status` value
  */
-#define PDXCP_CDCL_LEXER_ERROR(status) ((status) != pdxcp_cdcl_lexer_status_ok)
+#define PDXCP_CDCL_LEXER_OK(status) ((status) == pdxcp_cdcl_lexer_status_ok)
 
 /**
  * Maximum token length.

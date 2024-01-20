@@ -142,7 +142,7 @@ pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
       return pdxcp_cdcl_lexer_status_ungetc_fail;
     // read identifier text into the token
     pdxcp_cdcl_lexer_status status;
-    if (PDXCP_CDCL_LEXER_ERROR(status = pdxcp_cdcl_get_iden_text(in, token)))
+    if (!PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_get_iden_text(in, token)))
       return status;
     // const qualifier, token text is "\0"
     if (!strcmp(token->text, "const")) {
@@ -156,13 +156,13 @@ pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
     }
     // struct (requires another string read)
     else if (!strcmp(token->text, "struct")) {
-      if (PDXCP_CDCL_LEXER_ERROR(status = pdxcp_cdcl_get_iden_text(in, token)))
+      if (!PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_get_iden_text(in, token)))
         return status;
       token->type = pdxcp_cdcl_token_type_struct;
     }
     // enum (requires another string read)
     else if (!strcmp(token->text, "enum")) {
-      if (PDXCP_CDCL_LEXER_ERROR(status = pdxcp_cdcl_get_iden_text(in, token)))
+      if (!PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_get_iden_text(in, token)))
         return status;
       token->type = pdxcp_cdcl_token_type_enum;
     }
