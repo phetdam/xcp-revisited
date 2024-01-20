@@ -8,6 +8,8 @@
 #ifndef PDXCP_FEATURES_H_
 #define PDXCP_FEATURES_H_
 
+#include "pdxcp/common.h"
+
 // GNU/Linux features
 #ifdef _GNU_SOURCE
 #define PDXCP_GNU
@@ -51,5 +53,33 @@
 #define PDXCP_POSIX_C_2008
 #endif  // _POSIX_C_SOURCE < 200809L
 #endif  // _POSIX_C_SOURCE
+
+// test for C++ standard features
+#ifdef PDXCP_CPLUSPLUS
+// C++98
+#if PDXCP_CPLUSPLUS >= 199711L
+#define PDXCP_HAS_CC_98
+#endif  // PDXCP_CPLUSPLUS < 199711L
+// C++11
+#if PDXCP_CPLUSPLUS >= 201103L
+#define PDXCP_HAS_CC_11
+#endif  // PDXCP_CPLUSPLUS < 201103L
+// C++14
+#if PDXCP_CPLUSPLUS >= 201402L
+#define PDXCP_HAS_CC_14
+#endif  // PDXCP_CPLUSPLUS < 201402L
+// C++17
+#if PDXCP_CPLUSPLUS >= 201703L
+#define PDXCP_HAS_CC_17
+#endif  // PDXCP_CPLUSPLUS < 201703L
+// C++20
+#if PDXCP_CPLUSPLUS >= 202002L
+#define PDXCP_HAS_CC_20
+#endif  // PDXCP_CPLUSPLUS < 202002L
+// C++23
+#if PDXCP_CPLUSPLUS >= 202302L
+#define PDXCP_HAS_CC_23
+#endif  // PDXCP_CPLUSPLUS < 202302L
+#endif  // PDXCP_CPLUSPLUS
 
 #endif  // PDXCP_FEATURES_H_

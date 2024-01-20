@@ -42,7 +42,8 @@
  * @param first First token
  * @param second Second token
  */
-bool operator==(const pdxcp_cdcl_token& first, const pdxcp_cdcl_token& second)
+bool operator==(
+  const pdxcp_cdcl_token& first, const pdxcp_cdcl_token& second) noexcept
 {
   return first.type == second.type && pdxcp::string_equal(first.text, second.text);
 }

@@ -32,4 +32,22 @@
 #define PDXCP_INLINE static inline
 #endif  // !defined(__cplusplus)
 
+// C++ standard macro that works correctly with MSVC
+#if defined(_MSVC_LANG)
+#define PDXCP_CPLUSPLUS _MSVC_LANG
+#else
+#define PDXCP_CPLUSPLUS __cplusplus
+#endif  // !defined(_MSVC_LANG)
+
+// C++11 noexcept
+#if defined(PDXCP_CPLUSPLUS)
+#if PDXCP_CPLUSPLUS >= 201103L
+#define PDXCP_NOEXCEPT noexcept
+#else
+#define PDXCP_NOEXCEPT
+#endif  // PDXCP_CPLUSPLUS < 201103L
+#else
+#define PDXCP_NOEXCEPT
+#endif  // !defined(PDXCP_CPLUSPLUS)
+
 #endif  // PDXCP_COMMON_H_
