@@ -48,7 +48,7 @@ typedef enum {
  * @param type Token type value
  */
 const char *
-pdxcp_cdcl_token_type_string(pdxcp_cdcl_token_type type);
+pdxcp_cdcl_token_type_string(pdxcp_cdcl_token_type type) PDXCP_NOEXCEPT;
 
 /**
  * Lexer status codes.
@@ -71,7 +71,7 @@ typedef enum {
  * @param value Lexer status value
  */
 const char *
-pdxcp_cdcl_lexer_status_message(pdxcp_cdcl_lexer_status status);
+pdxcp_cdcl_lexer_status_message(pdxcp_cdcl_lexer_status status) PDXCP_NOEXCEPT;
 
 /**
  * Macro for checking if a lexer routine exited with ok status.
@@ -110,7 +110,7 @@ typedef struct pdxcp_cdcl_token {
  *  `pdxcp_cdcl_token_type_error` and token text has error details
  */
 pdxcp_cdcl_lexer_status
-pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token);
+pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token) PDXCP_NOEXCEPT;
 
 PDXCP_EXTERN_C_END
 
