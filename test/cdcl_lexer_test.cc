@@ -362,4 +362,61 @@ INSTANTIATE_TEST_SUITE_P(
   )
 );
 
+// function pointer declarations
+// note: these may not be understood by parser but are good for testing lexer
+INSTANTIATE_TEST_SUITE_P(
+  FuncPtrDecls,
+  LexerMultipleTokenTest,
+  ::testing::Values(
+    LexerParamTestInput{
+      "void **(*my_func)(double x, volatile int *);",
+      {
+        create_cdcl_token(pdxcp_cdcl_token_type_t_void, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_lparen, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "my_func"),
+        create_cdcl_token(pdxcp_cdcl_token_type_rparen, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_lparen, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_t_double, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "x"),
+        create_cdcl_token(pdxcp_cdcl_token_type_comma, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_q_volatile, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_t_int, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_rparen, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
+      }
+    },
+    LexerParamTestInput{
+      "volatile double *(*func1)(int x, const volatile *y[], long const);",
+      {
+        create_cdcl_token(pdxcp_cdcl_token_type_q_volatile, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_t_double, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_lparen, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "func1"),
+        create_cdcl_token(pdxcp_cdcl_token_type_rparen, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_lparen, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_t_int, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "x"),
+        create_cdcl_token(pdxcp_cdcl_token_type_comma, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_q_const, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_q_volatile, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "y"),
+        create_cdcl_token(pdxcp_cdcl_token_type_langle, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_rangle, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_comma, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_t_long, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_q_const, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_rparen, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
+      }
+    }
+  )
+);
+
 }  // namespace
