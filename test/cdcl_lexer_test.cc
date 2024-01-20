@@ -142,13 +142,18 @@ class LexerParamTest
     public ::testing::WithParamInterface<LexerParamTestInput> {};
 
 /**
+ * C declaration lexer parametrized test fixture for single-token tests.
+ */
+class LexerSingleTokenTest : public LexerParamTest {};
+
+/**
  * Check that parsing a single token works as expected.
  */
-TEST_P(LexerParamTest, SingleTokenTest)
+TEST_P(LexerSingleTokenTest, Test)
 {
 #if defined(PDXCP_HAS_FMEMOPEN)
   // must contain single token
-  ASSERT_EQ(1u, GetParam().tokens.size()) << "Only one token allowed";
+  ASSERT_EQ(1, GetParam().tokens.size()) << "Only one input token allowed";
   // open memory-backed stream
   auto stream = memopen_string(GetParam().input);
   // get single token + check for success
@@ -171,7 +176,7 @@ TEST_P(LexerParamTest, SingleTokenTest)
 // identifiers
 INSTANTIATE_TEST_SUITE_P(
   IdenTokens,
-  LexerParamTest,
+  LexerSingleTokenTest,
   ::testing::Values(
     LexerParamTestInput{
       "iden_1",
@@ -191,7 +196,7 @@ INSTANTIATE_TEST_SUITE_P(
 // single-char tokens
 INSTANTIATE_TEST_SUITE_P(
   CharTokens,
-  LexerParamTest,
+  LexerSingleTokenTest,
   ::testing::Values(
     LexerParamTestInput{
       "[",
@@ -211,7 +216,7 @@ INSTANTIATE_TEST_SUITE_P(
 // structs
 INSTANTIATE_TEST_SUITE_P(
   StructTokens,
-  LexerParamTest,
+  LexerSingleTokenTest,
   ::testing::Values(
     LexerParamTestInput{
       "struct my_struct_1",
@@ -227,7 +232,7 @@ INSTANTIATE_TEST_SUITE_P(
 // enums
 INSTANTIATE_TEST_SUITE_P(
   EnumTokens,
-  LexerParamTest,
+  LexerSingleTokenTest,
   ::testing::Values(
     LexerParamTestInput{
       "enum    my_enum_1",
@@ -243,7 +248,7 @@ INSTANTIATE_TEST_SUITE_P(
 // const + volatile
 INSTANTIATE_TEST_SUITE_P(
   QualTokens,
-  LexerParamTest,
+  LexerSingleTokenTest,
   ::testing::Values(
     LexerParamTestInput{
       "const",
@@ -255,5 +260,57 @@ INSTANTIATE_TEST_SUITE_P(
     }
   )
 );
+
+/**
+ * C declaration lexer parametrized test fixture for multi-token tests.
+ */
+class LexerMultipleTokenTest : public LexerParamTest {};
+
+/**
+ * Allow `LexerMultipleTokenTest` to be compiled but not instantiated.
+ *
+ * One cannot disable a `TEST_P` test by using the `DISABLE_` prefix on a test
+ * name so we allow the uninstantiated test to stay for now, otherwise Google
+ * Test will fail the uninstantiated `TEST_P` test.
+ *
+ * Note that `LexerMultipleTokenTest.Test` succeeds with single-token inputs.
+ */
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(LexerMultipleTokenTest);
+
+/**
+ * Check that parsing a string of tokens works as expected.
+ */
+TEST_P(LexerMultipleTokenTest, Test)
+{
+#if defined(PDXCP_HAS_FMEMOPEN)
+  // must contain at least a single token
+  auto n_tokens = GetParam().tokens.size();
+  ASSERT_GE(n_tokens, 1) << "One of more input tokens expected";
+  // open memory-backed stream
+  auto stream = memopen_string(GetParam().input);
+  // lexer status + reserved vector of tokens
+  pdxcp_cdcl_lexer_status status;
+  std::vector<pdxcp_cdcl_token> tokens;
+  tokens.reserve(n_tokens);
+  // push tokens into vector until non-ok status detected
+  do {
+    pdxcp_cdcl_token token;
+    if (PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_get_token(stream, &token)))
+      tokens.push_back(token);
+  }
+  while (PDXCP_CDCL_LEXER_OK(status));
+  // must have read n_tokens, otherwise error
+  ASSERT_EQ(n_tokens, tokens.size()) << "Read only " << tokens.size() <<
+    " of " << n_tokens << " tokens. Lexer status: " <<
+    pdxcp_cdcl_lexer_status_message(status);
+  // only EOF is expected once we break the loop
+  ASSERT_EQ(pdxcp_cdcl_lexer_status_fgetc_eof, status) << "Lexer status: " <<
+    pdxcp_cdcl_lexer_status_message(status);
+  // check for token equality
+  EXPECT_EQ(GetParam().tokens, tokens);
+#else
+  GTEST_SKIP();
+#endif  // !defined(PDXCP_HAS_FMEMOPEN)
+}
 
 }  // namespace
