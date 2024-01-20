@@ -144,12 +144,16 @@ pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
     pdxcp_cdcl_lexer_status status;
     if (PDXCP_CDCL_LEXER_ERROR(status = pdxcp_cdcl_get_iden_text(in, token)))
       return status;
-    // const qualifier
-    if (!strcmp(token->text, "const"))
+    // const qualifier, token text is "\0"
+    if (!strcmp(token->text, "const")) {
       token->type = pdxcp_cdcl_token_type_q_const;
-    // volatile qualifier
-    else if (!strcmp(token->text, "volatile"))
+      token->text[0] = '\0';
+    }
+    // volatile qualifier, token text is "\0"
+    else if (!strcmp(token->text, "volatile")) {
       token->type = pdxcp_cdcl_token_type_q_volatile;
+      token->text[0] = '\0';
+    }
     // struct (requires another string read)
     else if (!strcmp(token->text, "struct")) {
       if (PDXCP_CDCL_LEXER_ERROR(status = pdxcp_cdcl_get_iden_text(in, token)))

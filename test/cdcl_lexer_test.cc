@@ -249,11 +249,11 @@ INSTANTIATE_TEST_SUITE_P(
   ::testing::Values(
     LexerParamTestInput{
       "const",
-      {create_cdcl_token(pdxcp_cdcl_token_type_q_const, "const")}
+      {create_cdcl_token(pdxcp_cdcl_token_type_q_const, "")}
     },
     LexerParamTestInput{
       "volatile",
-      {create_cdcl_token(pdxcp_cdcl_token_type_q_volatile, "volatile")}
+      {create_cdcl_token(pdxcp_cdcl_token_type_q_volatile, "")}
     }
   )
 );
