@@ -75,12 +75,10 @@ auto create_cdcl_token(pdxcp_cdcl_token_type type, const std::string_view& text)
   // throw if text is too large
   if (text.size() > PDXCP_CDCL_MAX_TOKEN_LEN)
     throw std::runtime_error{"Token text exceeds PDXCP_CDCL_MAX_TOKEN_LEN"};
-  // populate token contents
-  pdxcp_cdcl_token token;
+  // create zeroed token + populate token contents
+  pdxcp_cdcl_token token{};
   token.type = type;
   std::strcpy(token.text, text.data());
-  // token text must be null-terminated
-  token.text[PDXCP_CDCL_MAX_TOKEN_LEN] = '\0';
   return token;
 }
 
