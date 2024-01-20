@@ -83,7 +83,7 @@ To build a release build, use
 
 .. code:: bash
 
-   ./build.sh -Ca -DCMAKE_BUILD_TYPE=Release
+   ./build.sh -c -Release
 
 To enable AddressSanitizer and specify a different C compiler, one can use
 
