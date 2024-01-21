@@ -8,6 +8,7 @@
 #include "pdxcp/cdcl_lexer.h"
 
 #include "pdxcp/common.h"
+#include "pdxcp/string.h"
 
 #include <ctype.h>
 #include <stddef.h>
@@ -89,7 +90,7 @@ pdxcp_cdcl_lexer_status_message(pdxcp_cdcl_lexer_status status)
  *  `pdxcp_cdcl_token_type_error` and token text has error details
  */
 static pdxcp_cdcl_lexer_status
-pdxcp_cdcl_get_iden_text(FILE *in, pdxcp_cdcl_token *token)
+pdxcp_cdcl_get_iden_text(FILE *in, pdxcp_cdcl_token *token) PDXCP_NOEXCEPT
 {
   // pointer to where next read character should be written
   char *text_out = token->text;
@@ -128,87 +129,22 @@ pdxcp_cdcl_get_iden_text(FILE *in, pdxcp_cdcl_token *token)
   return pdxcp_cdcl_lexer_status_ok;
 }
 
-pdxcp_cdcl_lexer_status
-pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
+/**
+ * Initialize a token from a single character.
+ *
+ * The token type is set and token text has a single null terminator written at
+ * the first position to efficiently mimic an empty string.
+ *
+ * @param token Token to initialize
+ * @param c Character token, e.g. `[`, `;`
+ * @returns `pdxcp_cdcl_lexer_status` status code. If
+ *  `pdxcp_cdcl_lexer_status_bad_token` is returned, the token type is
+ *  `pdxcp_cdcl_token_type_error` and token text has error details
+ */
+static pdxcp_cdcl_lexer_status
+pdxcp_cdcl_set_char_token(pdxcp_cdcl_token *token, char c) PDXCP_NOEXCEPT
 {
-  // must be non-NULL
-  if (!in)
-    return pdxcp_cdcl_lexer_status_stream_null;
-  if (!token)
-    return pdxcp_cdcl_lexer_status_token_null;
-  // skip whitespace
-  int c;
-  while (isspace(c = fgetc(in)));
-  // if EOF, return
-  if (c == EOF)
-    return pdxcp_cdcl_lexer_status_fgetc_eof;
-  // if start of an identifier, parse rest of identifier
-  if (isalpha(c) || c == '_') {
-    // put the last character read back into the stream
-    if (ungetc(c, in) == EOF)
-      return pdxcp_cdcl_lexer_status_ungetc_fail;
-    // read identifier text into the token
-    pdxcp_cdcl_lexer_status status;
-    if (!PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_get_iden_text(in, token)))
-      return status;
-    // const qualifier, token text is "\0"
-    if (!strcmp(token->text, "const")) {
-      token->type = pdxcp_cdcl_token_type_q_const;
-      token->text[0] = '\0';
-    }
-    // volatile qualifier, token text is "\0"
-    else if (!strcmp(token->text, "volatile")) {
-      token->type = pdxcp_cdcl_token_type_q_volatile;
-      token->text[0] = '\0';
-    }
-    // struct (requires another string read)
-    else if (!strcmp(token->text, "struct")) {
-      if (!PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_get_iden_text(in, token)))
-        return status;
-      token->type = pdxcp_cdcl_token_type_struct;
-    }
-    // enum (requires another string read)
-    else if (!strcmp(token->text, "enum")) {
-      if (!PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_get_iden_text(in, token)))
-        return status;
-      token->type = pdxcp_cdcl_token_type_enum;
-    }
-    // void
-    else if (!strcmp(token->text, "void")) {
-      token->type = pdxcp_cdcl_token_type_t_void;
-      token->text[0] = '\0';
-    }
-    // char
-    else if (!strcmp(token->text, "char")) {
-      token->type = pdxcp_cdcl_token_type_t_char;
-      token->text[0] = '\0';
-    }
-    // signed int
-    else if (!strcmp(token->text, "int")) {
-      token->type = pdxcp_cdcl_token_type_t_int;
-      token->text[0] = '\0';
-    }
-    // signed long
-    else if (!strcmp(token->text, "long")) {
-      token->type = pdxcp_cdcl_token_type_t_long;
-      token->text[0] = '\0';
-    }
-    // float
-    else if (!strcmp(token->text, "float")) {
-      token->type = pdxcp_cdcl_token_type_t_float;
-      token->text[0] = '\0';
-    }
-    // double
-    else if (!strcmp(token->text, "double")) {
-      token->type = pdxcp_cdcl_token_type_t_double;
-      token->text[0] = '\0';
-    }
-    // identifier
-    else
-      token->type = pdxcp_cdcl_token_type_iden;
-    return pdxcp_cdcl_lexer_status_ok;
-  }
-  // check single-character tokens. the token text is '\0' in the case
+  // token text is '\0' for single-character tokens
   token->text[0] = '\0';
   switch (c) {
     case '(':
@@ -236,9 +172,112 @@ pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
     default:
       token->type = pdxcp_cdcl_token_type_error;
       strcpy(token->text, char_token_error);
-      token->text[sizeof char_token_error - 3] = (char) c;
+      token->text[sizeof char_token_error - 3] = c;
       token->text[sizeof char_token_error - 1] = '\0';  // terminate string
       return pdxcp_cdcl_lexer_status_bad_token;
   }
   return pdxcp_cdcl_lexer_status_ok;
+}
+
+/**
+ * Get a token from an identifier string from the specified input stream.
+ *
+ * This routine assumes that the next token to be read is a valid C identifier
+ * and will return a status code indicating whether lexing succeeded or not.
+ *
+ * @param in Input stream to read from
+ * @param token Token to write to
+ * @returns `pdxcp_cdcl_lexer_status` status code. If
+ *  `pdxcp_cdcl_lexer_status_bad_token` is returned, the token type is
+ *  `pdxcp_cdcl_token_type_error` and token text has error details
+ */
+static pdxcp_cdcl_lexer_status
+pdxcp_cdcl_get_iden_token(FILE *in, pdxcp_cdcl_token *token)
+{
+  // read identifier text into the token
+  pdxcp_cdcl_lexer_status status;
+  if (!PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_get_iden_text(in, token)))
+    return status;
+  // const qualifier, token text is "\0"
+  if (pdxcp_streq(token->text, "const")) {
+    token->type = pdxcp_cdcl_token_type_q_const;
+    token->text[0] = '\0';
+  }
+  // volatile qualifier, token text is "\0"
+  else if (pdxcp_streq(token->text, "volatile")) {
+    token->type = pdxcp_cdcl_token_type_q_volatile;
+    token->text[0] = '\0';
+  }
+  // struct (requires another string read)
+  else if (pdxcp_streq(token->text, "struct")) {
+    if (!PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_get_iden_text(in, token)))
+      return status;
+    token->type = pdxcp_cdcl_token_type_struct;
+  }
+  // enum (requires another string read)
+  else if (pdxcp_streq(token->text, "enum")) {
+    if (!PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_get_iden_text(in, token)))
+      return status;
+    token->type = pdxcp_cdcl_token_type_enum;
+  }
+  // void
+  else if (pdxcp_streq(token->text, "void")) {
+    token->type = pdxcp_cdcl_token_type_t_void;
+    token->text[0] = '\0';
+  }
+  // char
+  else if (pdxcp_streq(token->text, "char")) {
+    token->type = pdxcp_cdcl_token_type_t_char;
+    token->text[0] = '\0';
+  }
+  // signed int
+  else if (pdxcp_streq(token->text, "int")) {
+    token->type = pdxcp_cdcl_token_type_t_int;
+    token->text[0] = '\0';
+  }
+  // signed long
+  else if (pdxcp_streq(token->text, "long")) {
+    token->type = pdxcp_cdcl_token_type_t_long;
+    token->text[0] = '\0';
+  }
+  // float
+  else if (pdxcp_streq(token->text, "float")) {
+    token->type = pdxcp_cdcl_token_type_t_float;
+    token->text[0] = '\0';
+  }
+  // double
+  else if (pdxcp_streq(token->text, "double")) {
+    token->type = pdxcp_cdcl_token_type_t_double;
+    token->text[0] = '\0';
+  }
+  // identifier
+  else
+    token->type = pdxcp_cdcl_token_type_iden;
+  return pdxcp_cdcl_lexer_status_ok;
+}
+
+pdxcp_cdcl_lexer_status
+pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
+{
+  // must be non-NULL
+  if (!in)
+    return pdxcp_cdcl_lexer_status_stream_null;
+  if (!token)
+    return pdxcp_cdcl_lexer_status_token_null;
+  // skip whitespace
+  int c;
+  while (isspace(c = fgetc(in)));
+  // if EOF, return
+  if (c == EOF)
+    return pdxcp_cdcl_lexer_status_fgetc_eof;
+  // if start of an identifier, parse rest of identifier
+  if (isalpha(c) || c == '_') {
+    // put the last character read back into the stream
+    if (ungetc(c, in) == EOF)
+      return pdxcp_cdcl_lexer_status_ungetc_fail;
+    // read token from identifier string
+    return pdxcp_cdcl_get_iden_token(in, token);
+  }
+  // else single-character token. the token text is '\0' in this case
+  return pdxcp_cdcl_set_char_token(token, (char) c);
 }
