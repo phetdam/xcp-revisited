@@ -246,7 +246,7 @@ INSTANTIATE_TEST_SUITE_P(
   )
 );
 
-// const + volatile
+// type qualifiers
 INSTANTIATE_TEST_SUITE_P(
   QualTokens,
   LexerSingleTokenTest,
@@ -258,6 +258,14 @@ INSTANTIATE_TEST_SUITE_P(
     LexerParamTestInput{
       "volatile",
       {create_cdcl_token(pdxcp_cdcl_token_type_q_volatile, "")}
+    },
+    LexerParamTestInput{
+      "signed",
+      {create_cdcl_token(pdxcp_cdcl_token_type_q_signed, "")}
+    },
+    LexerParamTestInput{
+      "unsigned",
+      {create_cdcl_token(pdxcp_cdcl_token_type_q_unsigned, "")}
     }
   )
 );
@@ -356,6 +364,37 @@ INSTANTIATE_TEST_SUITE_P(
         create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_iden, "b"),
+        create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
+      }
+    }
+  )
+);
+
+// declarations with type qualifiers
+INSTANTIATE_TEST_SUITE_P(
+  QualDecls,
+  LexerMultipleTokenTest,
+  ::testing::Values(
+    LexerParamTestInput{
+      "unsigned long const *x;",
+      {
+        create_cdcl_token(pdxcp_cdcl_token_type_q_unsigned, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_t_long, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_q_const, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "x"),
+        create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
+      }
+    },
+    LexerParamTestInput{
+      "unsigned char ** const y;",
+      {
+        create_cdcl_token(pdxcp_cdcl_token_type_q_unsigned, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_t_char, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_q_const, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "y"),
         create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
       }
     }

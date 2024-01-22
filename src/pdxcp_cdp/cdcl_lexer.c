@@ -45,6 +45,8 @@ pdxcp_cdcl_token_type_string(pdxcp_cdcl_token_type type)
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_enum);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_q_const);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_q_volatile);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_q_signed);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_q_unsigned);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_iden);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_void);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_char);
@@ -198,14 +200,24 @@ pdxcp_cdcl_get_iden_token(FILE *in, pdxcp_cdcl_token *token)
   pdxcp_cdcl_lexer_status status;
   if (!PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_get_iden_text(in, token)))
     return status;
-  // const qualifier, token text is "\0"
+  // const qualifier
   if (pdxcp_streq(token->text, "const")) {
     token->type = pdxcp_cdcl_token_type_q_const;
     token->text[0] = '\0';
   }
-  // volatile qualifier, token text is "\0"
+  // volatile qualifier
   else if (pdxcp_streq(token->text, "volatile")) {
     token->type = pdxcp_cdcl_token_type_q_volatile;
+    token->text[0] = '\0';
+  }
+  // signed type qualifier
+  else if (pdxcp_streq(token->text, "signed")) {
+    token->type = pdxcp_cdcl_token_type_q_signed;
+    token->text[0] = '\0';
+  }
+  // unsigned type qualifier
+  else if (pdxcp_streq(token->text, "unsigned")) {
+    token->type = pdxcp_cdcl_token_type_q_unsigned;
     token->text[0] = '\0';
   }
   // struct (requires another string read)
