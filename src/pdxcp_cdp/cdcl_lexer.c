@@ -39,6 +39,7 @@ pdxcp_cdcl_token_type_string(pdxcp_cdcl_token_type type)
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_langle);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_rangle);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_comma);
+    ENUM_STRING_CASE(pdxcp_cdcl_token_type_slash);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_star);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_semicolon);
     ENUM_STRING_CASE(pdxcp_cdcl_token_type_struct);
@@ -164,6 +165,9 @@ pdxcp_cdcl_set_char_token(pdxcp_cdcl_token *token, char c) PDXCP_NOEXCEPT
     case ',':
       token->type = pdxcp_cdcl_token_type_comma;
       break;
+    case '/':
+      token->type = pdxcp_cdcl_token_type_slash;
+      break;
     case '*':
       token->type = pdxcp_cdcl_token_type_star;
       break;
@@ -268,6 +272,35 @@ pdxcp_cdcl_get_iden_token(FILE *in, pdxcp_cdcl_token *token)
   return pdxcp_cdcl_lexer_status_ok;
 }
 
+/**
+ * Skip input until the end of a C block comment is consumed.
+ *
+ * This routine should be called only if the beginning of a C block comment has
+ * already been consumed from the input stream.
+ *
+ * @param in Input stream to read from
+ * @returns 'pdxcp_cdcl_lexer_status` status code
+ */
+static pdxcp_cdcl_lexer_status
+pdxcp_cdcl_skip_rem_c_comment(FILE *in)
+{
+  // next char, return on error
+  int c;
+  // loop to skip comment block. either terminate the comment block or hit EOF
+  do {
+    // skip until we reach EOF or '*'
+    while ((c = fgetc(in)) != EOF && c != '*');
+    // EOF is error
+    if (c == EOF)
+      return pdxcp_cdcl_lexer_status_fgetc_eof;
+    // get another char, error on EOF
+    if ((c = fgetc(in)) == EOF)
+      return pdxcp_cdcl_lexer_status_fgetc_eof;
+  }
+  while (c != '/');
+  return pdxcp_cdcl_lexer_status_ok;
+}
+
 pdxcp_cdcl_lexer_status
 pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
 {
@@ -282,6 +315,38 @@ pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
   // if EOF, return
   if (c == EOF)
     return pdxcp_cdcl_lexer_status_fgetc_eof;
+  // handle slash. possibly skip C block comment, C++ line comment
+  if (c == '/') {
+    // read another char and switch on its value
+    c = fgetc(in);
+    switch (c) {
+      // C block comment. skip until EOF or end of block comment
+      case '*': {
+        pdxcp_cdcl_lexer_status status;
+        if (!PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_skip_rem_c_comment(in)))
+          return status;
+        break;
+      }
+      // C++ line comment. just skip rest of the line or until EOF
+      case '/':
+        while ((c = fgetc(in)) != EOF && c != '\n');
+        if (c == EOF)
+          return pdxcp_cdcl_lexer_status_fgetc_eof;
+        break;
+      // some other char. put it back into the stream if not EOF, token is '/'.
+      // note that if c is EOF, this is an edge case where '/' is the last
+      // token in the stream. this is obviously a parse error but for a correct
+      // lexer we still accept this and return without lexer error
+      default:
+        if (c != EOF && ungetc(c, in) == EOF)
+          return pdxcp_cdcl_lexer_status_ungetc_fail;
+        return pdxcp_cdcl_set_char_token(token, '/');
+    }
+    // finished skipping comments, so skip any additional whitespace
+    while (isspace(c = fgetc(in)));
+    if (c == EOF)
+      return pdxcp_cdcl_lexer_status_fgetc_eof;
+  }
   // if start of an identifier, parse rest of identifier
   if (isalpha(c) || c == '_') {
     // put the last character read back into the stream

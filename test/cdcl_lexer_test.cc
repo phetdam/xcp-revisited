@@ -208,6 +208,10 @@ INSTANTIATE_TEST_SUITE_P(
       {create_cdcl_token(pdxcp_cdcl_token_type_rparen, "")}
     },
     LexerParamTestInput{
+      "/",
+      {create_cdcl_token(pdxcp_cdcl_token_type_slash, "")}
+    },
+    LexerParamTestInput{
       "*",
       {create_cdcl_token(pdxcp_cdcl_token_type_star, "")}
     }
@@ -305,9 +309,8 @@ class LexerMultipleTokenTest : public LexerParamTest {};
 TEST_P(LexerMultipleTokenTest, Test)
 {
 #if defined(PDXCP_HAS_FMEMOPEN)
-  // must contain at least a single token
+  // number of tokens. we allow zero tokens to be read
   auto n_tokens = GetParam().tokens.size();
-  ASSERT_GE(n_tokens, 1) << "One of more input tokens expected";
   // open memory-backed stream
   auto stream = memopen_string(GetParam().input);
   // lexer status + reserved vector of tokens
@@ -394,6 +397,80 @@ INSTANTIATE_TEST_SUITE_P(
         create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_q_const, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "y"),
+        create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
+      }
+    }
+  )
+);
+
+// comment blocks
+INSTANTIATE_TEST_SUITE_P(
+  CommentBlocks,
+  LexerMultipleTokenTest,
+  ::testing::Values(
+    LexerParamTestInput{
+      "// this is a line comment with no terminating newline",
+      {}
+    },
+    LexerParamTestInput{
+      "// this is a line comment with a terminating newline\n",
+      {}
+    },
+    LexerParamTestInput{
+      "/* this is a single-line comment block, no terminating newline */",
+      {}
+    },
+    LexerParamTestInput{
+      "/**\n"
+      " * This is a stylized Doxygen-style comment block.\n"
+      " *\n"
+      " * There is a lot more content in this block compared to the other\n"
+      " * inputs that have been used to test the lexer's comment-skipping.\n"
+      " */\n",
+      {}
+    },
+    LexerParamTestInput{
+      "/**\n"
+      " * This is a comment block with an extra * and / at the end. Although\n"
+      " * this would be a parse error, the lexer understands the tokens.\n"
+      " */*/",
+      {
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_slash, "")
+      }
+    }
+  )
+);
+
+// declarations with comment blocks
+INSTANTIATE_TEST_SUITE_P(
+  CommentedDecls,
+  LexerMultipleTokenTest,
+  ::testing::Values(
+    LexerParamTestInput{
+      "const double **x;\n"
+      "// random line comment without terminating newline",
+      {
+        create_cdcl_token(pdxcp_cdcl_token_type_q_const, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_t_double, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "x"),
+        create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
+      }
+    },
+    LexerParamTestInput{
+      "/**\n"
+      " * y is a pointer to volatile void.\n"
+      " *\n"
+      " * It's some memory that may change asynchronously.\n"
+      " */\n"
+      "volatile void *y;",
+      {
+        create_cdcl_token(pdxcp_cdcl_token_type_q_volatile, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_t_void, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_iden, "y"),
         create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
       }
