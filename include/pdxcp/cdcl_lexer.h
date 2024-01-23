@@ -106,6 +106,9 @@ typedef struct pdxcp_cdcl_token {
 /**
  * Get the next token from the specified input stream.
  *
+ * Like most lexers, this lexing routine can be abstractly considered an LL(1)
+ * parser that operates on a stream of character bytes.
+ *
  * @param in Input stream to read from
  * @param token Token to write to
  * @returns `pdxcp_cdcl_lexer_status` status code. If
