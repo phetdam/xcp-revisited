@@ -390,11 +390,12 @@ INSTANTIATE_TEST_SUITE_P(
       }
     },
     LexerParamTestInput{
-      "unsigned char ** const y;",
+      "unsigned char *const *const y;",
       {
         create_cdcl_token(pdxcp_cdcl_token_type_q_unsigned, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_t_char, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_q_const, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_q_const, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_iden, "y"),
