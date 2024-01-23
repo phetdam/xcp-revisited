@@ -93,7 +93,7 @@ pdxcp_cdcl_lexer_status_message(pdxcp_cdcl_lexer_status status)
  *  `pdxcp_cdcl_token_type_error` and token text has error details
  */
 static pdxcp_cdcl_lexer_status
-pdxcp_cdcl_get_iden_text(FILE *in, pdxcp_cdcl_token *token) PDXCP_NOEXCEPT
+pdxcp_cdcl_get_iden_text(FILE *in, pdxcp_cdcl_token *token)
 {
   // pointer to where next read character should be written
   char *text_out = token->text;
@@ -145,7 +145,7 @@ pdxcp_cdcl_get_iden_text(FILE *in, pdxcp_cdcl_token *token) PDXCP_NOEXCEPT
  *  `pdxcp_cdcl_token_type_error` and token text has error details
  */
 static pdxcp_cdcl_lexer_status
-pdxcp_cdcl_set_char_token(pdxcp_cdcl_token *token, char c) PDXCP_NOEXCEPT
+pdxcp_cdcl_set_char_token(pdxcp_cdcl_token *token, char c)
 {
   // token text is '\0' for single-character tokens
   token->text[0] = '\0';
