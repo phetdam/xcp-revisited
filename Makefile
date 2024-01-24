@@ -302,7 +302,9 @@ endif
 	@echo "Built target $@"
 
 # libpdxcp_cdcl: cdcl C declaration parser support library
-CDCL_LIB_OBJS = $(BUILDDIR)/src/pdxcp_cdp/cdcl_lexer.$(LIBOBJSUFFIX)
+CDCL_LIB_OBJS = \
+$(BUILDDIR)/src/pdxcp_cdp/cdcl_lexer.$(LIBOBJSUFFIX) \
+$(BUILDDIR)/src/pdxcp_cdp/cdcl_parser.$(LIBOBJSUFFIX)
 -include $(CDCL_LIB_OBJS:%=%.d)
 $(BUILDDIR)/$(CDCL_LIBFILE): $(CDCL_LIB_OBJS)
 ifneq ($(BUILD_SHARED),)
@@ -319,6 +321,7 @@ endif
 ifneq ($(BUILD_TESTS),)
 TEST_OBJS = \
 $(BUILDDIR)/test/cdcl_lexer_test.cc.o \
+$(BUILDDIR)/test/cdcl_parser_test.cc.o \
 $(BUILDDIR)/test/lockable_test.cc.o \
 $(BUILDDIR)/test/string_test.cc.o
 -include $(TEST_OBJS:%=%.d)
