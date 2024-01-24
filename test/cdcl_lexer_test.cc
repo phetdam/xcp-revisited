@@ -7,7 +7,6 @@
 
 #include "pdxcp/cdcl_lexer.h"
 
-#include <cerrno>
 #include <cstdint>
 #include <cstring>
 #include <iterator>
