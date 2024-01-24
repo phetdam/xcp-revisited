@@ -13,7 +13,6 @@
 #include <sstream>
 
 #include "pdxcp/features.h"
-#include "pdxcp/memory.hh"
 
 // fmemopen requires _GNU_SOURCE or _POSIX_C_SOURCE >= 200809L
 #ifdef PDXCP_HAS_FMEMOPEN
@@ -23,6 +22,8 @@
 #include <cstring>
 #include <stdexcept>
 #include <string>
+
+#include "pdxcp/memory.hh"
 #endif  // PDXCP_HAS_FMEMOPEN
 
 namespace pdxcp {
