@@ -56,12 +56,12 @@ class ParserParamTest
 TEST_P(ParserParamTest, PureTest)
 {
 #if defined(PDXCP_HAS_FMEMOPEN)
-  // create input stream + expect successful parse
+  // create input stream
   auto stream = pdxcp::memopen_string(GetParam().input);
-  EXPECT_EQ(
-    pdxcp_cdcl_parser_status_ok,
-    pdxcp_cdcl_stream_parse(stream, stdout, nullptr)
-  );
+  // parse and check status (no error info for now)
+  auto status = pdxcp_cdcl_stream_parse(stream, stdout, nullptr);
+  EXPECT_EQ(pdxcp_cdcl_parser_status_ok, status) << "Parser status: " <<
+    pdxcp_cdcl_parser_status_message(status);
 #else
   GTEST_SKIP();
 #endif  // !defined(PDXCP_HAS_FMEMOPEN)
