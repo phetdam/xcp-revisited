@@ -85,13 +85,11 @@ class LexerTest : public ::testing::Test {};
  */
 struct LexerParamTestInput {
   const std::string input;
-  std::vector<pdxcp_cdcl_token> tokens;
+  const std::vector<pdxcp_cdcl_token> tokens;
 };
 
 /**
  * Google Test value printer for `LexerParamTestInput`.
- *
- * @note Must be in top-level namespace for ADL to work correctly.
  */
 void PrintTo(const LexerParamTestInput& input, std::ostream* out)
 {
