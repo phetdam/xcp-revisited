@@ -83,7 +83,7 @@ To build a release build, use
 
 .. code:: bash
 
-   ./build.sh -c -Release
+   ./build.sh -c Release
 
 To enable AddressSanitizer and specify a different C compiler, one can use
 
