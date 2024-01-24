@@ -12,6 +12,19 @@
 #include <ostream>
 #include <sstream>
 
+#include "pdxcp/features.h"
+#include "pdxcp/memory.hh"
+
+// fmemopen requires _GNU_SOURCE or _POSIX_C_SOURCE >= 200809L
+#ifdef PDXCP_HAS_FMEMOPEN
+#include <stdio.h>
+
+#include <cerrno>
+#include <cstring>
+#include <stdexcept>
+#include <string>
+#endif  // PDXCP_HAS_FMEMOPEN
+
 namespace pdxcp {
 
 /**
@@ -116,6 +129,23 @@ inline auto& operator<<(std::ostream& out, const safe_stream_wrapper<N>& value)
 {
   return value.write(out);
 }
+
+#ifdef PDXCP_HAS_FMEMOPEN
+/**
+ * Return a `unique_file_stream` backed by an STL string.
+ *
+ * Wraps a call to `fmemopen` with read-only access.
+ *
+ * @param str Backing string, must be in scope during file stream usage
+ */
+inline auto memopen_string(const std::string& str)
+{
+  auto stream = ::fmemopen((void*) str.c_str(), str.size(), "r");
+  if (!stream)
+    throw std::runtime_error{"fmemopen: " + std::string{std::strerror(errno)}};
+  return unique_file_stream{stream};
+}
+#endif  // PDXCP_HAS_FMEMOPEN
 
 }  // namespace pdxcp
 

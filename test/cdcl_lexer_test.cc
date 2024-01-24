@@ -22,16 +22,6 @@
 #include "pdxcp/memory.hh"
 #include "pdxcp/string.hh"
 
-// helper macro for checking if we have fmemopen
-#if defined(PDXCP_GNU) || defined(PDXCP_POSIX_C_2008)
-#define PDXCP_HAS_FMEMOPEN
-#endif  // !defined(PDXCP_GNU) && !defined(PDXCP_POSIX_C_2008)
-
-// fmemopen requires _GNU_SOURCE or _POSIX_C_SOURCE >= 200809L
-#ifdef PDXCP_HAS_FMEMOPEN
-#include <stdio.h>
-#endif  // PDXCP_HAS_FMEMOPEN
-
 /**
  * Equality operator for `pdxcp_cdcl_token`.
  *
@@ -82,25 +72,6 @@ auto create_cdcl_token(pdxcp_cdcl_token_type type, const std::string_view& text)
   std::strcpy(token.text, text.data());
   return token;
 }
-
-#ifdef PDXCP_HAS_FMEMOPEN
-/**
- * Return a `unique_file_stream` backed by an STL string.
- *
- * Wraps a `fmemopen` call with read-only access.
- *
- * @param str Backing string. Must be in scope during file stream usage.
- */
-inline auto memopen_string(const std::string& str)
-{
-  auto stream = fmemopen((void*) str.c_str(), str.size(), "r");
-  if (!stream)
-    throw std::runtime_error{
-      "fmemopen error: " + std::string{std::strerror(errno)}
-    };
-  return pdxcp::unique_file_stream{stream};
-}
-#endif  // PDXCP_HAS_FMEMOPEN
 
 /**
  * C declaration lexer test fixture base.
@@ -156,7 +127,7 @@ TEST_P(LexerSingleTokenTest, Test)
   // must contain single token
   ASSERT_EQ(1, GetParam().tokens.size()) << "Only one input token allowed";
   // open memory-backed stream
-  auto stream = memopen_string(GetParam().input);
+  auto stream = pdxcp::memopen_string(GetParam().input);
   // get single token + check for success
   pdxcp_cdcl_token token;
   auto status = pdxcp_cdcl_get_token(stream, &token);
@@ -312,7 +283,7 @@ TEST_P(LexerMultipleTokenTest, Test)
   // number of tokens. we allow zero tokens to be read
   auto n_tokens = GetParam().tokens.size();
   // open memory-backed stream
-  auto stream = memopen_string(GetParam().input);
+  auto stream = pdxcp::memopen_string(GetParam().input);
   // lexer status + reserved vector of tokens
   pdxcp_cdcl_lexer_status status;
   std::vector<pdxcp_cdcl_token> tokens;

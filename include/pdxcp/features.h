@@ -53,6 +53,10 @@
 #define PDXCP_POSIX_C_2008
 #endif  // _POSIX_C_SOURCE < 200809L
 #endif  // _POSIX_C_SOURCE
+// fmemopen
+#if defined(PDXCP_GNU) || defined(PDXCP_POSIX_C_2008)
+#define PDXCP_HAS_FMEMOPEN
+#endif  // !defined(PDXCP_GNU) && !defined(PDXCP_POSIX_C_2008)
 
 // test for C++ standard features
 #ifdef PDXCP_CPLUSPLUS
