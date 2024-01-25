@@ -50,20 +50,24 @@ pdxcp_cdcl_parser_status_message(pdxcp_cdcl_parser_status status)
  * @param errinfo Error info structure
  * @param lexer_status Lexer status
  * @param cur_token Most recent token read by lexer
+ * @param parser_status Parser status
  */
 static void
 pdxcp_cdcl_write_errinfo(
-  pdxcp_cdcl_lexer_errinfo *errinfo,
+  pdxcp_cdcl_parser_errinfo *errinfo,
   pdxcp_cdcl_lexer_status lexer_status,
-  const pdxcp_cdcl_token *cur_token)
+  const pdxcp_cdcl_token *cur_token,
+  pdxcp_cdcl_parser_status parser_status)
 {
   if (!errinfo)
     return;
-  errinfo->lexer_status = lexer_status;
+  // write status values
+  errinfo->lexer.status = lexer_status;
+  errinfo->parser.status = parser_status;
   // if the token is bad, copy the token text
   if (lexer_status == pdxcp_cdcl_lexer_status_bad_token) {
-    strcpy(errinfo->token_text, cur_token->text);
-    errinfo->token_text[strlen(cur_token->text)] = '\0';  // terminate string
+    strcpy(errinfo->lexer.text, cur_token->text);
+    errinfo->lexer.text[strlen(cur_token->text)] = '\0';  // terminate string
   }
 }
 
@@ -165,7 +169,7 @@ stream_parse_ptrs(pdxcp_cdcl_token_stack *stack, FILE *out)
 }
 
 pdxcp_cdcl_parser_status
-pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_lexer_errinfo *errinfo)
+pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
 {
   // check streams
   if (!in)
@@ -182,7 +186,7 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_lexer_errinfo *errinfo)
   // read tokens from lexer until error
   parser_status = stream_parse_to_iden(in, &lexer_status, &stack, &token);
   if (!PDXCP_CDCL_PARSER_OK(parser_status)) {
-    pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token);
+    pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status);
     return parser_status;
   }
   // write identifer token
@@ -190,7 +194,7 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_lexer_errinfo *errinfo)
     return pdxcp_cdcl_parser_status_out_err;
   // read another token, handling lexer error as appropriate
   if (!PDXCP_CDCL_LEXER_OK(lexer_status = pdxcp_cdcl_get_token(in, &token))) {
-    pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token);
+    pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status);
     return pdxcp_cdcl_parser_status_lexer_err;
   }
   // TODO: handle array, function, etc.
@@ -199,6 +203,7 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_lexer_errinfo *errinfo)
     // consume pointer tokens from stack
     if (!PDXCP_CDCL_PARSER_OK(parser_status = stream_parse_ptrs(&stack, out)))
       return parser_status;
+    // TODO: parse cv-qualifiedm signed/unsigned qualified type
     if (fprintf(out, " a thing\n") < 0)
       return pdxcp_cdcl_parser_status_out_err;
     return pdxcp_cdcl_parser_status_ok;

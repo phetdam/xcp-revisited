@@ -126,13 +126,31 @@ pdxcp_cdcl_parser_status_message(pdxcp_cdcl_parser_status status) PDXCP_NOEXCEPT
  *
  * @todo Rename + rework to hold parser error info as well, not just lexer.
  *
- * @param lexer_status Lexer status
- * @param token_text Error text if lexer read bad token
+ * @param lexer Lexer error info
+ * @param parser Parser error info
  */
 typedef struct {
-  pdxcp_cdcl_lexer_status lexer_status;
-  char token_text[PDXCP_CDCL_MAX_TOKEN_LEN + 1];
-} pdxcp_cdcl_lexer_errinfo;
+  /**
+   * Lexer error info.
+   *
+   * @param status Lexer status
+   * @param text Lexer error text. Typically a single null terminator, but if
+   *  `status` is `pdxcp_cdcl_lexer_status_bad_token`, a null-terminated string.
+   */
+  struct {
+    pdxcp_cdcl_lexer_status status;
+    char text[PDXCP_CDCL_MAX_TOKEN_LEN + 1];
+  } lexer;
+
+  /**
+   * Parser error info.
+   *
+   * @param status Parser status
+   */
+  struct {
+    pdxcp_cdcl_parser_status status;
+  } parser;
+} pdxcp_cdcl_parser_errinfo;
 
 /**
  * Parse text from the input stream and write output to the output stream.
@@ -146,7 +164,7 @@ typedef struct {
  */
 pdxcp_cdcl_parser_status
 pdxcp_cdcl_stream_parse(
-  FILE *in, FILE *out, pdxcp_cdcl_lexer_errinfo *errinfo) PDXCP_NOEXCEPT;
+  FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo) PDXCP_NOEXCEPT;
 
 PDXCP_EXTERN_C_END
 
