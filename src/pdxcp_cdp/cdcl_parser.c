@@ -32,7 +32,7 @@ pdxcp_cdcl_parser_status_message(pdxcp_cdcl_parser_status status)
     case pdxcp_cdcl_parser_status_eof:
       return "Parser read EOF before finishing parser";
     case pdxcp_cdcl_parser_status_lexer_err:
-      return "Lexer error, check parser error info";
+      return "Lexer error, check parser error info lexer text";
     case pdxcp_cdcl_parser_status_token_overflow:
       return "Too many tokens to fit on token stack";
     case pdxcp_cdcl_parser_status_out_err:
