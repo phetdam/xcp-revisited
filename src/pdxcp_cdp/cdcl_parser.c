@@ -40,7 +40,7 @@ pdxcp_cdcl_parser_status_message(pdxcp_cdcl_parser_status status)
     case pdxcp_cdcl_parser_status_parse_err:
       return "Parser error, check parser error info";
     default:
-      return "Unknown lexer status";
+      return "Unknown parser status";
   }
 }
 
