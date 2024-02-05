@@ -91,15 +91,28 @@ pdxcp_cdcl_token_stack_init(pdxcp_cdcl_token_stack *stack) PDXCP_NOEXCEPT;
  * Parser status codes.
  */
 typedef enum {
-  pdxcp_cdcl_parser_status_ok,              // no error
-  pdxcp_cdcl_parser_status_in_null,         // input FILE * is NULL
-  pdxcp_cdcl_parser_status_out_null,        // output FILE * is NULL
-  pdxcp_cdcl_parser_status_eof,             // read EOF before finishing parse
-  pdxcp_cdcl_parser_status_lexer_err,       // lexer error, check errinfo
-  pdxcp_cdcl_parser_status_token_overflow,  // token stack overflow
-  pdxcp_cdcl_parser_status_out_err,         // error writing to output FILE *
-  pdxcp_cdcl_parser_status_parse_err,       // parse error, check errinfo
-  pdxcp_cdcl_parser_status_bad_token        // bad token (duplicate?)
+  // no error
+  pdxcp_cdcl_parser_status_ok,
+  // input FILE * is NULL
+  pdxcp_cdcl_parser_status_in_null,
+  // output FILE * is NULL
+  pdxcp_cdcl_parser_status_out_null,
+  // parser read EOF before finishing parse
+  pdxcp_cdcl_parser_status_eof,
+  // lexer error, check errinfo
+  pdxcp_cdcl_parser_status_lexer_err,
+  // token stack overflow
+  pdxcp_cdcl_parser_status_token_overflow,
+  // error writing parser output to FILE *
+  pdxcp_cdcl_parser_status_out_err,
+  // parser error, check errinfo
+  pdxcp_cdcl_parser_status_parse_err,
+  // bad token (may be removed, could be duplicate as lexer checks tokens)
+  pdxcp_cdcl_parser_status_bad_token,
+  // parser error text is NULL when it should not be
+  pdxcp_cdcl_parser_status_null_err_text,
+  // supplied parser error text is too long and therefore truncated
+  pdxcp_cdcl_parser_status_err_text_too_long
 } pdxcp_cdcl_parser_status;
 
 /**
@@ -124,7 +137,7 @@ pdxcp_cdcl_parser_status_message(pdxcp_cdcl_parser_status status) PDXCP_NOEXCEPT
 /**
  * Maximum length of parser error text.
  */
-#define PDXCP_CDCL_PARSER_ERROR_TEXT_LEN 256
+#define PDXCP_CDCL_PARSER_ERROR_TEXT_LEN 255
 
 /**
  * Struct to hold parser error information.

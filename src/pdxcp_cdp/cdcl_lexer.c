@@ -122,10 +122,11 @@ pdxcp_cdcl_get_iden_text(FILE *in, pdxcp_cdcl_token *token)
   // put the last character read back into the stream if not EOF
   if (c != EOF && ungetc(c, in) == EOF)
     return pdxcp_cdcl_lexer_status_ungetc_fail;
-  // if c is a valid identifier character, token is too large
+  // if c is a valid identifier character, token is too large. we overwrite the
+  // front part of the token with the long_token_error message
   if (isalnum(c) || c == '_') {
     token->type = pdxcp_cdcl_token_type_error;
-    strcpy(token->text, long_token_error);  // overwrites front part of token
+    memcpy(token->text, long_token_error, sizeof long_token_error - 1);
     return pdxcp_cdcl_lexer_status_bad_token;
   }
   // otherwise we are ok
@@ -177,9 +178,8 @@ pdxcp_cdcl_set_char_token(pdxcp_cdcl_token *token, char c)
     // unknown token. copy error template and write the character to text
     default:
       token->type = pdxcp_cdcl_token_type_error;
-      strcpy(token->text, char_token_error);
+      strcpy(token->text, char_token_error);  // null-terminated
       token->text[sizeof char_token_error - 3] = c;
-      token->text[sizeof char_token_error - 1] = '\0';  // terminate string
       return pdxcp_cdcl_lexer_status_bad_token;
   }
   return pdxcp_cdcl_lexer_status_ok;

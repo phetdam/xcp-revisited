@@ -7,6 +7,7 @@
 
 #include "pdxcp/cdcl_parser.h"
 
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -49,15 +50,23 @@ pdxcp_cdcl_parser_status_message(pdxcp_cdcl_parser_status status)
  *
  * @param errinfo Error info structure
  * @param lexer_status Lexer status
- * @param cur_token Most recent token read by lexer
+ * @param cur_token Most recent token read by lexer. If the lexer status is
+ *  `pdxcp_cdcl_lexer_status_bad_token`, its text will contain the error text.
+ *  Ignored unless `lexer_status` is `pdxcp_cdcl_lexer_status_bad_token`.
  * @param parser_status Parser status
+ * @param parser_text Null-terminated parser error text for more details when
+ *  `parser_status` is `pdxcp_cdcl_parser_status_parse_err` (generic error).
+ *  Ignored unless `parser_status` is `pdxcp_cdcl_parser_status_parse_err`. If
+ *  `NULL` when expected, errinfo parser status instead becomes
+ *  `pdxcp_cdcl_parser_status_null_err_text`.
  */
 static void
 pdxcp_cdcl_write_errinfo(
   pdxcp_cdcl_parser_errinfo *errinfo,
   pdxcp_cdcl_lexer_status lexer_status,
   const pdxcp_cdcl_token *cur_token,
-  pdxcp_cdcl_parser_status parser_status)
+  pdxcp_cdcl_parser_status parser_status,
+  const char *parser_text)
 {
   if (!errinfo)
     return;
@@ -68,6 +77,25 @@ pdxcp_cdcl_write_errinfo(
   if (lexer_status == pdxcp_cdcl_lexer_status_bad_token) {
     strcpy(errinfo->lexer.text, cur_token->text);
     errinfo->lexer.text[strlen(cur_token->text)] = '\0';  // terminate string
+  }
+  // check parser_text if parser_status is generic error
+  if (parser_status == pdxcp_cdcl_parser_status_parse_err) {
+    // if NULL, use specific error code
+    if (!parser_text) {
+      errinfo->parser.status = pdxcp_cdcl_parser_status_null_err_text;
+      errinfo->parser.text[0] = '\0';
+      return;
+    }
+    // otherwise, write actual error text. first get error text length
+    size_t parser_text_len = strlen(parser_text);
+    // if too long, truncate and use appropriate status
+    if (parser_text_len > PDXCP_CDCL_PARSER_ERROR_TEXT_LEN) {
+      memcpy(errinfo->parser.text, parser_text, PDXCP_CDCL_PARSER_ERROR_TEXT_LEN);
+      errinfo->parser.text[PDXCP_CDCL_PARSER_ERROR_TEXT_LEN] = '\0';
+    }
+    // otherwise, copy null-terminated entire string in
+    else
+      strcpy(errinfo->parser.text, parser_text);
   }
 }
 
@@ -186,7 +214,7 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
   // read tokens from lexer until error
   parser_status = stream_parse_to_iden(in, &lexer_status, &stack, &token);
   if (!PDXCP_CDCL_PARSER_OK(parser_status)) {
-    pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status);
+    pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status, NULL);
     return parser_status;
   }
   // write identifer token
@@ -194,7 +222,7 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
     return pdxcp_cdcl_parser_status_out_err;
   // read another token, handling lexer error as appropriate
   if (!PDXCP_CDCL_LEXER_OK(lexer_status = pdxcp_cdcl_get_token(in, &token))) {
-    pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status);
+    pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status, NULL);
     return pdxcp_cdcl_parser_status_lexer_err;
   }
   // TODO: handle array, function, etc.
