@@ -203,7 +203,7 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
     // consume pointer tokens from stack
     if (!PDXCP_CDCL_PARSER_OK(parser_status = stream_parse_ptrs(&stack, out)))
       return parser_status;
-    // TODO: parse cv-qualifiedm signed/unsigned qualified type
+    // TODO: parse cv-qualified signed/unsigned qualified type
     if (fprintf(out, " a thing\n") < 0)
       return pdxcp_cdcl_parser_status_out_err;
     return pdxcp_cdcl_parser_status_ok;

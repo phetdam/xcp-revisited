@@ -122,6 +122,11 @@ pdxcp_cdcl_parser_status_message(pdxcp_cdcl_parser_status status) PDXCP_NOEXCEPT
 #define PDXCP_CDCL_PARSER_OK(status) ((status) == pdxcp_cdcl_parser_status_ok)
 
 /**
+ * Maximum length of parser error text.
+ */
+#define PDXCP_CDCL_PARSER_ERROR_TEXT_LEN 256
+
+/**
  * Struct to hold parser error information.
  *
  * @todo Rename + rework to hold parser error info as well, not just lexer.
@@ -134,8 +139,8 @@ typedef struct {
    * Lexer error info.
    *
    * @param status Lexer status
-   * @param text Lexer error text. Typically a single null terminator, but if
-   *  `status` is `pdxcp_cdcl_lexer_status_bad_token`, a null-terminated string.
+   * @param text Null-terminated lexer error text. If `status` is
+   *  `pdxcp_cdcl_lexer_status_bad_token`, contains details on the error
    */
   struct {
     pdxcp_cdcl_lexer_status status;
@@ -145,10 +150,14 @@ typedef struct {
   /**
    * Parser error info.
    *
+   * @note Size of parser error text may be changed later.
+   *
    * @param status Parser status
+   * @param text Null-terminated parser error text
    */
   struct {
     pdxcp_cdcl_parser_status status;
+    char text[PDXCP_CDCL_PARSER_ERROR_TEXT_LEN + 1];
   } parser;
 } pdxcp_cdcl_parser_errinfo;
 
