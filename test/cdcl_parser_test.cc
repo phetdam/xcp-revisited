@@ -133,7 +133,9 @@ TEST_P(ParserErrorParamTest, ErrorTest)
     pdxcp_cdcl_parser_status_string(status) << " while errinfo received " <<
     pdxcp_cdcl_parser_status_string(errinfo.parser.status);
   // check that error status and message are as expected
-  EXPECT_EQ(GetParam().status, errinfo.parser.status);
+  EXPECT_EQ(GetParam().status, errinfo.parser.status) << "expected: " <<
+    pdxcp_cdcl_parser_status_string(status) << ", actual: " <<
+    pdxcp_cdcl_parser_status_string(errinfo.parser.status);
   EXPECT_EQ(GetParam().message, errinfo.parser.text);
 #else
   GTEST_SKIP();
