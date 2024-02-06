@@ -169,7 +169,7 @@ stream_parse_to_iden(
  *
  * @param stack Token stack to pop from
  * @param out Output stream
- * @param errinfo Error info structure, cannot be `NULL`
+ * @param errinfo Error info structure, can be `NULL`
  * @returns `pdxcp_cdcl_parser_status` parser status, where if there is an
  *  error, the value written to `errinfo` is returned instead of the original
  */
@@ -195,7 +195,7 @@ stream_parse_ptrs(
             pdxcp_cdcl_parser_status_parse_err,
             "Duplicate const qualifier for pointer"
           );
-          return errinfo->parser.status;
+          return pdxcp_cdcl_parser_status_parse_err;
         }
         // otherwise note const qualifier
         has_const = true;
@@ -211,7 +211,7 @@ stream_parse_ptrs(
             pdxcp_cdcl_parser_status_parse_err,
             "Duplicate volatile qualifier for pointer"
           );
-          return errinfo->parser.status;
+          return pdxcp_cdcl_parser_status_parse_err;
         }
         // otherwise note volatile qualifier
         has_volatile = true;
@@ -249,7 +249,7 @@ stream_parse_ptrs(
             pdxcp_cdcl_parser_status_parse_err,
             errmsg
           );
-          return errinfo->parser.status;
+          return pdxcp_cdcl_parser_status_parse_err;
         }
         return pdxcp_cdcl_parser_status_ok;
     }
@@ -265,7 +265,7 @@ stream_parse_ptrs(
       pdxcp_cdcl_parser_status_parse_err,
       "Unexpectedly ran out of tokens when parsing pointers"
     );
-    return errinfo->parser.status;
+    return pdxcp_cdcl_parser_status_parse_err;
   }
   return pdxcp_cdcl_parser_status_ok;
 }

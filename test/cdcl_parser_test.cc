@@ -153,6 +153,14 @@ INSTANTIATE_TEST_SUITE_P(
     },
     ParserErrorParamTestInput{
       "double *yyy * x;", pdxcp_cdcl_parser_status_bad_token, ""
+    },
+    // TODO: haven't implemented rest of the parser so without a cv qualifier,
+    // this actually erroneously parses successfully
+    ParserErrorParamTestInput{
+      "struct my_struct * [ const abc;",
+      pdxcp_cdcl_parser_status_parse_err,
+      "Unexpected token type pdxcp_cdcl_token_type_langle with text \"\" when "
+      "parsing pointers"
     }
   )
 );
