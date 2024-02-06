@@ -116,6 +116,16 @@ typedef enum {
 } pdxcp_cdcl_parser_status;
 
 /**
+ * Return a string for the given parser status value.
+ *
+ * If the value is unknown, a pointer to `"(unknown)"` is returned.
+ *
+ * @param status Lexer status value
+ */
+const char *
+pdxcp_cdcl_parser_status_string(pdxcp_cdcl_parser_status status) PDXCP_NOEXCEPT;
+
+/**
  * Return a message for the given parser status value.
  *
  * If the value is unknown, a pointer to `"Unknown parser status"` is returned.

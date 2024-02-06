@@ -7,57 +7,66 @@
 
 #include "pdxcp/cdcl_lexer.h"
 
-#include "pdxcp/common.h"
-#include "pdxcp/string.h"
-
 #include <ctype.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "pdxcp/cdcl_common.h"
+#include "pdxcp/common.h"
+#include "pdxcp/string.h"
 
 // error message template for invalid character tokens
 static const char char_token_error[] = "Unknown character token 'X'";
 // error message template for token that is too long
 static const char long_token_error[] = "Token too large: ...";
 
-/**
- * Macro defining case statement returning the stringified value.
- *
- * @param value Enum, integral, etc. value
- */
-#define ENUM_STRING_CASE(value) \
-  case value: \
-    return PDXCP_STRINGIFY(value)
-
 const char *
 pdxcp_cdcl_token_type_string(pdxcp_cdcl_token_type type)
 {
   switch (type) {
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_error);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_lparen);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_rparen);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_langle);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_rangle);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_comma);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_slash);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_star);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_semicolon);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_struct);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_enum);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_q_const);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_q_volatile);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_q_signed);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_q_unsigned);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_iden);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_void);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_char);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_int);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_long);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_float);
-    ENUM_STRING_CASE(pdxcp_cdcl_token_type_t_double);
+    // PDXCP_PDXCP_STRING_CASE
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_error);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_lparen);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_rparen);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_langle);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_rangle);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_comma);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_slash);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_star);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_semicolon);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_struct);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_enum);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_q_const);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_q_volatile);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_q_signed);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_q_unsigned);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_iden);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_t_void);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_t_char);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_t_int);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_t_long);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_t_float);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_t_double);
     default:
       return "(unknown)";
   }
+}
+
+const char *
+pdxcp_cdcl_lexer_status_string(pdxcp_cdcl_lexer_status status)
+{
+  switch (status) {
+    PDXCP_STRING_CASE(pdxcp_cdcl_lexer_status_ok);
+    PDXCP_STRING_CASE(pdxcp_cdcl_lexer_status_stream_null);
+    PDXCP_STRING_CASE(pdxcp_cdcl_lexer_status_token_null);
+    PDXCP_STRING_CASE(pdxcp_cdcl_lexer_status_ungetc_fail);
+    PDXCP_STRING_CASE(pdxcp_cdcl_lexer_status_fgetc_eof);
+    PDXCP_STRING_CASE(pdxcp_cdcl_lexer_status_not_iden);
+    PDXCP_STRING_CASE(pdxcp_cdcl_lexer_status_bad_token);
+    default:
+      return "(unknown)";
+  };
 }
 
 const char *

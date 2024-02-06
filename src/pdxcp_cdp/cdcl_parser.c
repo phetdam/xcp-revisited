@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "pdxcp/cdcl_common.h"
 #include "pdxcp/cdcl_lexer.h"
 
 void
@@ -18,6 +19,26 @@ pdxcp_cdcl_token_stack_init(pdxcp_cdcl_token_stack *stack)
 {
   if (stack)
     stack->n_tokens = 0;
+}
+
+const char *
+pdxcp_cdcl_parser_status_string(pdxcp_cdcl_parser_status status)
+{
+  switch (status) {
+    PDXCP_STRING_CASE(pdxcp_cdcl_parser_status_ok);
+    PDXCP_STRING_CASE(pdxcp_cdcl_parser_status_in_null);
+    PDXCP_STRING_CASE(pdxcp_cdcl_parser_status_out_null);
+    PDXCP_STRING_CASE(pdxcp_cdcl_parser_status_eof);
+    PDXCP_STRING_CASE(pdxcp_cdcl_parser_status_lexer_err);
+    PDXCP_STRING_CASE(pdxcp_cdcl_parser_status_token_overflow);
+    PDXCP_STRING_CASE(pdxcp_cdcl_parser_status_out_err);
+    PDXCP_STRING_CASE(pdxcp_cdcl_parser_status_parse_err);
+    PDXCP_STRING_CASE(pdxcp_cdcl_parser_status_bad_token);
+    PDXCP_STRING_CASE(pdxcp_cdcl_parser_status_null_err_text);
+    PDXCP_STRING_CASE(pdxcp_cdcl_parser_status_err_text_too_long);
+    default:
+      return "(unknown)";
+  };
 }
 
 const char *
@@ -48,7 +69,7 @@ pdxcp_cdcl_parser_status_message(pdxcp_cdcl_parser_status status)
 /**
  * Write parser error info.
  *
- * @param errinfo Error info structure
+ * @param errinfo Error info structure. If `NULL`, nothing is done
  * @param lexer_status Lexer status
  * @param cur_token Most recent token read by lexer. If the lexer status is
  *  `pdxcp_cdcl_lexer_status_bad_token`, its text will contain the error text.
@@ -78,6 +99,9 @@ pdxcp_cdcl_write_errinfo(
     strcpy(errinfo->lexer.text, cur_token->text);
     errinfo->lexer.text[strlen(cur_token->text)] = '\0';  // terminate string
   }
+  // otherwise just empty string
+  else
+    errinfo->lexer.text[0] = '\0';
   // check parser_text if parser_status is generic error
   if (parser_status == pdxcp_cdcl_parser_status_parse_err) {
     // if NULL, use specific error code
@@ -90,6 +114,7 @@ pdxcp_cdcl_write_errinfo(
     size_t parser_text_len = strlen(parser_text);
     // if too long, truncate and use appropriate status
     if (parser_text_len > PDXCP_CDCL_PARSER_ERROR_TEXT_LEN) {
+      errinfo->parser.status = pdxcp_cdcl_parser_status_err_text_too_long;
       memcpy(errinfo->parser.text, parser_text, PDXCP_CDCL_PARSER_ERROR_TEXT_LEN);
       errinfo->parser.text[PDXCP_CDCL_PARSER_ERROR_TEXT_LEN] = '\0';
     }
@@ -97,6 +122,9 @@ pdxcp_cdcl_write_errinfo(
     else
       strcpy(errinfo->parser.text, parser_text);
   }
+  // otherwise just empty string
+  else
+    errinfo->parser.text[0] = '\0';
 }
 
 /**
@@ -141,29 +169,51 @@ stream_parse_to_iden(
  *
  * @param stack Token stack to pop from
  * @param out Output stream
- * @returns `pdxcp_cdcl_parser_status`
+ * @param errinfo Error info structure, cannot be `NULL`
+ * @returns `pdxcp_cdcl_parser_status` parser status, where if there is an
+ *  error, the value written to `errinfo` is returned instead of the original
  */
 static pdxcp_cdcl_parser_status
-stream_parse_ptrs(pdxcp_cdcl_token_stack *stack, FILE *out)
+stream_parse_ptrs(
+  pdxcp_cdcl_token_stack *stack, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
 {
+  // indicators for cv-qualifiers
   bool has_const = false;
   bool has_volatile = false;
-  // TODO: need to parse cv-qualifiers correctly
+  // pop tokens off stack
   while (!PDXCP_CDCL_TOKEN_STACK_EMPTY(stack)) {
     // switch on the token type
     switch (PDXCP_CDCL_TOKEN_STACK_HEAD(stack)->type) {
       // const qualifier, only one allowed
       case pdxcp_cdcl_token_type_q_const:
-        // TODO: write error message somewhere
-        if (has_const)
-          return pdxcp_cdcl_parser_status_parse_err;
+        // already have const, duplicate qualifier
+        if (has_const) {
+          pdxcp_cdcl_write_errinfo(
+            errinfo,
+            pdxcp_cdcl_lexer_status_ok,
+            NULL,
+            pdxcp_cdcl_parser_status_parse_err,
+            "Duplicate const qualifier for pointer"
+          );
+          return errinfo->parser.status;
+        }
+        // otherwise note const qualifier
         has_const = true;
         break;
       // volatile qualifier, only one allowed
       case pdxcp_cdcl_token_type_q_volatile:
-        // TODO: write error message somewhere
-        if (has_volatile)
-          return pdxcp_cdcl_parser_status_parse_err;
+        // already have volatile, duplicate qualifier
+        if (has_volatile) {
+          pdxcp_cdcl_write_errinfo(
+            errinfo,
+            pdxcp_cdcl_lexer_status_ok,
+            NULL,
+            pdxcp_cdcl_parser_status_parse_err,
+            "Duplicate volatile qualifier for pointer"
+          );
+          return errinfo->parser.status;
+        }
+        // otherwise note volatile qualifier
         has_volatile = true;
         break;
       // pointer
@@ -181,18 +231,42 @@ stream_parse_ptrs(pdxcp_cdcl_token_stack *stack, FILE *out)
       // unexpected token. if either has_const or has_volatile is true, then
       // definitely this is a parse error, otherwise assume success
       default:
-        // TODO: where to write error message
-        if (has_const || has_volatile)
-          return pdxcp_cdcl_parser_status_parse_err;
+        if (has_const || has_volatile) {
+          // format message into buffer
+          char errmsg[PDXCP_CDCL_PARSER_ERROR_TEXT_LEN + 1];
+          snprintf(
+            errmsg,
+            sizeof errmsg,
+            "Unexpected token type %s with text \"%s\" when parsing pointers",
+            pdxcp_cdcl_token_type_string(PDXCP_CDCL_TOKEN_STACK_HEAD(stack)->type),
+            PDXCP_CDCL_TOKEN_STACK_HEAD(stack)->text
+          );
+          // write result into error info
+          pdxcp_cdcl_write_errinfo(
+            errinfo,
+            pdxcp_cdcl_lexer_status_ok,
+            NULL,
+            pdxcp_cdcl_parser_status_parse_err,
+            errmsg
+          );
+          return errinfo->parser.status;
+        }
         return pdxcp_cdcl_parser_status_ok;
     }
     // done with token so pop from stack
     PDXCP_CDCL_TOKEN_STACK_POP(stack);
   }
   // if stack is empty, we are missing tokens, e.g. type, etc.
-  // TODO: where to write error message
-  if (PDXCP_CDCL_TOKEN_STACK_EMPTY(stack))
-    return pdxcp_cdcl_parser_status_parse_err;
+  if (PDXCP_CDCL_TOKEN_STACK_EMPTY(stack)) {
+    pdxcp_cdcl_write_errinfo(
+      errinfo,
+      pdxcp_cdcl_lexer_status_ok,
+      NULL,
+      pdxcp_cdcl_parser_status_parse_err,
+      "Unexpectedly ran out of tokens when parsing pointers"
+    );
+    return errinfo->parser.status;
+  }
   return pdxcp_cdcl_parser_status_ok;
 }
 
@@ -228,16 +302,29 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
   // TODO: handle array, function, etc.
   // if read semicolon, end of declaration
   if (token.type == pdxcp_cdcl_token_type_semicolon) {
-    // consume pointer tokens from stack
-    if (!PDXCP_CDCL_PARSER_OK(parser_status = stream_parse_ptrs(&stack, out)))
+    // consume pointer tokens from stack. parser_status written on error
+    parser_status = stream_parse_ptrs(&stack, out, errinfo);
+    if (!PDXCP_CDCL_PARSER_OK(parser_status))
       return parser_status;
     // TODO: parse cv-qualified signed/unsigned qualified type
     if (fprintf(out, " a thing\n") < 0)
       return pdxcp_cdcl_parser_status_out_err;
-    return pdxcp_cdcl_parser_status_ok;
+    goto parse_success;
   }
   // TODO: not implemented
-  else
-    return pdxcp_cdcl_parser_status_bad_token;
+  else {
+    parser_status = pdxcp_cdcl_parser_status_bad_token;
+    pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status, NULL);
+    return parser_status;
+  }
+  // success, so errinfo has no errors
+parse_success:
+  pdxcp_cdcl_write_errinfo(
+    errinfo,
+    pdxcp_cdcl_lexer_status_ok,
+    NULL,
+    pdxcp_cdcl_parser_status_ok,
+    NULL
+  );
   return pdxcp_cdcl_parser_status_ok;
 }

@@ -87,4 +87,74 @@ INSTANTIATE_TEST_SUITE_P(
   )
 );
 
+/**
+ * Struct holding the input for a `ParserErrorParamTest`.
+ *
+ * @param input Input fragment to parse
+ * @param status Expected parser status
+ * @param message Expected parser error message
+ */
+struct ParserErrorParamTestInput {
+  const std::string input;
+  const pdxcp_cdcl_parser_status status;
+  const std::string message;
+};
+
+/**
+ * Google Test value printer for `ParserErrorParamTestInput`.
+ */
+void PrintTo(const ParserErrorParamTestInput& input, std::ostream* out)
+{
+  *out << "{" << input.input << ", " <<
+    pdxcp_cdcl_parser_status_string(input.status) << ", " <<
+    input.message << "}";
+}
+
+/**
+ * C declaration parser parametrized test fixture for testing parser errors.
+ */
+class ParserErrorParamTest
+  : public ParserTest,
+    public ::testing::WithParamInterface<ParserErrorParamTestInput> {};
+
+/**
+ * Test that the correct status and error are emitted on parsing failures.
+ */
+TEST_P(ParserErrorParamTest, ErrorTest)
+{
+#if defined(PDXCP_HAS_FMEMOPEN)
+  // create input stream
+  auto stream = pdxcp::memopen_string(GetParam().input);
+  // parse and write error info
+  pdxcp_cdcl_parser_errinfo errinfo;
+  auto status = pdxcp_cdcl_stream_parse(stream, stdout, &errinfo);
+  // check that returned status and errinfo status are the same
+  ASSERT_EQ(status, errinfo.parser.status) << "Parser returned " <<
+    pdxcp_cdcl_parser_status_string(status) << " while errinfo received " <<
+    pdxcp_cdcl_parser_status_string(errinfo.parser.status);
+  // check that error status and message are as expected
+  EXPECT_EQ(GetParam().status, errinfo.parser.status);
+  EXPECT_EQ(GetParam().message, errinfo.parser.text);
+#else
+  GTEST_SKIP();
+#endif  // !defined(PDXCP_HAS_FMEMOPEN)
+}
+
+// simple declaration mishaps
+INSTANTIATE_TEST_SUITE_P(
+  SimpleDecls,
+  ParserErrorParamTest,
+  ::testing::Values(
+    ParserErrorParamTestInput{"int **;", pdxcp_cdcl_parser_status_lexer_err, ""},
+    ParserErrorParamTestInput{
+      "*y;",
+      pdxcp_cdcl_parser_status_parse_err,
+      "Unexpectedly ran out of tokens when parsing pointers"
+    },
+    ParserErrorParamTestInput{
+      "double *yyy * x;", pdxcp_cdcl_parser_status_bad_token, ""
+    }
+  )
+);
+
 }  // namespace

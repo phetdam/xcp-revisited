@@ -67,11 +67,21 @@ typedef enum {
 } pdxcp_cdcl_lexer_status;
 
 /**
+ * Return a string for the given lexer status value.
+ *
+ * If the value is unknown, a pointer to `"(unknown)"` is returned.
+ *
+ * @param status Lexer status value
+ */
+const char *
+pdxcp_cdcl_lexer_status_string(pdxcp_cdcl_lexer_status status) PDXCP_NOEXCEPT;
+
+/**
  * Return a message for the given lexer status value.
  *
  * If the value is unknown, a pointer to `"Unknown lexer status"` is returned.
  *
- * @param value Lexer status value
+ * @param status Lexer status value
  */
 const char *
 pdxcp_cdcl_lexer_status_message(pdxcp_cdcl_lexer_status status) PDXCP_NOEXCEPT;
