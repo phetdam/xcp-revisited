@@ -154,7 +154,9 @@ INSTANTIATE_TEST_SUITE_P(
       "Unexpectedly ran out of tokens when parsing pointers"
     },
     ParserErrorParamTestInput{
-      "double *yyy * x;", pdxcp_cdcl_parser_status_bad_token, ""
+      "double *yyy * x;",
+      pdxcp_cdcl_parser_status_parse_err,
+      "Incomplete declaration for identifier yyy"
     },
     // TODO: haven't implemented rest of the parser so without a cv qualifier,
     // this actually erroneously parses successfully

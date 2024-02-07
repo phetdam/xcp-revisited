@@ -236,11 +236,12 @@ stream_parse_ptrs(
           char errmsg[PDXCP_CDCL_PARSER_ERROR_TEXT_LEN + 1];
           snprintf(
             errmsg,
-            sizeof errmsg,
+            sizeof errmsg - 1,
             "Unexpected token type %s with text \"%s\" when parsing pointers",
             pdxcp_cdcl_token_type_string(PDXCP_CDCL_TOKEN_STACK_HEAD(stack)->type),
             PDXCP_CDCL_TOKEN_STACK_HEAD(stack)->text
           );
+          errmsg[sizeof errmsg - 1] = '\0';  // guarantee null termination
           // write result into error info
           pdxcp_cdcl_write_errinfo(
             errinfo,
@@ -281,16 +282,19 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
   // allocate + initialize token stack
   pdxcp_cdcl_token_stack stack;
   pdxcp_cdcl_token_stack_init(&stack);
-  // statuses + current token
+  // statuses, current token, token holding identifier
   pdxcp_cdcl_lexer_status lexer_status;
   pdxcp_cdcl_parser_status parser_status;
-  pdxcp_cdcl_token token;
+  pdxcp_cdcl_token token, iden_token;
   // read tokens from lexer until error
   parser_status = stream_parse_to_iden(in, &lexer_status, &stack, &token);
   if (!PDXCP_CDCL_PARSER_OK(parser_status)) {
     pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status, NULL);
     return parser_status;
   }
+  // copy token contents to identifier token
+  iden_token.type = token.type;
+  strcpy(iden_token.text, token.text);
   // write identifer token
   if (fprintf(out, "%s:", token.text) < 0)
     return pdxcp_cdcl_parser_status_out_err;
@@ -311,10 +315,20 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
       return pdxcp_cdcl_parser_status_out_err;
     goto parse_success;
   }
-  // TODO: not implemented
+  // nothing we can do with this identifier, error
   else {
-    parser_status = pdxcp_cdcl_parser_status_bad_token;
-    pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status, NULL);
+    parser_status = pdxcp_cdcl_parser_status_parse_err;
+    // format error message
+    char errmsg[PDXCP_CDCL_PARSER_ERROR_TEXT_LEN + 1];
+    snprintf(
+      errmsg,
+      sizeof errmsg - 1,
+      "Incomplete declaration for identifier %s",
+      iden_token.text
+    );
+    errmsg[sizeof errmsg - 1] = '\0';  // guarantee null termination
+    // write error info as usual
+    pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status, errmsg);
     return parser_status;
   }
   // success, so errinfo has no errors
