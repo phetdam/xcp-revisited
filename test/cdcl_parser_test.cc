@@ -58,10 +58,17 @@ TEST_P(ParserParamTest, PureTest)
 #if defined(PDXCP_HAS_FMEMOPEN)
   // create input stream
   auto stream = pdxcp::memopen_string(GetParam().input);
-  // parse and check status (no error info for now)
-  auto status = pdxcp_cdcl_stream_parse(stream, stdout, nullptr);
+  // parse and write error info
+  pdxcp_cdcl_parser_errinfo errinfo;
+  auto status = pdxcp_cdcl_stream_parse(stream, stdout, &errinfo);
+  // note: only stream parser error text when status is
+  // pdxcp_cdcl_parser_status_parse_err, result is undefined otherwise
   EXPECT_EQ(pdxcp_cdcl_parser_status_ok, status) << "Parser status: " <<
-    pdxcp_cdcl_parser_status_message(status);
+    pdxcp_cdcl_parser_status_string(status) << "\nParser error text: " <<
+    (
+      (status == pdxcp_cdcl_parser_status_parse_err) ?
+        errinfo.parser.text : "(none)"
+    );
 #else
   GTEST_SKIP();
 #endif  // !defined(PDXCP_HAS_FMEMOPEN)
@@ -151,20 +158,26 @@ INSTANTIATE_TEST_SUITE_P(
     ParserErrorParamTestInput{
       "*y;",
       pdxcp_cdcl_parser_status_parse_err,
-      "Unexpectedly ran out of tokens when parsing pointers"
+      "Unexpectedly ran out of tokens when parsing pointers, missing type"
     },
     ParserErrorParamTestInput{
       "double *yyy * x;",
       pdxcp_cdcl_parser_status_parse_err,
       "Incomplete declaration for identifier yyy"
     },
-    // TODO: haven't implemented rest of the parser so without a cv qualifier,
-    // this actually erroneously parses successfully
+    // note: if there is a cv-qualifier before the unexpected token, then the
+    // error reported is from stream_parse_ptrs, not stream_parse_type
     ParserErrorParamTestInput{
-      "struct my_struct * [ const abc;",
+      "enum my_enum * [ const volatile abc;",
       pdxcp_cdcl_parser_status_parse_err,
       "Unexpected token type pdxcp_cdcl_token_type_langle with text \"\" when "
       "parsing pointers"
+    },
+    ParserErrorParamTestInput{
+      "struct my_struct * [ def;",
+      pdxcp_cdcl_parser_status_parse_err,
+      "Unexpected token type pdxcp_cdcl_token_type_langle with text \"\" when "
+      "parsing identifier type"
     }
   )
 );

@@ -128,6 +128,29 @@ pdxcp_cdcl_write_errinfo(
 }
 
 /**
+ * Write parser error info when there is a parsing error.
+ *
+ * The parser error status is `pdxcp_cdcl_parser_status_parse_err`.
+ *
+ * @param errinfo Error info structure. If `NULL`, nothing is done
+ * @param parser_text Null-terminated parser error text for more details. If
+ *  `NULL` when expected, errinfo parser status instead becomes
+ *  `pdxcp_cdcl_parser_status_null_err_text`.
+ */
+static void
+pdxcp_cdcl_write_parse_err(
+  pdxcp_cdcl_parser_errinfo *errinfo, const char *parser_text)
+{
+  return pdxcp_cdcl_write_errinfo(
+    errinfo,
+    pdxcp_cdcl_lexer_status_ok,
+    NULL,
+    pdxcp_cdcl_parser_status_parse_err,
+    parser_text
+  );
+}
+
+/**
  * Read tokens from input stream until an identifier is parsed.
  *
  * @param in Input stream
@@ -188,13 +211,7 @@ stream_parse_ptrs(
       case pdxcp_cdcl_token_type_q_const:
         // already have const, duplicate qualifier
         if (has_const) {
-          pdxcp_cdcl_write_errinfo(
-            errinfo,
-            pdxcp_cdcl_lexer_status_ok,
-            NULL,
-            pdxcp_cdcl_parser_status_parse_err,
-            "Duplicate const qualifier for pointer"
-          );
+          pdxcp_cdcl_write_parse_err(errinfo, "Duplicate pointer const qualifier");
           return pdxcp_cdcl_parser_status_parse_err;
         }
         // otherwise note const qualifier
@@ -204,13 +221,7 @@ stream_parse_ptrs(
       case pdxcp_cdcl_token_type_q_volatile:
         // already have volatile, duplicate qualifier
         if (has_volatile) {
-          pdxcp_cdcl_write_errinfo(
-            errinfo,
-            pdxcp_cdcl_lexer_status_ok,
-            NULL,
-            pdxcp_cdcl_parser_status_parse_err,
-            "Duplicate volatile qualifier for pointer"
-          );
+          pdxcp_cdcl_write_parse_err(errinfo, "Duplicate pointer volatile qualifier");
           return pdxcp_cdcl_parser_status_parse_err;
         }
         // otherwise note volatile qualifier
@@ -243,13 +254,7 @@ stream_parse_ptrs(
           );
           errmsg[sizeof errmsg - 1] = '\0';  // guarantee null termination
           // write result into error info
-          pdxcp_cdcl_write_errinfo(
-            errinfo,
-            pdxcp_cdcl_lexer_status_ok,
-            NULL,
-            pdxcp_cdcl_parser_status_parse_err,
-            errmsg
-          );
+          pdxcp_cdcl_write_parse_err(errinfo, errmsg);
           return pdxcp_cdcl_parser_status_parse_err;
         }
         return pdxcp_cdcl_parser_status_ok;
@@ -259,14 +264,225 @@ stream_parse_ptrs(
   }
   // if stack is empty, we are missing tokens, e.g. type, etc.
   if (PDXCP_CDCL_TOKEN_STACK_EMPTY(stack)) {
-    pdxcp_cdcl_write_errinfo(
+    pdxcp_cdcl_write_parse_err(
       errinfo,
-      pdxcp_cdcl_lexer_status_ok,
-      NULL,
-      pdxcp_cdcl_parser_status_parse_err,
-      "Unexpectedly ran out of tokens when parsing pointers"
+      "Unexpectedly ran out of tokens when parsing pointers, missing type"
     );
     return pdxcp_cdcl_parser_status_parse_err;
+  }
+  return pdxcp_cdcl_parser_status_ok;
+}
+
+/**
+ * Pop tokens off of the token stack to handle the identifier's qualified type.
+ *
+ * Handles cv-qualifiers and sign qualifiers appropriately.
+ *
+ * @param stack Token stack to pop from
+ * @param out Output stream
+ * @param errinfo Error info structure, can be `NULL`
+ * @returns `pdxcp_cdcl_parser_status` parser status, where if there is an
+ *  error, the value written to `errinfo` is returned instead of the original
+ */
+static pdxcp_cdcl_parser_status
+stream_parse_type(
+  pdxcp_cdcl_token_stack *stack, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
+{
+  // indicators for cv-qualifiers and sign
+  bool has_const = false;
+  bool has_volatile = false;
+  bool is_signed = false;
+  bool is_unsigned = false;
+  // type token. we mark the type as error so we can distinguish whether or not
+  // a type has already been read off of the token stack
+  pdxcp_cdcl_token type_token;
+  type_token.type = pdxcp_cdcl_token_type_error;
+  // pop tokens off stack to determine type and qualifiers
+  while (!PDXCP_CDCL_TOKEN_STACK_EMPTY(stack)) {
+    // switch on the token type
+    switch (PDXCP_CDCL_TOKEN_STACK_HEAD(stack)->type) {
+      // const qualifier, only one allowed
+      case pdxcp_cdcl_token_type_q_const:
+        if (has_const) {
+          pdxcp_cdcl_write_parse_err(errinfo, "Duplicate type const qualifier");
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        // otherwise note const qualifier
+        has_const = true;
+        break;
+      // volatile qualifier, only one allowed
+      case pdxcp_cdcl_token_type_q_volatile:
+        if (has_volatile) {
+          pdxcp_cdcl_write_parse_err(errinfo, "Duplicate type volatile qualifier");
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        // otherwise note volatile qualifier
+        has_volatile = true;
+        break;
+      // signed qualifier, only one allowed
+      case pdxcp_cdcl_token_type_q_signed:
+        if (is_signed) {
+          pdxcp_cdcl_write_parse_err(errinfo, "Duplicate signed type qualifier");
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        if (is_unsigned) {
+          pdxcp_cdcl_write_parse_err(
+            errinfo,
+            "Type already qualified as unsigned, cannot re-qualify as signed"
+          );
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        // otherwise note signed qualifier
+        is_signed = true;
+        break;
+      // unsigned qualifier, only one allowed
+      case pdxcp_cdcl_token_type_q_unsigned:
+        if (is_unsigned) {
+          pdxcp_cdcl_write_parse_err(errinfo, "Duplicate unsigned type qualifier");
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        if (is_signed) {
+          pdxcp_cdcl_write_parse_err(
+            errinfo,
+            "Type already qualified as signed, cannot re-quaifiy as unsigned"
+          );
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+      // fill type token when a type is specified
+      case pdxcp_cdcl_token_type_struct:
+      case pdxcp_cdcl_token_type_enum:
+      case pdxcp_cdcl_token_type_t_void:
+      case pdxcp_cdcl_token_type_t_char:
+      case pdxcp_cdcl_token_type_t_int:
+      case pdxcp_cdcl_token_type_t_long:
+      case pdxcp_cdcl_token_type_t_float:
+      case pdxcp_cdcl_token_type_t_double:
+        // if already parsed a type, error
+        if (type_token.type != pdxcp_cdcl_token_type_error) {
+          // format message
+          char errmsg[PDXCP_CDCL_PARSER_ERROR_TEXT_LEN + 1];
+          snprintf(
+            errmsg,
+            sizeof errmsg - 1,
+            "Type %s provided when identifier already specified as %s",
+            // TODO: add function that C type string from enum token type
+            pdxcp_cdcl_token_type_string(PDXCP_CDCL_TOKEN_STACK_HEAD(stack)->type),
+            pdxcp_cdcl_token_type_string(type_token.type)
+          );
+          errmsg[sizeof errmsg - 1] = '\0';  // guarantee null termination
+          // write result into error info
+          pdxcp_cdcl_write_parse_err(errinfo, errmsg);
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        // otherwise, copy token type and text
+        type_token.type = PDXCP_CDCL_TOKEN_STACK_HEAD(stack)->type;
+        strcpy(type_token.text, PDXCP_CDCL_TOKEN_STACK_HEAD(stack)->text);
+        break;
+      // unknown token
+      default: {
+        // format message
+        char errmsg[PDXCP_CDCL_PARSER_ERROR_TEXT_LEN + 1];
+        snprintf(
+          errmsg,
+          sizeof errmsg - 1,
+          "Unexpected token type %s with text \"%s\" when parsing identifier type",
+          // TODO: nicer way to indicate the token + text?
+          pdxcp_cdcl_token_type_string(PDXCP_CDCL_TOKEN_STACK_HEAD(stack)->type),
+          PDXCP_CDCL_TOKEN_STACK_HEAD(stack)->text
+        );
+        errmsg[sizeof errmsg - 1] = '\0';  // guarantee null termination
+        // write result into error info
+        pdxcp_cdcl_write_parse_err(errinfo, errmsg);
+        return pdxcp_cdcl_parser_status_parse_err;
+      }
+    }
+    // done with token so pop from stack
+    PDXCP_CDCL_TOKEN_STACK_POP(stack);
+  }
+  // if no type, we ran out of tokens
+  if (type_token.type == pdxcp_cdcl_token_type_error)  {
+    pdxcp_cdcl_write_parse_err(errinfo, "Identifier missing required type");
+    return pdxcp_cdcl_parser_status_parse_err;
+  }
+  // print out cv-qualifiers
+  if (has_const && fprintf(out, " const") < 0)
+    return pdxcp_cdcl_parser_status_out_err;
+  if (has_volatile && fprintf(out, " volatile") < 0)
+    return pdxcp_cdcl_parser_status_out_err;
+  // print out sign qualifiers
+  switch (type_token.type) {
+    // type that can have sign qualifiers
+    case pdxcp_cdcl_token_type_t_char:
+    case pdxcp_cdcl_token_type_t_int:
+    case pdxcp_cdcl_token_type_t_long:
+      if (is_signed && fprintf(out, " signed") < 0)
+        return pdxcp_cdcl_parser_status_out_err;
+      if (is_unsigned && fprintf(out, " unsigned") < 0)
+        return pdxcp_cdcl_parser_status_out_err;
+      break;
+    // unsupported type
+    default:
+      if (is_signed || is_unsigned) {
+        char errmsg[PDXCP_CDCL_PARSER_ERROR_TEXT_LEN + 1];
+        snprintf(
+          errmsg,
+          sizeof errmsg - 1,
+          "Only char, int, or long can be signed or unsigned, received %s",
+          // TODO: nicer way to indicate identifier type
+          pdxcp_cdcl_token_type_string(type_token.type)
+        );
+        errmsg[sizeof errmsg - 1] = '\0';  // guarantee null termination
+        // write result into error info
+        pdxcp_cdcl_write_parse_err(errinfo, errmsg);
+        return pdxcp_cdcl_parser_status_parse_err;
+      }
+      break;
+  }
+  // print out type
+  switch (type_token.type) {
+    // struct + enum
+    case pdxcp_cdcl_token_type_struct:
+      if (fprintf(out, " struct %s", type_token.text) < 0)
+        return pdxcp_cdcl_parser_status_out_err;
+      break;
+    case pdxcp_cdcl_token_type_enum:
+      if (fprintf(out, " enum %s", type_token.text) < 0)
+        return pdxcp_cdcl_parser_status_out_err;
+      break;
+    // other types
+    case pdxcp_cdcl_token_type_t_void:
+      if (fprintf(out, " void") < 0) return pdxcp_cdcl_parser_status_out_err;
+      break;
+    case pdxcp_cdcl_token_type_t_char:
+      if (fprintf(out, " char") < 0) return pdxcp_cdcl_parser_status_out_err;
+      break;
+    case pdxcp_cdcl_token_type_t_int:
+      if (fprintf(out, " int") < 0) return pdxcp_cdcl_parser_status_out_err;
+      break;
+    case pdxcp_cdcl_token_type_t_long:
+      if (fprintf(out, " long") < 0) return pdxcp_cdcl_parser_status_out_err;
+      break;
+    case pdxcp_cdcl_token_type_t_float:
+      if (fprintf(out, " float") < 0) return pdxcp_cdcl_parser_status_out_err;
+      break;
+    case pdxcp_cdcl_token_type_t_double:
+      if (fprintf(out, " double") < 0) return pdxcp_cdcl_parser_status_out_err;
+      break;
+    // unsupported type
+    default: {
+      char errmsg[PDXCP_CDCL_PARSER_ERROR_TEXT_LEN + 1];
+      snprintf(
+        errmsg,
+        sizeof errmsg - 1,
+        "Unknown identifier type %s",
+        // TODO: nicer way to indicate identifier type
+        pdxcp_cdcl_token_type_string(type_token.type)
+      );
+      errmsg[sizeof errmsg - 1] = '\0';  // guarantee null termination
+      // write result into error info
+      pdxcp_cdcl_write_parse_err(errinfo, errmsg);
+      return pdxcp_cdcl_parser_status_parse_err;
+    }
   }
   return pdxcp_cdcl_parser_status_ok;
 }
@@ -290,6 +506,7 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
   parser_status = stream_parse_to_iden(in, &lexer_status, &stack, &token);
   if (!PDXCP_CDCL_PARSER_OK(parser_status)) {
     pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status, NULL);
+    // no jumping to parse_finalize since nothing gets printed
     return parser_status;
   }
   // copy token contents to identifier token
@@ -300,8 +517,9 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
     return pdxcp_cdcl_parser_status_out_err;
   // read another token, handling lexer error as appropriate
   if (!PDXCP_CDCL_LEXER_OK(lexer_status = pdxcp_cdcl_get_token(in, &token))) {
+    parser_status = pdxcp_cdcl_parser_status_lexer_err;
     pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status, NULL);
-    return pdxcp_cdcl_parser_status_lexer_err;
+    goto parse_finalize;
   }
   // TODO: handle array, function, etc.
   // if read semicolon, end of declaration
@@ -309,11 +527,10 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
     // consume pointer tokens from stack. parser_status written on error
     parser_status = stream_parse_ptrs(&stack, out, errinfo);
     if (!PDXCP_CDCL_PARSER_OK(parser_status))
-      return parser_status;
-    // TODO: parse cv-qualified signed/unsigned qualified type
-    if (fprintf(out, " a thing\n") < 0)
-      return pdxcp_cdcl_parser_status_out_err;
-    goto parse_success;
+      goto parse_finalize;
+    // parse cv-qualified signed/unsigned qualified type
+    parser_status = stream_parse_type(&stack, out, errinfo);
+    goto parse_finalize;
   }
   // nothing we can do with this identifier, error
   else {
@@ -329,16 +546,12 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
     errmsg[sizeof errmsg - 1] = '\0';  // guarantee null termination
     // write error info as usual
     pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status, errmsg);
-    return parser_status;
+    goto parse_finalize;
   }
-  // success, so errinfo has no errors
-parse_success:
-  pdxcp_cdcl_write_errinfo(
-    errinfo,
-    pdxcp_cdcl_lexer_status_ok,
-    NULL,
-    pdxcp_cdcl_parser_status_ok,
-    NULL
-  );
-  return pdxcp_cdcl_parser_status_ok;
+  // parse complete. just write final newline + returning parser status, as all
+  // the parsing subroutines should have written appropriate error info
+parse_finalize:
+  if (fprintf(out, "\n") < 0)
+    return pdxcp_cdcl_parser_status_out_err;
+  return parser_status;
 }
