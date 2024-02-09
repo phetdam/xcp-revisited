@@ -80,7 +80,8 @@ INSTANTIATE_TEST_SUITE_P(
   ParserParamTest,
   ::testing::Values(
     ParserParamTestInput{"int **x;"},
-    ParserParamTestInput{"double *y;"}
+    ParserParamTestInput{"double *y;"},
+    ParserParamTestInput{"struct my_struct_1 **z;"}
   )
 );
 
@@ -90,7 +91,8 @@ INSTANTIATE_TEST_SUITE_P(
   ParserParamTest,
   ::testing::Values(
     ParserParamTestInput{"const int *const a;"},
-    ParserParamTestInput{"volatile void *volatile *const b;"}
+    ParserParamTestInput{"volatile void *volatile *const b;"},
+    ParserParamTestInput{"const enum my_enum **const * const volatile c;"}
   )
 );
 
