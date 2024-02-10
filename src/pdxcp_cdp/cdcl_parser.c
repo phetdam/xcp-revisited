@@ -188,7 +188,7 @@ stream_parse_to_iden(
 /**
  * Pop tokens off of the token stack to handle pointers in the declaration.
  *
- * Also handles cv-qualifiers for the tokens and balances any left parentheses
+ * Also handles cv-qualifiers for the tokens and balances any left parenthesis
  * on the token stack against the number of right parentheses already read.
  *
  * @param stack Token stack to pop from
@@ -234,7 +234,7 @@ stream_parse_ptrs(
         // otherwise note volatile qualifier
         has_volatile = true;
         break;
-      // left parentheses, so increment n_lparen
+      // left parenthesis, so increment n_lparen
       case pdxcp_cdcl_token_type_lparen:
         n_lparen++;
         break;
