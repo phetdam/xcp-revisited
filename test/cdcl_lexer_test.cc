@@ -352,12 +352,15 @@ INSTANTIATE_TEST_SUITE_P(
       }
     },
     LexerParamTestInput{
-      "float arr[1500];",
+      "float mat[500][700];",
       {
         create_cdcl_token(pdxcp_cdcl_token_type_t_float, ""),
-        create_cdcl_token(pdxcp_cdcl_token_type_iden, "arr"),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "mat"),
         create_cdcl_token(pdxcp_cdcl_token_type_langle, ""),
-        create_cdcl_token(pdxcp_cdcl_token_type_num, "1500"),
+        create_cdcl_token(pdxcp_cdcl_token_type_num, "500"),
+        create_cdcl_token(pdxcp_cdcl_token_type_rangle, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_langle, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_num, "700"),
         create_cdcl_token(pdxcp_cdcl_token_type_rangle, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
       }
@@ -395,15 +398,21 @@ INSTANTIATE_TEST_SUITE_P(
       }
     },
     LexerParamTestInput{
-      "const volatile void *bigarr[4096];",
+      "const volatile void *ptrcube[40][40][40];",
       {
         create_cdcl_token(pdxcp_cdcl_token_type_q_const, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_q_volatile, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_t_void, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
-        create_cdcl_token(pdxcp_cdcl_token_type_iden, "bigarr"),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "ptrcube"),
         create_cdcl_token(pdxcp_cdcl_token_type_langle, ""),
-        create_cdcl_token(pdxcp_cdcl_token_type_num, "4096"),
+        create_cdcl_token(pdxcp_cdcl_token_type_num, "40"),
+        create_cdcl_token(pdxcp_cdcl_token_type_rangle, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_langle, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_num, "40"),
+        create_cdcl_token(pdxcp_cdcl_token_type_rangle, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_langle, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_num, "40"),
         create_cdcl_token(pdxcp_cdcl_token_type_rangle, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
       }
