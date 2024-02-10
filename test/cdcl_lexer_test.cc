@@ -337,6 +337,30 @@ INSTANTIATE_TEST_SUITE_P(
         create_cdcl_token(pdxcp_cdcl_token_type_iden, "b"),
         create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
       }
+    },
+    LexerParamTestInput{
+      "double **ptr_array[100];",
+      {
+        create_cdcl_token(pdxcp_cdcl_token_type_t_double, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "ptr_array"),
+        create_cdcl_token(pdxcp_cdcl_token_type_langle, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_num, "100"),
+        create_cdcl_token(pdxcp_cdcl_token_type_rangle, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
+      }
+    },
+    LexerParamTestInput{
+      "float arr[1500];",
+      {
+        create_cdcl_token(pdxcp_cdcl_token_type_t_float, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "arr"),
+        create_cdcl_token(pdxcp_cdcl_token_type_langle, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_num, "1500"),
+        create_cdcl_token(pdxcp_cdcl_token_type_rangle, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
+      }
     }
   )
 );
@@ -367,6 +391,20 @@ INSTANTIATE_TEST_SUITE_P(
         create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_q_const, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_iden, "y"),
+        create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
+      }
+    },
+    LexerParamTestInput{
+      "const volatile void *bigarr[4096];",
+      {
+        create_cdcl_token(pdxcp_cdcl_token_type_q_const, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_q_volatile, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_t_void, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_star, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_iden, "bigarr"),
+        create_cdcl_token(pdxcp_cdcl_token_type_langle, ""),
+        create_cdcl_token(pdxcp_cdcl_token_type_num, "4096"),
+        create_cdcl_token(pdxcp_cdcl_token_type_rangle, ""),
         create_cdcl_token(pdxcp_cdcl_token_type_semicolon, "")
       }
     }

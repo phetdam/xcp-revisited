@@ -41,13 +41,14 @@ pdxcp_cdcl_token_type_string(pdxcp_cdcl_token_type type)
     PDXCP_STRING_CASE(pdxcp_cdcl_token_type_q_volatile);
     PDXCP_STRING_CASE(pdxcp_cdcl_token_type_q_signed);
     PDXCP_STRING_CASE(pdxcp_cdcl_token_type_q_unsigned);
-    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_iden);
     PDXCP_STRING_CASE(pdxcp_cdcl_token_type_t_void);
     PDXCP_STRING_CASE(pdxcp_cdcl_token_type_t_char);
     PDXCP_STRING_CASE(pdxcp_cdcl_token_type_t_int);
     PDXCP_STRING_CASE(pdxcp_cdcl_token_type_t_long);
     PDXCP_STRING_CASE(pdxcp_cdcl_token_type_t_float);
     PDXCP_STRING_CASE(pdxcp_cdcl_token_type_t_double);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_num);
+    PDXCP_STRING_CASE(pdxcp_cdcl_token_type_iden);
     default:
       return "(unknown)";
   }
@@ -139,6 +140,65 @@ pdxcp_cdcl_get_iden_text(FILE *in, pdxcp_cdcl_token *token)
     return pdxcp_cdcl_lexer_status_bad_token;
   }
   // otherwise we are ok
+  return pdxcp_cdcl_lexer_status_ok;
+}
+
+/**
+ * Get an integral number into the text field of a token.
+ *
+ * @param in Input stream to read from
+ * @param token Token to write identifier text to
+ * @returns `pdxcp_cdcl_lexer_status` status code. If
+ *  `pdxcp_cdcl_lexer_status_bad_token` is returned, the token type is
+ *  `pdxcp_cdcl_token_type_error` and token text has error details
+ */
+static pdxcp_cdcl_lexer_status
+pdxcp_cdcl_get_num_text(FILE *in, pdxcp_cdcl_token *token)
+{
+  // pointer to where next read character should be written
+  char *text_out = token->text;
+  // skip whitespace. return on EOF, otherwise first non-space character
+  int c;
+  while (isspace(c = fgetc(in)));
+  if (c == EOF)
+    return pdxcp_cdcl_lexer_status_fgetc_eof;
+  // not a number. put char back so we don't lose it
+  if (!isdigit(c)) {
+    if (ungetc(c, in) == EOF)
+      return pdxcp_cdcl_lexer_status_ungetc_fail;
+    return pdxcp_cdcl_lexer_status_not_num;
+  }
+  // write c into token text and advance text_out
+  *text_out++ = (char) c;
+  // if c is '0', then we can also read 'x' or 'X' for hex
+  if (c == '0' && (c = fgetc(in)) != 'x' && c != 'X') {
+    // might be EOF
+    if (c == EOF)
+      return pdxcp_cdcl_lexer_status_fgetc_eof;
+    // otherwise, malformed number. this is reported as a parsing error as we
+    // cannot portably guarantee ungetc() of more than 1 char
+    token->type = pdxcp_cdcl_token_type_error;
+    strcpy(token->text, "Malformed token read when attempting to parse number");
+    return pdxcp_cdcl_lexer_status_bad_token;
+  }
+  // read rest of [0-9] string text
+  while (
+    isdigit(c = fgetc(in)) && c != EOF &&
+    text_out < token->text + PDXCP_CDCL_MAX_TOKEN_LEN
+  )
+    *text_out++ = (char) c;
+  // write null terminator. if EOF, this is the last number we can read
+  *text_out = '\0';
+  // put last char read back in stream if not EOF
+  if (c != EOF && ungetc(c, in) == EOF)
+    return pdxcp_cdcl_lexer_status_ungetc_fail;
+  // if c is a valid digit, token is too large, so overwrite front with message
+  if (isdigit(c)) {
+    token->type = pdxcp_cdcl_token_type_error;
+    memcpy(token->text, long_token_error, sizeof long_token_error - 1);
+    return pdxcp_cdcl_lexer_status_bad_token;
+  }
+  // success
   return pdxcp_cdcl_lexer_status_ok;
 }
 
@@ -310,6 +370,30 @@ pdxcp_cdcl_skip_rem_c_comment(FILE *in)
   return pdxcp_cdcl_lexer_status_ok;
 }
 
+/**
+ * Get a token from an integral number from the specified input stream.
+ *
+ * This routine assumes that the next token to be read is an integral number
+ * and will return a status code indicating whether lexing succeeded or not.
+ *
+ * @param in Input stream to read from
+ * @param token Token to write to
+ * @returns `pdxcp_cdcl_lexer_status` status code. If
+ *  `pdxcp_cdcl_lexer_status_bad_token` is returned, the token type is
+ *  `pdxcp_cdcl_token_type_error` and token text has error details
+ */
+static pdxcp_cdcl_lexer_status
+pdxcp_cdcl_get_num_token(FILE *in, pdxcp_cdcl_token *token)
+{
+  // read numeric text into the token
+  pdxcp_cdcl_lexer_status status;
+  if (!PDXCP_CDCL_LEXER_OK(status = pdxcp_cdcl_get_num_text(in, token)))
+    return status;
+  // set type and return
+  token->type = pdxcp_cdcl_token_type_num;
+  return pdxcp_cdcl_lexer_status_ok;
+}
+
 pdxcp_cdcl_lexer_status
 pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
 {
@@ -363,6 +447,14 @@ pdxcp_cdcl_get_token(FILE *in, pdxcp_cdcl_token *token)
       return pdxcp_cdcl_lexer_status_ungetc_fail;
     // read token from identifier string
     return pdxcp_cdcl_get_iden_token(in, token);
+  }
+  // if digit, parse rest of digit (identifier cannot start with digit)
+  if (isdigit(c)) {
+    // put last char read back into stream
+    if (ungetc(c, in) == EOF)
+      return pdxcp_cdcl_lexer_status_ungetc_fail;
+    // read token from numeric string
+    return pdxcp_cdcl_get_num_token(in, token);
   }
   // else single-character token. the token text is '\0' in this case
   return pdxcp_cdcl_set_char_token(token, (char) c);

@@ -39,6 +39,7 @@ typedef enum {
   pdxcp_cdcl_token_type_t_long,      // signed long
   pdxcp_cdcl_token_type_t_float,     // float
   pdxcp_cdcl_token_type_t_double,    // double
+  pdxcp_cdcl_token_type_num,         // <text> (number)
   pdxcp_cdcl_token_type_iden,        // <text> (identifier)
   pdxcp_cdcl_token_type_max          // number of valid token types
 } pdxcp_cdcl_token_type;
@@ -62,6 +63,7 @@ typedef enum {
   pdxcp_cdcl_lexer_status_token_null,   // pdxcpl_cdcl_token * is NULL
   pdxcp_cdcl_lexer_status_ungetc_fail,  // couldn't ungetc last char
   pdxcp_cdcl_lexer_status_fgetc_eof,    // fgetc retrieved EOF
+  pdxcp_cdcl_lexer_status_not_num,      // next token not a number
   pdxcp_cdcl_lexer_status_not_iden,     // next token not an identifier
   pdxcp_cdcl_lexer_status_bad_token     // bad token, token text has details
 } pdxcp_cdcl_lexer_status;
