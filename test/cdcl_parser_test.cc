@@ -145,7 +145,12 @@ TEST_P(ParserErrorParamTest, ErrorTest)
   EXPECT_EQ(GetParam().status, errinfo.parser.status) << "expected: " <<
     pdxcp_cdcl_parser_status_string(GetParam().status) << ", actual: " <<
     pdxcp_cdcl_parser_status_string(errinfo.parser.status);
-  EXPECT_EQ(GetParam().message, errinfo.parser.text);
+  // parser error text meaningful only if pdxcp_cdcl_parser_status_parse_err.
+  // we use braces because GTEST_AMBIGUOUS_ELSE_BLOCKER_ doesn't actually work
+  // as the Google Test writers may have expected with GCC 11.3
+  if (status == pdxcp_cdcl_parser_status_parse_err) {
+    EXPECT_EQ(GetParam().message, errinfo.parser.text);
+  }
 #else
   GTEST_SKIP();
 #endif  // !defined(PDXCP_HAS_FMEMOPEN)
