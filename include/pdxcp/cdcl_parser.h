@@ -75,8 +75,11 @@ pdxcp_cdcl_token_stack_init(pdxcp_cdcl_token_stack *stack) PDXCP_NOEXCEPT;
  * @param token Pointer to a valid `pdxcp_cdcl_token`
  */
 #define PDXCP_CDCL_TOKEN_STACK_PUSH(stack, token) \
-  memcpy(PDXCP_CDCL_TOKEN_STACK_HEAD(stack) + 1, token, sizeof *(token)); \
-  (stack)->n_tokens++
+  do { \
+    memcpy(PDXCP_CDCL_TOKEN_STACK_HEAD(stack) + 1, token, sizeof *(token)); \
+    (stack)->n_tokens++; \
+  } \
+  while (false)
 
 /**
  * Macro for popping a token off of the stack.
