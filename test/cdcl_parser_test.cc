@@ -180,6 +180,11 @@ INSTANTIATE_TEST_SUITE_P(
       pdxcp_cdcl_parser_status_parse_err,
       "Unexpected token type pdxcp_cdcl_token_type_langle with text \"\" when "
       "parsing identifier type"
+    },
+    ParserErrorParamTestInput{
+      "const double ((**(*x));",
+      pdxcp_cdcl_parser_status_parse_err,
+      "Mismatched parentheses when parsing pointers, read 3 '(' 2 ')'"
     }
   )
 );

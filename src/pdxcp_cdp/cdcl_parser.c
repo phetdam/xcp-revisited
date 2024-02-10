@@ -188,21 +188,28 @@ stream_parse_to_iden(
 /**
  * Pop tokens off of the token stack to handle pointers in the declaration.
  *
- * Also handles cv-qualifiers for the tokens.
+ * Also handles cv-qualifiers for the tokens and balances any left parentheses
+ * on the token stack against the number of right parentheses already read.
  *
  * @param stack Token stack to pop from
  * @param out Output stream
+ * @param n_rparen Number of right parentheses already read as part of decl
  * @param errinfo Error info structure, can be `NULL`
  * @returns `pdxcp_cdcl_parser_status` parser status, where if there is an
  *  error, the value written to `errinfo` is returned instead of the original
  */
 static pdxcp_cdcl_parser_status
 stream_parse_ptrs(
-  pdxcp_cdcl_token_stack *stack, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
+  pdxcp_cdcl_token_stack *stack,
+  FILE *out,
+  unsigned int n_rparen,
+  pdxcp_cdcl_parser_errinfo *errinfo)
 {
   // indicators for cv-qualifiers
   bool has_const = false;
   bool has_volatile = false;
+  // number of left parentheses popped off stack
+  unsigned int n_lparen = 0;
   // pop tokens off stack
   while (!PDXCP_CDCL_TOKEN_STACK_EMPTY(stack)) {
     // switch on the token type
@@ -226,6 +233,10 @@ stream_parse_ptrs(
         }
         // otherwise note volatile qualifier
         has_volatile = true;
+        break;
+      // left parentheses, so increment n_lparen
+      case pdxcp_cdcl_token_type_lparen:
+        n_lparen++;
         break;
       // pointer
       case pdxcp_cdcl_token_type_star:
@@ -254,6 +265,20 @@ stream_parse_ptrs(
           );
           errmsg[sizeof errmsg - 1] = '\0';  // guarantee null termination
           // write result into error info
+          pdxcp_cdcl_write_parse_err(errinfo, errmsg);
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        // if n_lparen != n_rparen, mismatched parentheses
+        if (n_lparen != n_rparen) {
+          char errmsg[PDXCP_CDCL_PARSER_ERROR_TEXT_LEN + 1];
+          snprintf(
+            errmsg,
+            sizeof errmsg - 1,
+            "Mismatched parentheses when parsing pointers, read %u '(' %u ')'",
+            n_lparen,
+            n_rparen
+          );
+          errmsg[sizeof errmsg - 1] = '\0';  // guarantee null termination
           pdxcp_cdcl_write_parse_err(errinfo, errmsg);
           return pdxcp_cdcl_parser_status_parse_err;
         }
@@ -521,11 +546,33 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
     pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status, NULL);
     goto parse_finalize;
   }
+  // number of ')' read so far. this is passed to stream_parse_ptrs
+  unsigned int n_rparen = 0;
+  // handle parentheses around pointers if we see ')'
+  if (token.type == pdxcp_cdcl_token_type_rparen) {
+    // read more tokens until next token is not ')'
+    do {
+      // pre-increment number of ')' read as next token may not be ')' and we
+      // already read a ')' to even be in this block
+      n_rparen++;
+      if (!PDXCP_CDCL_LEXER_OK(lexer_status = pdxcp_cdcl_get_token(in, &token))) {
+        parser_status = pdxcp_cdcl_parser_status_lexer_err;
+        pdxcp_cdcl_write_errinfo(errinfo, lexer_status, &token, parser_status, NULL);
+        goto parse_finalize;
+      }
+    }
+    while (token.type == pdxcp_cdcl_token_type_rparen);
+  }
   // TODO: handle array, function, etc.
+  // if read left bracket, consume array components
+  // if (token.type == pdxcp_cdcl_token_type_langle) {
+    // consume array specifiers, i.e. by parsing
+  // }
   // if read semicolon, end of declaration
   if (token.type == pdxcp_cdcl_token_type_semicolon) {
-    // consume pointer tokens from stack. parser_status written on error
-    parser_status = stream_parse_ptrs(&stack, out, errinfo);
+    // consume pointer tokens from stack + also balance any '(' that have been
+    // read as part of the declarastion. parser_status written on error
+    parser_status = stream_parse_ptrs(&stack, out, n_rparen, errinfo);
     if (!PDXCP_CDCL_PARSER_OK(parser_status))
       goto parse_finalize;
     // parse cv-qualified signed/unsigned qualified type
