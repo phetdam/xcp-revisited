@@ -63,6 +63,7 @@ pdxcp_cdcl_lexer_status_string(pdxcp_cdcl_lexer_status status)
     PDXCP_STRING_CASE(pdxcp_cdcl_lexer_status_token_null);
     PDXCP_STRING_CASE(pdxcp_cdcl_lexer_status_ungetc_fail);
     PDXCP_STRING_CASE(pdxcp_cdcl_lexer_status_fgetc_eof);
+    PDXCP_STRING_CASE(pdxcp_cdcl_lexer_status_not_num);
     PDXCP_STRING_CASE(pdxcp_cdcl_lexer_status_not_iden);
     PDXCP_STRING_CASE(pdxcp_cdcl_lexer_status_bad_token);
     default:
