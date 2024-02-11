@@ -718,6 +718,10 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
     goto parse_finalize;
   }
   // number of ')' read so far. this is passed to stream_parse_ptrs
+  // TODO: current structure of pdxcp_cdcl_stream_parse cannot handle something
+  // like int (*x[10])(), even if function handling is implemented, as we need
+  // a recursive call to handle array -> then grouping with parentheses.
+  // stream_parse_arrays also needs to be updated to not parse up to semicolon.
   unsigned int n_rparen = 0;
   // handle parentheses around pointers if we see ')'
   if (token.type == pdxcp_cdcl_token_type_rparen) {
