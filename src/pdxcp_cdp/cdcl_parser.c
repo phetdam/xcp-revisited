@@ -7,8 +7,10 @@
 
 #include "pdxcp/cdcl_parser.h"
 
+#include <limits.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "pdxcp/cdcl_common.h"
@@ -128,6 +130,32 @@ pdxcp_cdcl_write_errinfo(
 }
 
 /**
+ * Write lexer error info when there is a tokenization error.
+ *
+ * The parser error status is `pdxcp_cdcl_parser_status_lexer_err`.
+ *
+ * @param errinfo Error info structure. If `NULL`, nothing is done
+ * @param lexer_status Lexer error status
+ * @param cur_token Most recent token read by lexer. If the lexer status is
+ *  `pdxcp_cdcl_lexer_status_bad_token`, its text will contain the error text.
+ *  Ignored unless `lexer_status` is `pdxcp_cdcl_lexer_status_bad_token`.
+ */
+static void
+pdxcp_cdcl_write_lexer_err(
+  pdxcp_cdcl_parser_errinfo *errinfo,
+  pdxcp_cdcl_lexer_status lexer_status,
+  const pdxcp_cdcl_token *cur_token)
+{
+  return pdxcp_cdcl_write_errinfo(
+    errinfo,
+    lexer_status,
+    cur_token,
+    pdxcp_cdcl_parser_status_lexer_err,
+    NULL
+  );
+}
+
+/**
  * Write parser error info when there is a parsing error.
  *
  * The parser error status is `pdxcp_cdcl_parser_status_parse_err`.
@@ -195,8 +223,7 @@ stream_parse_to_iden(
  * @param out Output stream
  * @param n_rparen Number of right parentheses already read as part of decl
  * @param errinfo Error info structure, can be `NULL`
- * @returns `pdxcp_cdcl_parser_status` parser status, where if there is an
- *  error, the value written to `errinfo` is returned instead of the original
+ * @returns `pdxcp_cdcl_parser_status` parser status
  */
 static pdxcp_cdcl_parser_status
 stream_parse_ptrs(
@@ -299,6 +326,155 @@ stream_parse_ptrs(
 }
 
 /**
+ * Parse array specifiers, reading tokens from input stream until semicolon.
+ *
+ * @note A multidimensional array declaration is allowed to omit the size for
+ *  the first dimension, but only if declared as a function parameter. This
+ *  function is slightly noncompliant by allowing a non-parameter array
+ *  declaration to omit the size for the first dimension.
+ *
+ * A precondition for calling this function is that a left bracket token has
+ * already been read, with `cur_token` being the pointer to that token.
+ *
+ * @param in Input stream
+ * @param out Output stream
+ * @param cur_token Last token read by lexer and modified as this function
+ *  runs. On successful completion, the token type is semicolon.
+ * @param errinfo Error info structure, can be `NULL`
+ * @returns `pdxcp_cdcl_parser_status` parser status
+ */
+static pdxcp_cdcl_parser_status
+stream_parse_arrays(
+  FILE *in,
+  FILE *out,
+  pdxcp_cdcl_token *cur_token,
+  pdxcp_cdcl_parser_errinfo *errinfo)
+{
+  // internal error if cur_token is not left bracket
+  if (cur_token->type != pdxcp_cdcl_token_type_langle) {
+    pdxcp_cdcl_write_parse_err(
+      errinfo,
+      "Internal parser error: attempted to parse array without langle token"
+    );
+    return pdxcp_cdcl_parser_status_parse_err;
+  }
+  // indicate if unmatched left angle bracket was read
+  bool unmatched_langle = true;
+  // array size. since it cannot be zero, we use zero to indicate no size
+  size_t array_size = 0;
+  // number of array specifiers read. only first dimension can have no size,
+  // but this is actually only true if this decl is a function parameter
+  unsigned int n_specs = 0;
+  // consume tokens from input stream up to semicolon
+  do {
+    pdxcp_cdcl_lexer_status lexer_status;
+    if (!PDXCP_CDCL_LEXER_OK(lexer_status = pdxcp_cdcl_get_token(in, cur_token))) {
+      pdxcp_cdcl_write_lexer_err(errinfo, lexer_status, cur_token);
+      return pdxcp_cdcl_parser_status_lexer_err;
+    }
+    // switch on token type
+    switch (cur_token->type) {
+      // left bracket
+      case pdxcp_cdcl_token_type_langle:
+        // if already have a left one, mismatch
+        if (unmatched_langle) {
+          pdxcp_cdcl_write_parse_err(
+            errinfo, "Array specifier contains duplicate left angle bracket"
+          );
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        // otherwise, unmatched
+        unmatched_langle = true;
+        break;
+      // integral value giving array size
+      case pdxcp_cdcl_token_type_num: {
+        // if no unmatched left bracket, error
+        if (!unmatched_langle) {
+          pdxcp_cdcl_write_parse_err(
+            errinfo,
+            "Array specifier size read without matching left angle bracket"
+          );
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        // convert text to array size (handles hex and octal). note that since
+        // we know it will be a number, 0 is not considered an error return
+        long value = strtol(cur_token->text, NULL, 0);
+        // out of range errors
+        if (value == LONG_MIN || value == LONG_MAX) {
+          pdxcp_cdcl_write_parse_err(errinfo, "Array specifier size out of range");
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        // size cannot be zero or negative
+        if (value == 0) {
+          pdxcp_cdcl_write_parse_err(errinfo, "Array specifier size is 0");
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        if (value < 0) {
+          pdxcp_cdcl_write_parse_err(errinfo, "Array specifier size is < 0");
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        // valid array size
+        array_size = (size_t) value;
+        break;
+      }
+      // right bracket
+      case pdxcp_cdcl_token_type_rangle:
+        // if no unmatched left bracket, mismatch
+        if (!unmatched_langle) {
+          pdxcp_cdcl_write_parse_err(
+            errinfo, "Array specifier missing matching left angle bracket"
+          );
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        // if no array size and not the first array specifier, error
+        // note: mildly nonconforming since actual compilers only allow this
+        // if a multidimensional array is declared as a function parameter
+        if (!array_size && n_specs) {
+          pdxcp_cdcl_write_parse_err(
+            errinfo,
+            "Multidimensional array specifier must have bounds for all "
+            "dimensions except for the first"
+          );
+          return pdxcp_cdcl_parser_status_parse_err;
+        }
+        // write array specifier (may or may not have size)
+        if (fprintf(out, " array[") < 0)
+          return pdxcp_cdcl_parser_status_out_err;
+        if (array_size && fprintf(out, "%zu", array_size) < 0)
+          return pdxcp_cdcl_parser_status_out_err;
+        if (fprintf(out, "] of") < 0)
+          return pdxcp_cdcl_parser_status_out_err;
+        // matched. reset, and increment number of array specifiers read
+        unmatched_langle = false;
+        array_size = 0;
+        n_specs++;
+        break;
+      // if semicolon, we will break from the loop at end of block
+      case pdxcp_cdcl_token_type_semicolon:
+        break;
+      // other tokens. these are errors (e.g. can't have function return array)
+      default: {
+        char errmsg[PDXCP_CDCL_PARSER_ERROR_TEXT_LEN + 1];
+        snprintf(
+          errmsg,
+          sizeof errmsg - 1,
+          "Unexpected token type %s with text \"%s\" when parsing array specifiers",
+          // TODO: nicer way to indicate the token + text?
+          pdxcp_cdcl_token_type_string(cur_token->type),
+          cur_token->text
+        );
+        errmsg[sizeof errmsg - 1] = '\0';  // guarantee null termination
+        pdxcp_cdcl_write_parse_err(errinfo, errmsg);
+        return pdxcp_cdcl_parser_status_parse_err;
+      }
+    }
+  }
+  while (cur_token->type != pdxcp_cdcl_token_type_semicolon);
+  // done with array specifier
+  return pdxcp_cdcl_parser_status_ok;
+}
+
+/**
  * Pop tokens off of the token stack to handle the identifier's qualified type.
  *
  * Handles cv-qualifiers and sign qualifiers appropriately.
@@ -306,8 +482,7 @@ stream_parse_ptrs(
  * @param stack Token stack to pop from
  * @param out Output stream
  * @param errinfo Error info structure, can be `NULL`
- * @returns `pdxcp_cdcl_parser_status` parser status, where if there is an
- *  error, the value written to `errinfo` is returned instead of the original
+ * @returns `pdxcp_cdcl_parser_status` parser status
  */
 static pdxcp_cdcl_parser_status
 stream_parse_type(
@@ -373,6 +548,9 @@ stream_parse_type(
           );
           return pdxcp_cdcl_parser_status_parse_err;
         }
+        // otherwise note unsigned qualifier
+        is_unsigned = true;
+        break;
       // fill type token when a type is specified
       case pdxcp_cdcl_token_type_struct:
       case pdxcp_cdcl_token_type_enum:
@@ -563,11 +741,14 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
     }
     while (token.type == pdxcp_cdcl_token_type_rparen);
   }
-  // TODO: handle array, function, etc.
+  // TODO: handle function declarations
   // if read left bracket, consume array components
-  // if (token.type == pdxcp_cdcl_token_type_langle) {
-    // consume array specifiers, i.e. by parsing
-  // }
+  if (token.type == pdxcp_cdcl_token_type_langle) {
+    // consume array specifiers, reading more tokens from input
+    parser_status = stream_parse_arrays(in, out, &token, errinfo);
+    if (!PDXCP_CDCL_PARSER_OK(parser_status))
+      goto parse_finalize;
+  }
   // if read semicolon, end of declaration
   if (token.type == pdxcp_cdcl_token_type_semicolon) {
     // consume pointer tokens from stack + also balance any '(' that have been

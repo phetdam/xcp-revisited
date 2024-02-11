@@ -96,6 +96,31 @@ INSTANTIATE_TEST_SUITE_P(
   )
 );
 
+// declarations with extra parentheses
+INSTANTIATE_TEST_SUITE_P(
+  ExtraParenDecls,
+  ParserParamTest,
+  ::testing::Values(
+    // surprisingly, these are accepted by actual compilers
+    ParserParamTestInput{"int (**(*b));"},
+    ParserParamTestInput{"const volatile double (**c);"}
+  )
+);
+
+// declarations with array specifiers
+INSTANTIATE_TEST_SUITE_P(
+  ArrayDecls,
+  ParserParamTest,
+  ::testing::Values(
+    ParserParamTestInput{"double *x[100];"},
+    ParserParamTestInput{"unsigned int *arr[10][100];"},
+    // technically not accepted by actual compilers, as first dimension size
+    // can only be missing if declared as a function parameter
+    ParserParamTestInput{"const unsigned char **b[][50];"},
+    ParserParamTestInput{"struct my_struct *const *b[100];"}
+  )
+);
+
 /**
  * Struct holding the input for a `ParserErrorParamTest`.
  *
@@ -145,6 +170,18 @@ TEST_P(ParserErrorParamTest, ErrorTest)
   EXPECT_EQ(GetParam().status, errinfo.parser.status) << "expected: " <<
     pdxcp_cdcl_parser_status_string(GetParam().status) << ", actual: " <<
     pdxcp_cdcl_parser_status_string(errinfo.parser.status);
+  // check error info based on the status
+  switch (status) {
+    // TODO: consider handling pdxcp_cdcl_parser_status_lexer_err so we can
+    // check the lexer error status and possible message if any
+    // parser error
+    case pdxcp_cdcl_parser_status_parse_err:
+      EXPECT_EQ(GetParam().message, errinfo.parser.text);
+      break;
+    // no-op
+    default:
+      break;
+  }
   // parser error text meaningful only if pdxcp_cdcl_parser_status_parse_err.
   // we use braces because GTEST_AMBIGUOUS_ELSE_BLOCKER_ doesn't actually work
   // with GCC 11.3 as the Google Test writers may have expected
@@ -162,6 +199,7 @@ INSTANTIATE_TEST_SUITE_P(
   ParserErrorParamTest,
   ::testing::Values(
     ParserErrorParamTestInput{"int **;", pdxcp_cdcl_parser_status_lexer_err, ""},
+    ParserErrorParamTestInput{"int a", pdxcp_cdcl_parser_status_lexer_err, ""},
     ParserErrorParamTestInput{
       "*y;",
       pdxcp_cdcl_parser_status_parse_err,
@@ -185,11 +223,64 @@ INSTANTIATE_TEST_SUITE_P(
       pdxcp_cdcl_parser_status_parse_err,
       "Unexpected token type pdxcp_cdcl_token_type_langle with text \"\" when "
       "parsing identifier type"
-    },
+    }
+  )
+);
+
+// declarations with mismatched parentheses
+INSTANTIATE_TEST_SUITE_P(
+  ParenDecls,
+  ParserErrorParamTest,
+  ::testing::Values(
     ParserErrorParamTestInput{
       "const double ((**(*x));",
       pdxcp_cdcl_parser_status_parse_err,
       "Mismatched parentheses when parsing pointers, read 3 '(' 2 ')'"
+    },
+    ParserErrorParamTestInput{
+      "const volatile int ((**(*x)))));",
+      pdxcp_cdcl_parser_status_parse_err,
+      "Mismatched parentheses when parsing pointers, read 3 '(' 5 ')'"
+    }
+  )
+);
+
+// invalid array declarations
+INSTANTIATE_TEST_SUITE_P(
+  ArrayDecls,
+  ParserErrorParamTest,
+  ::testing::Values(
+    ParserErrorParamTestInput{
+      "volatile void *x[100[];",
+      pdxcp_cdcl_parser_status_parse_err,
+      "Array specifier contains duplicate left angle bracket"
+    },
+    ParserErrorParamTestInput{
+      "const double **y[]1000];",
+      pdxcp_cdcl_parser_status_parse_err,
+      "Array specifier size read without matching left angle bracket"
+    },
+    ParserErrorParamTestInput{
+      "unsigned int z[88]]];",
+      pdxcp_cdcl_parser_status_parse_err,
+      "Array specifier missing matching left angle bracket"
+    },
+    ParserErrorParamTestInput{
+      "double **a[100][];",
+      pdxcp_cdcl_parser_status_parse_err,
+      "Multidimensional array specifier must have bounds for all dimensions "
+      "except for the first"
+    },
+    ParserErrorParamTestInput{
+      "const double b[100](;",
+      pdxcp_cdcl_parser_status_parse_err,
+      "Unexpected token type pdxcp_cdcl_token_type_lparen with text \"\" when "
+      "parsing array specifiers"
+    },
+    ParserErrorParamTestInput{
+      "const double b[100][50]",
+      pdxcp_cdcl_parser_status_lexer_err,
+      ""
     }
   )
 );
