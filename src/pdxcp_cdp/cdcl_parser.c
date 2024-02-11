@@ -16,13 +16,6 @@
 #include "pdxcp/cdcl_common.h"
 #include "pdxcp/cdcl_lexer.h"
 
-void
-pdxcp_cdcl_token_stack_init(pdxcp_cdcl_token_stack *stack)
-{
-  if (stack)
-    stack->n_tokens = 0;
-}
-
 const char *
 pdxcp_cdcl_parser_status_string(pdxcp_cdcl_parser_status status)
 {
@@ -700,7 +693,7 @@ pdxcp_cdcl_stream_parse(FILE *in, FILE *out, pdxcp_cdcl_parser_errinfo *errinfo)
     return pdxcp_cdcl_parser_status_out_null;
   // allocate + initialize token stack
   pdxcp_cdcl_token_stack stack;
-  pdxcp_cdcl_token_stack_init(&stack);
+  PDXCP_CDCL_TOKEN_STACK_INIT(&stack);
   // statuses, current token, token holding identifier
   pdxcp_cdcl_lexer_status lexer_status;
   pdxcp_cdcl_parser_status parser_status;

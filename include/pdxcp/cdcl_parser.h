@@ -36,10 +36,9 @@ typedef struct {
 /**
  * Initialize a token stack by setting its size to zero.
  *
- * @param stack Token stack to initialize. If `NULL`, nothing is done
+ * @param stack Pointer to a valid `pdxcp_cdcl_token_stack`
  */
-void
-pdxcp_cdcl_token_stack_init(pdxcp_cdcl_token_stack *stack) PDXCP_NOEXCEPT;
+#define PDXCP_CDCL_TOKEN_STACK_INIT(stack) (stack)->n_tokens = 0
 
 /**
  * Macro for checking if the token stack is empty or not.
