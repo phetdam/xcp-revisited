@@ -103,7 +103,8 @@ INSTANTIATE_TEST_SUITE_P(
   ::testing::Values(
     // surprisingly, these are accepted by actual compilers
     ParserParamTestInput{"int (**(*b));"},
-    ParserParamTestInput{"const volatile double (**c);"}
+    ParserParamTestInput{"const volatile double (**c);"},
+    ParserParamTestInput{"volatile struct my_struct **((*(d)));"}  // legal
   )
 );
 
@@ -117,7 +118,9 @@ INSTANTIATE_TEST_SUITE_P(
     // technically not accepted by actual compilers, as first dimension size
     // can only be missing if declared as a function parameter
     ParserParamTestInput{"const unsigned char **b[][50];"},
-    ParserParamTestInput{"struct my_struct *const *b[100];"}
+    ParserParamTestInput{"struct my_struct *const *b[100];"},
+    // add extra parentheses since this is technically legal
+    ParserParamTestInput{"volatile enum new_enum (**const *c)[90];"}
   )
 );
 
