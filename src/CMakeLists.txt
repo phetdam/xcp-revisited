@@ -26,6 +26,8 @@ target_link_libraries(kbpoll PRIVATE pdxcp)
 # actually allocate any file descriptors and is just to demonstrate hash table
 # lookup. define FILE_HASH to 1 for a trivial hash that returns zero
 add_executable(filehash filehash.c)
+# zerobits: check that 0.0 and 0 have the same bits. true on most machines
+add_executable(zerobits zerobits.c)
 
 # segsize1: program to get segment sizes (1)
 add_executable(segsize1 segsize.c)
