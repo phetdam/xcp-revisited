@@ -22,6 +22,10 @@ add_executable(kbpoll kbpoll.c)
 target_compile_options(kbpoll PRIVATE -pthread)
 target_link_options(kbpoll PRIVATE -pthread)
 target_link_libraries(kbpoll PRIVATE pdxcp)
+# filehash: hash-table based file info struct lookup program. this does not
+# actually allocate any file descriptors and is just to demonstrate hash table
+# lookup. define FILE_HASH to 1 for a trivial hash that returns zero
+add_executable(filehash filehash.c)
 
 # segsize1: program to get segment sizes (1)
 add_executable(segsize1 segsize.c)
