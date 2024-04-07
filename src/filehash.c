@@ -213,13 +213,13 @@ find_filename(const char *s)
  * `FILE_HASH + 1` (too many) to just `FILE_HASH`. The final table cleanup loop
  * was using `FILE_HASH + 1` which is of course an overrun.
  *
- * @note This is the "obvious" implementation but fails with pointers or when
- *  used in C++ with objects that overload `operator[]`. See the answer at
- *  https://stackoverflow.com/a/4415646/14227825 for a better alternative.
+ * @note This is the "obvious" implementation but fails with pointers. Unlike
+ *  if using `a[0]` this should have no issues in C++ for objects that overload
+ *  `operator[]`. See https://stackoverflow.com/a/4415646/14227825 for details.
  *
  * @param a Fixed-size array
  */
-#define ARRAY_SIZE(a) sizeof (a) / sizeof 0[a]
+#define ARRAY_SIZE(a) sizeof (a) / sizeof *(a)
 
 int
 main(void)
