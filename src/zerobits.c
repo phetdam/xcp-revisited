@@ -21,7 +21,7 @@
 #elif ULLONG_MAX == 0xFFFFFFFFFFFFFFFF
 #define U64_LENSPEC "ll"
 #else
-#error "Neither unsigned long nor unsigned long long are 64 bits"
+#error "zerobits.c: neither unsigned long nor unsigned long long are 64 bits"
 #endif  // ULONG_MAX != (1 << 64) - 1 && ULLONG_MAX != (1 << 64) - 1
 
 int
