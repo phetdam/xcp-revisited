@@ -136,7 +136,7 @@ sigpoll_handler(int signum)
 }
 
 int
-main()
+main(void)
 {
   // sleep spec for nanosleep
   struct timespec spec = {.tv_sec = 1};

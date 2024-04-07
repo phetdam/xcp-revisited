@@ -16,7 +16,7 @@
 int sniff_data = 5;
 
 int
-main()
+main(void)
 {
   // first declared variable should be top of stack
   int sniff_stack;

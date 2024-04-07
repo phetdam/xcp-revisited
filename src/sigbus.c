@@ -31,7 +31,7 @@ sigbus_handler(int signum)
 #endif  // __MINGW32__
 
 int
-main()
+main(void)
 {
   // install SIGBUS signal handler. SIGBUS not produced on MinGW.
   // note: unaligned memory access may not result in SIGBUS on x86 machines in

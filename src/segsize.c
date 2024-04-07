@@ -44,7 +44,7 @@ static int bigarr[1000]
 #endif  // SEGSIZE_STEPS < 2
 
 int
-main()
+main(void)
 {
   // silence -Wunused-variable
 #if SEGSIZE_STEPS >= 2

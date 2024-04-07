@@ -206,7 +206,7 @@ find_filename(const char *s)
 }
 
 int
-main()
+main(void)
 {
   // arbitrary file paths
   const char *paths[] = {

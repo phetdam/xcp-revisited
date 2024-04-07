@@ -113,7 +113,8 @@ PDXCP_GNU_WARNING_POP();
   return EXIT_SUCCESS;
 }
 
-int main()
+int
+main(void)
 {
   // seed PRNG + run our "event loop"
   SRANDINT(time(NULL));

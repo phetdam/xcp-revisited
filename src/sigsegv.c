@@ -28,7 +28,7 @@ sigsegv_handler(int signum)
 }
 
 int
-main()
+main(void)
 {
   // install SIGSEGV signal handler
 #if defined(_WIN32)

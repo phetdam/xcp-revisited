@@ -159,7 +159,7 @@ handle_input_events(int fd, PDXCP_LKABLE(size_t) *counter)
 }
 
 int
-main()
+main(void)
 {
   int status;
   // worker payload with counter, loop stop indicator, and timespec struct
