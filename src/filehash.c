@@ -205,6 +205,22 @@ find_filename(const char *s)
   return f;
 }
 
+/**
+ * Return the number of elements in an array.
+ *
+ * This macro was added after catching a buffer overrun with AddressSanitizer
+ * since the number of elements in `file_hash_table` was changed from
+ * `FILE_HASH + 1` (too many) to just `FILE_HASH`. The final table cleanup loop
+ * was using `FILE_HASH + 1` which is of course an overrun.
+ *
+ * @note This is the "obvious" implementation but fails with pointers or when
+ *  used in C++ with objects that overload `operator[]`. See the answer at
+ *  https://stackoverflow.com/a/4415646/14227825 for a better alternative.
+ *
+ * @param a Fixed-size array
+ */
+#define ARRAY_SIZE(a) sizeof (a) / sizeof 0[a]
+
 int
 main(void)
 {
@@ -218,10 +234,10 @@ main(void)
     "/another/path/to/file"
   };
   // insert into hash table (no error checking done here)
-  for (size_t i = 0; i < sizeof paths / sizeof paths[0]; i++)
+  for (size_t i = 0; i < ARRAY_SIZE(paths); i++)
     (void) find_filename(paths[i]);
   // print all hash buckets in the file hash table
-  for (size_t i = 0; i < sizeof file_hash_table / sizeof file_hash_table[0]; i++) {
+  for (size_t i = 0; i < ARRAY_SIZE(file_hash_table); i++) {
     // note: width of index could be determined at runtime based on FILE_HASH
     printf("bucket %zu: ", i);
     file f = file_hash_table[i];
@@ -240,7 +256,7 @@ main(void)
     putchar('\n');
   }
   // clear file hash table completely
-  for (size_t i = 0; i < FILE_HASH + 1; i++) {
+  for (size_t i = 0; i < ARRAY_SIZE(file_hash_table); i++) {
     // if not NULL, not only do we destroy the file list, but also set to NULL
     if (file_hash_table[i]) {
       destroy_file_list(file_hash_table[i]);
