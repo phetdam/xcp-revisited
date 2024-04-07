@@ -39,14 +39,14 @@ main()
   // make stack grow by initializing a buffer
   char buf[BUFSIZ] = {'h', 'e', 'l', 'l', 'o'};
   // note that buf is same as &buf here since arrays decay to pointers
-  // TODO: addresses seem to be increasing... oops?
   printf("Approx. top of stack: 0x%p (+ char[%ld])\n", buf, sizeof buf);
-  // grow stack some more
+  // grow stack some more. note that at least for GCC longbuf is allocated at a
+  // lower address than buf which is a bit surprising
   unsigned long long longbuf[BUFSIZ * 2] = {8888};
   printf(
-    "Approx. top of stack: 0x%p (+ unsigned long long[%d])\n",
+    "Approx. top of stack: 0x%p (+ unsigned long long[%ld])\n",
     longbuf,
-    BUFSIZ * 2
+    sizeof longbuf / sizeof longbuf[0]
   );
   return EXIT_SUCCESS;
 }
