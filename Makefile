@@ -280,6 +280,7 @@ $(BUILDDIR)/sigsegv \
 $(BUILDDIR)/kbsig \
 $(BUILDDIR)/kbpoll \
 $(BUILDDIR)/filehash \
+$(BUILDDIR)/zerobits \
 segsizes
 	@echo "All targets built"
 
@@ -406,6 +407,14 @@ $(BUILDDIR)/kbpoll: $(KBPOLL_OBJS) $(BUILDDIR)/$(LIBFILE)
 FILEHASH_OBJS = $(BUILDDIR)/src/filehash.o
 -include $(FILEHASH_OBJS:%=%.d)
 $(BUILDDIR)/filehash: $(FILEHASH_OBJS)
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
+
+# zerobits: check that 0.0 and 0 have the same bits. true on most machines
+ZEROBITS_OBJS = $(BUILDDIR)/src/zerobits.o
+-include $(ZEROBITS_OBJS:%=%.d)
+$(BUILDDIR)/zerobits: $(ZEROBITS_OBJS)
 	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
 	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 	@echo "Built target $@"
