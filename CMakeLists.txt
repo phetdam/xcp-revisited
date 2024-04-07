@@ -85,6 +85,7 @@ endif()
 # eliminate per-configuration subdirs from being appended to build artifact
 # output dirs for multi-config generators, e.g. Visual Studio, while outputting
 # all the artifacts into the top-level build directory
+# TODO: consider allowing per-config subdirectories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}$<$<CONFIG:Debug>:>)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}$<$<CONFIG:Debug>:>)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}$<$<CONFIG:Debug>:>)
