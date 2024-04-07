@@ -44,13 +44,11 @@ target_compile_definitions(segsize4b PRIVATE SEGSIZE_STEPS=4 SEGSIZE_STEPS_4B)
 # segsize5d: program to get segment sizes (5, 4b compiled with debug flags)
 add_executable(segsize5d segsize.c)
 target_compile_definitions(segsize5d PRIVATE SEGSIZE_STEPS=5)
-set_target_properties(segsize5d PROPERTIES COMPILE_OPTIONS "-Wall;-g")
+target_compile_options(segsize5d PRIVATE -Wall -g -O0)
 # segsize5r: program to get segment sizes (5, 4b compiled with release flags)
 add_executable(segsize5r segsize.c)
 target_compile_definitions(segsize5r PRIVATE SEGSIZE_STEPS=5)
-set_target_properties(
-    segsize5r PROPERTIES COMPILE_OPTIONS "-Wall;-O3;-mtune=native"
-)
+target_compile_options(segsize5r PRIVATE -Wall -O3 -mtune=native)
 
 # convenience variable for all the segsize.c outputs
 set(
