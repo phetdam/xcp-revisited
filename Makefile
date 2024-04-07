@@ -279,6 +279,7 @@ $(BUILDDIR)/sigbus \
 $(BUILDDIR)/sigsegv \
 $(BUILDDIR)/kbsig \
 $(BUILDDIR)/kbpoll \
+$(BUILDDIR)/filehash \
 segsizes
 	@echo "All targets built"
 
@@ -397,6 +398,16 @@ KBPOLL_LDFLAGS = $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS)
 $(BUILDDIR)/kbpoll: $(KBPOLL_OBJS) $(BUILDDIR)/$(LIBFILE)
 	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
 	@$(CC) $(KBPOLL_LDFLAGS) -o $@ $(KBPOLL_OBJS) -lpthread -l$(LIBNAME)
+	@echo "Built target $@"
+
+# filehash: hash-table based file info struct lookup program. this does not
+# actually allocate any file descriptors and is just to demonstrate hash table
+# lookup. define FILE_HASH to 1 for a trivial hash that returns zero
+FILEHASH_OBJS = $(BUILDDIR)/src/filehash.o
+-include $(FILEHASH_OBJS:%=%.d)
+$(BUILDDIR)/filehash: $(FILEHASH_OBJS)
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 	@echo "Built target $@"
 
 # final ls + size call for showing the segment sizes for segsize[N]. note that
