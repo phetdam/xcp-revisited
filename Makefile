@@ -282,6 +282,7 @@ $(BUILDDIR)/kbpoll \
 $(BUILDDIR)/filehash \
 $(BUILDDIR)/zerobits \
 $(BUILDDIR)/arrptrcmp \
+$(BUILDDIR)/mdarrinc \
 segsizes
 	@echo "All targets built"
 
@@ -486,6 +487,14 @@ $(BUILDDIR)/zerobits: $(ZEROBITS_OBJS)
 ARRPTRCMP_OBJS = $(BUILDDIR)/src/arrptrcmp.o
 -include $(ARRPTRCMP_OBJS:%=%.d)
 $(BUILDDIR)/arrptrcmp: $(ARRPTRCMP_OBJS)
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
+
+# mdarrinc: multidimensional array address increment
+MDARRINC_OBJS = $(BUILDDIR)/src/mdarrinc.o
+-include $(MDARRINC_OBJS:%=%.d)
+$(BUILDDIR)/mdarrinc: $(MDARRINC_OBJS)
 	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
 	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 	@echo "Built target $@"
