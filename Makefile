@@ -402,32 +402,6 @@ $(BUILDDIR)/kbpoll: $(KBPOLL_OBJS) $(BUILDDIR)/$(LIBFILE)
 	@$(CC) $(KBPOLL_LDFLAGS) -o $@ $(KBPOLL_OBJS) -lpthread -l$(LIBNAME)
 	@echo "Built target $@"
 
-# filehash: hash-table based file info struct lookup program. this does not
-# actually allocate any file descriptors and is just to demonstrate hash table
-# lookup. define FILE_HASH to 1 for a trivial hash that returns zero
-FILEHASH_OBJS = $(BUILDDIR)/src/filehash.o
--include $(FILEHASH_OBJS:%=%.d)
-$(BUILDDIR)/filehash: $(FILEHASH_OBJS)
-	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
-	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
-	@echo "Built target $@"
-
-# zerobits: check that 0.0 and 0 have the same bits. true on most machines
-ZEROBITS_OBJS = $(BUILDDIR)/src/zerobits.o
--include $(ZEROBITS_OBJS:%=%.d)
-$(BUILDDIR)/zerobits: $(ZEROBITS_OBJS)
-	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
-	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
-	@echo "Built target $@"
-
-# arrptrcmp: compare addressing semantics between arrays and pointers
-ARRPTRCMP_OBJS = $(BUILDDIR)/src/arrptrcmp.o
--include $(ARRPTRCMP_OBJS:%=%.d)
-$(BUILDDIR)/arrptrcmp: $(ARRPTRCMP_OBJS)
-	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
-	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
-	@echo "Built target $@"
-
 # final ls + size call for showing the segment sizes for segsize[N]. note that
 # on Windows (MinGW), we need to also add the .exe suffix. awk is used to
 # filter the ls output so that we only print file name + sizes. we also depend
@@ -489,3 +463,29 @@ $(BUILDDIR)/segsize5r: src/segsize.c
 	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
 	@$(CC) -Wall -O3 -mtune=native -DSEGSIZE_STEPS=5 -o $@ $<
 	@echo "Build target $@"
+
+# filehash: hash-table based file info struct lookup program. this does not
+# actually allocate any file descriptors and is just to demonstrate hash table
+# lookup. define FILE_HASH to 1 for a trivial hash that returns zero
+FILEHASH_OBJS = $(BUILDDIR)/src/filehash.o
+-include $(FILEHASH_OBJS:%=%.d)
+$(BUILDDIR)/filehash: $(FILEHASH_OBJS)
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
+
+# zerobits: check that 0.0 and 0 have the same bits. true on most machines
+ZEROBITS_OBJS = $(BUILDDIR)/src/zerobits.o
+-include $(ZEROBITS_OBJS:%=%.d)
+$(BUILDDIR)/zerobits: $(ZEROBITS_OBJS)
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
+
+# arrptrcmp: compare addressing semantics between arrays and pointers
+ARRPTRCMP_OBJS = $(BUILDDIR)/src/arrptrcmp.o
+-include $(ARRPTRCMP_OBJS:%=%.d)
+$(BUILDDIR)/arrptrcmp: $(ARRPTRCMP_OBJS)
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
