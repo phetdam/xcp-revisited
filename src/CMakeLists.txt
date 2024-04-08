@@ -91,3 +91,5 @@ add_executable(filehash filehash.c)
 add_executable(zerobits zerobits.c)
 # arrptrcmp: compare addressing semantics between arrays and pointers
 add_executable(arrptrcmp arrptrcmp.c)
+# mdarrinc: multidimensional array address increment
+add_executable(mdarrinc mdarrinc.c)
