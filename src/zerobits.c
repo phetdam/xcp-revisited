@@ -16,9 +16,9 @@
  * This is used to prevent `printf` complaining when `long` is mixed with
  * `long long` in terms of type formatting specification
  */
-#if ULONG_MAX == 0xFFFFFFFFFFFFFFFF
+#if ULONG_MAX == 0xffffffffffffffff
 #define U64_LENSPEC "l"
-#elif ULLONG_MAX == 0xFFFFFFFFFFFFFFFF
+#elif ULLONG_MAX == 0xffffffffffffffff
 #define U64_LENSPEC "ll"
 #else
 #error "zerobits.c: neither unsigned long nor unsigned long long are 64 bits"
