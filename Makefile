@@ -281,6 +281,7 @@ $(BUILDDIR)/kbsig \
 $(BUILDDIR)/kbpoll \
 $(BUILDDIR)/filehash \
 $(BUILDDIR)/zerobits \
+$(BUILDDIR)/arrptrcmp \
 segsizes
 	@echo "All targets built"
 
@@ -415,6 +416,14 @@ $(BUILDDIR)/filehash: $(FILEHASH_OBJS)
 ZEROBITS_OBJS = $(BUILDDIR)/src/zerobits.o
 -include $(ZEROBITS_OBJS:%=%.d)
 $(BUILDDIR)/zerobits: $(ZEROBITS_OBJS)
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
+
+# arrptrcmp: compare addressing semantics between arrays and pointers
+ARRPTRCMP_OBJS = $(BUILDDIR)/src/arrptrcmp.o
+-include $(ARRPTRCMP_OBJS:%=%.d)
+$(BUILDDIR)/arrptrcmp: $(ARRPTRCMP_OBJS)
 	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
 	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 	@echo "Built target $@"
