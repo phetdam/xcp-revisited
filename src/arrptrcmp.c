@@ -26,9 +26,9 @@ static const char ga[] = "abcdefghijklmnopqrstuvwxyz";
 static void
 arr_addrs(const char ca[])
 {
-  printf("&ca:    %p\n", &ca);     // address of const char * ca
-  printf("&ca[0]: %p\n", &ca[0]);  // value of ca
-  printf("&ca[1]: %p\n", &ca[1]);  // value of ca + 1
+  printf("&ca    = %p\n", &ca);     // address of const char * ca
+  printf("&ca[0] = %p\n", &ca[0]);  // value of ca
+  printf("&ca[1] = %p\n", &ca[1]);  // value of ca + 1
 }
 
 /**
@@ -43,18 +43,18 @@ arr_addrs(const char ca[])
 static void
 ptr_addrs(const char *pa)
 {
-  printf("&pa:    %p\n", &pa);     // address of const char * pa
-  printf("&pa[0]: %p\n", &pa[0]);  // value of pa
-  printf("&pa[1]: %p\n", &pa[1]);  // value of pa + 1
-  printf("++pa:   %p\n", ++pa);    // value of original pa + 1
+  printf("&pa    = %p\n", &pa);     // address of const char * pa
+  printf("&pa[0] = %p\n", &pa[0]);  // value of pa
+  printf("&pa[1] = %p\n", &pa[1]);  // value of pa + 1
+  printf("++pa   = %p\n", ++pa);    // value of original pa + 1
 }
 
 int
 main(void)
 {
-  printf("&ga:    %p\n", &ga);     // address to ga[0] (value of ga)
-  printf("&ga[0]: %p\n", &ga[0]);  // address to ga[0] (value of ga)
-  printf("&ga[1]: %p\n", &ga[1]);  // address to ga[1] (value of ga + 1)
+  printf("&ga    = %p\n", &ga);     // address to ga[0] (value of ga)
+  printf("&ga[0] = %p\n", &ga[0]);  // address to ga[0] (value of ga)
+  printf("&ga[1] = %p\n", &ga[1]);  // address to ga[1] (value of ga + 1)
   //
   // comparison to &ga, &ga[0], &ga[1]:
   //
