@@ -28,6 +28,8 @@ target_link_libraries(kbpoll PRIVATE pdxcp)
 add_executable(filehash filehash.c)
 # zerobits: check that 0.0 and 0 have the same bits. true on most machines
 add_executable(zerobits zerobits.c)
+# arrptrcmp: compare addressing semantics between arrays and pointers
+add_executable(arrptrcmp arrptrcmp.c)
 
 # segsize1: program to get segment sizes (1)
 add_executable(segsize1 segsize.c)
