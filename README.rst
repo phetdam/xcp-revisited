@@ -24,26 +24,26 @@ Make
 
 For Make_, one can build a debugging, i.e. no optimization build, with
 
-.. code:: shell
+.. code:: bash
 
    make
 
 To build with optimization, one can specify ``CONFIG=Release``, e.g.
 
-.. code:: shell
+.. code:: bash
 
    make CONFIG=Release
 
 To enable AddressSanitizer_ and specify a different compiler, in this case
 Clang_, one can use
 
-.. code:: shell
+.. code:: bash
 
    make CC=clang ENABLE_ASAN=1
 
 To build the project's libraries as static instead of shared, one can use
 
-.. code:: shell
+.. code:: bash
 
    make BUILD_SHARED=
 
@@ -54,7 +54,7 @@ locatable via pkg-config_, unit tests will also be built. If one of these
 components is missing, no tests will be built. One can also disable test
 building with
 
-.. code:: shell
+.. code:: bash
 
    make BUILD_TESTS=
 
@@ -75,25 +75,25 @@ CMake
 
 Using the provided ``build.sh`` script, one can build a debugging build with
 
-.. code:: shell
+.. code:: bash
 
    ./build.sh
 
 To build a release build, use
 
-.. code:: shell
+.. code:: bash
 
    ./build.sh -c Release
 
 To enable AddressSanitizer and specify a different C compiler, one can use
 
-.. code:: shell
+.. code:: bash
 
    ./build.sh -Ca -DCMAKE_C_COMPILER=clang -DENABLE_ASAN=ON
 
 To build the project's libraries as static instead of shared, one can use
 
-.. code:: shell
+.. code:: bash
 
    ./build.sh -Ca -DBUILD_SHARED_LIBS=ON
 
@@ -104,6 +104,6 @@ If a C++ compiler and Google Test >=1.10.0 are available, unit tests will be
 built by default. If one of these components is missing, no tests will be built.
 One can also explicitly choose to disable test building with
 
-.. code:: shell
+.. code:: bash
 
    ./build.sh -Ca -DBUILD_TESTS=OFF
