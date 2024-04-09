@@ -93,3 +93,5 @@ add_executable(zerobits zerobits.c)
 add_executable(arrptrcmp arrptrcmp.c)
 # mdarrinc: multidimensional array address increment
 add_executable(mdarrinc mdarrinc.c)
+# arrptrbind: array/pointer function argument binding
+add_executable(arrptrbind arrptrbind.c)
