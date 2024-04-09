@@ -266,24 +266,8 @@ $(BUILDDIR)/%.PIC.cc.o: %.cc
 # phony targets
 .PHONY: clean
 
-# build all targets. segsizes should go last so the print statements are done
-# after all the other targets are built as the final build step.
-all: \
-$(BUILDDIR)/$(LIBFILE) \
-$(BUILDDIR)/$(CDCL_LIBFILE) \
-$(BUILDDIR)/pdxcp_test \
-$(BUILDDIR)/rejmp \
-$(BUILDDIR)/sigcatch \
-$(BUILDDIR)/locapprox \
-$(BUILDDIR)/sigbus \
-$(BUILDDIR)/sigsegv \
-$(BUILDDIR)/kbsig \
-$(BUILDDIR)/kbpoll \
-$(BUILDDIR)/filehash \
-$(BUILDDIR)/zerobits \
-$(BUILDDIR)/arrptrcmp \
-$(BUILDDIR)/mdarrinc \
-segsizes
+# build all targets. segsizes depends on all targets in NON_SEGSIZE_TGTS
+all: segsizes
 	@echo "All targets built"
 
 # cleanup
@@ -403,10 +387,28 @@ $(BUILDDIR)/kbpoll: $(KBPOLL_OBJS) $(BUILDDIR)/$(LIBFILE)
 	@$(CC) $(KBPOLL_LDFLAGS) -o $@ $(KBPOLL_OBJS) -lpthread -l$(LIBNAME)
 	@echo "Built target $@"
 
+# all targets that are not related to segsizes
+NON_SEGSIZE_TGTS = \
+$(BUILDDIR)/$(LIBFILE) \
+$(BUILDDIR)/$(CDCL_LIBFILE) \
+$(BUILDDIR)/pdxcp_test \
+$(BUILDDIR)/rejmp \
+$(BUILDDIR)/sigcatch \
+$(BUILDDIR)/locapprox \
+$(BUILDDIR)/sigbus \
+$(BUILDDIR)/sigsegv \
+$(BUILDDIR)/kbsig \
+$(BUILDDIR)/kbpoll \
+$(BUILDDIR)/filehash \
+$(BUILDDIR)/zerobits \
+$(BUILDDIR)/arrptrcmp \
+$(BUILDDIR)/mdarrinc \
+$(BUILDDIR)/arrptrbind
+
 # final ls + size call for showing the segment sizes for segsize[N]. note that
 # on Windows (MinGW), we need to also add the .exe suffix. awk is used to
-# filter the ls output so that we only print file name + sizes. we also depend
-# on the pdxcp_test unit test runner to ensure this is built last
+# filter the ls output so that we only print file name + sizes. we depend on
+# the NON_SEGSIZE_TGTS with all the non-segsize targets so this rule is last
 SEGSIZE_TGTS = $(BUILDDIR)/segsize1 \
 $(BUILDDIR)/segsize2 \
 $(BUILDDIR)/segsize3 \
@@ -414,7 +416,7 @@ $(BUILDDIR)/segsize4a \
 $(BUILDDIR)/segsize4b \
 $(BUILDDIR)/segsize5d \
 $(BUILDDIR)/segsize5r
-segsizes: $(BUILDDIR)/pdxcp_test $(SEGSIZE_TGTS)
+segsizes: $(NON_SEGSIZE_TGTS) $(SEGSIZE_TGTS)
 	@echo
 	@echo "segsize[N] disk sizes"
 	@ls -l build/segsize* | awk '{print "  " $$5 "  " $$9}'
@@ -425,42 +427,49 @@ segsizes: $(BUILDDIR)/pdxcp_test $(SEGSIZE_TGTS)
 
 # segsize1: program to get segment sizes (1)
 $(BUILDDIR)/segsize1: src/segsize.c
+	@mkdir -p $(@D)
 	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
 	@$(CC) $(BASE_CFLAGS) $(CFLAGS) -o $@ $<
 	@echo "Built target $@"
 
 # segsize2: program to get segment sizes (2)
 $(BUILDDIR)/segsize2: src/segsize.c
+	@mkdir -p $(@D)
 	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
 	@$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=2 -o $@ $<
 	@echo "Built target $@"
 
 # segsize3: program to get segment sizes (3)
 $(BUILDDIR)/segsize3: src/segsize.c
+	@mkdir -p $(@D)
 	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
 	@$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=3 -o $@ $<
 	@echo "Built target $@"
 
 # segsize4a: program to get segment sizes (4a, uninitialized auto array)
 $(BUILDDIR)/segsize4a: src/segsize.c
+	@mkdir -p $(@D)
 	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
 	@$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=4 -o $@ $<
 	@echo "Built target $@"
 
 # segsize4b: program to get segment sizes (4b, initialized auto array)
 $(BUILDDIR)/segsize4b: src/segsize.c
+	@mkdir -p $(@D)
 	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
 	@$(CC) $(BASE_CFLAGS) $(CFLAGS) -DSEGSIZE_STEPS=4 -DSEGSIZE_STEPS_4B -o $@ $<
 	@echo "Built target $@"
 
 # segsize5d: program to get segment sizes (5, 4b compiled with debug flags)
 $(BUILDDIR)/segsize5d: src/segsize.c
+	@mkdir -p $(@D)
 	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
 	@$(CC) -Wall -g -DSEGSIZE_STEPS=5 -o $@ $<
 	@echo "Built target $@"
 
 # segsize5r: program to get segment sizes (5, 4b compiled with release flags)
 $(BUILDDIR)/segsize5r: src/segsize.c
+	@mkdir -p $(@D)
 	@printf "$(TFCYAN)Building C executable $@$(TNORMAL)\n"
 	@$(CC) -Wall -O3 -mtune=native -DSEGSIZE_STEPS=5 -o $@ $<
 	@echo "Build target $@"
@@ -495,6 +504,14 @@ $(BUILDDIR)/arrptrcmp: $(ARRPTRCMP_OBJS)
 MDARRINC_OBJS = $(BUILDDIR)/src/mdarrinc.o
 -include $(MDARRINC_OBJS:%=%.d)
 $(BUILDDIR)/mdarrinc: $(MDARRINC_OBJS)
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
+
+# arrptrbind: array/pointer function argument binding
+ARRPTRBIND_OBJS = $(BUILDDIR)/src/arrptrbind.o
+-include $(ARRPTRBIND_OBJS:%=%.d)
+$(BUILDDIR)/arrptrbind: $(ARRPTRBIND_OBJS)
 	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
 	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 	@echo "Built target $@"
