@@ -1,7 +1,7 @@
 /**
  * @file features.h
  * @author Derek Huang
- * @brief C/C++ header for detecting platform-specific features
+ * @brief C/C++ header for detecting compile-time features
  * @copyright MIT License
  */
 
@@ -85,5 +85,10 @@
 #define PDXCP_HAS_CC_23
 #endif  // PDXCP_CPLUSPLUS < 202302L
 #endif  // PDXCP_CPLUSPLUS
+
+// __has_include macro. supported by GCC/Clang and available in C++17
+#ifdef __has_include
+#define PDXCP_HAS_INCLUDE_AVAILABLE
+#endif  // __has_include
 
 #endif  // PDXCP_FEATURES_H_
