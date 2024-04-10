@@ -403,7 +403,8 @@ $(BUILDDIR)/filehash \
 $(BUILDDIR)/zerobits \
 $(BUILDDIR)/arrptrcmp \
 $(BUILDDIR)/mdarrinc \
-$(BUILDDIR)/arrptrbind
+$(BUILDDIR)/arrptrbind \
+$(BUILDDIR)/arrptrbind++
 
 # final ls + size call for showing the segment sizes for segsize[N]. note that
 # on Windows (MinGW), we need to also add the .exe suffix. awk is used to
@@ -515,3 +516,13 @@ $(BUILDDIR)/arrptrbind: $(ARRPTRBIND_OBJS)
 	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
 	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 	@echo "Built target $@"
+
+# arrptrbind++: C++ array/pointer function argument binding
+ARRPTRBINDXX_OBJS = $(BUILDDIR)/src/arrptrbind.cc.o
+-include $(ARRPTRBINDXX_OBJS:%=%.d)
+$(BUILDDIR)/arrptrbind++: $(ARRPTRBINDXX_OBJS)
+ifneq ($(CXX_PATH),)
+	@printf "$(TFIGREEN)Linking C++ executable $@$(TNORMAL)\n"
+	@$(CXX) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
+endif
