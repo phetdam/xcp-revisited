@@ -13,7 +13,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
-#include <typeinfo>
+
+#include "pdxcp/demangle.hh"
 
 namespace {
 
@@ -27,7 +28,8 @@ namespace {
 template <typename T, std::size_t N>
 inline void mdarray_info(T (&arr)[N])
 {
-  std::cout << "received: " << typeid(T).name() << "[" << N << "]" << std::endl;
+  std::cout << "received: " << PDXCP_DEMANGLED_NAME(T) << "[" << N << "]" <<
+    std::endl;
 }
 
 /**
@@ -40,8 +42,8 @@ inline void mdarray_info(T (&arr)[N])
 template <typename T, std::size_t N1, std::size_t N2>
 inline void mdarray_info(T (&arr)[N1][N2])
 {
-  std::cout << "received: " << typeid(T).name() << "[" << N1 << "][" << N2 <<
-    "]" << std::endl;
+  std::cout << "received: " << PDXCP_DEMANGLED_NAME(T) << "[" << N1 << "][" <<
+    N2 << "]" << std::endl;
 }
 
 /**
@@ -54,8 +56,8 @@ inline void mdarray_info(T (&arr)[N1][N2])
 template <typename T, std::size_t N1, std::size_t N2, std::size_t N3>
 inline void mdarray_info(T (&arr)[N1][N2][N3])
 {
-  std::cout << "received: " << typeid(T).name() << "[" << N1 << "][" << N2 <<
-    "][" << N3 << "]" << std::endl;
+  std::cout << "received: " << PDXCP_DEMANGLED_NAME(T) << "[" << N1 << "][" <<
+    N2 << "][" << N3 << "]" << std::endl;
 }
 
 }  // namespace

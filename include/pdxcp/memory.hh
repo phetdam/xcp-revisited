@@ -9,10 +9,28 @@
 #define PDXCP_MEMORY_HH_
 
 #include <cstdio>
+#include <cstdlib>
 #include <stdexcept>
 #include <utility>
 
 namespace pdxcp {
+
+/**
+ * Deleter for a `unique_ptr` that uses `std::free` to free memory.
+ *
+ * This works for all `unique_ptr` element types since void pointer is used.
+ */
+struct malloc_deleter {
+  /**
+   * Free the allocated memory using `std::free`.
+   *
+   * @param ptr Owned pointer to call `std::free` on
+   */
+  void operator()(void* ptr) const noexcept
+  {
+    std::free(ptr);
+  }
+};
 
 /**
  * Class wrapping a `FILE*` with unique ownership.
