@@ -104,3 +104,7 @@ add_executable(arrptrcmp arrptrcmp.c)
 add_executable(mdarrinc mdarrinc.c)
 # arrptrbind: array/pointer function argument binding
 add_executable(arrptrbind arrptrbind.c)
+# arrptrbind++: C++ array/pointer function argument binding
+if(CMAKE_CXX_COMPILER)
+    add_executable(arrptrbind++ arrptrbind.cc)
+endif()
