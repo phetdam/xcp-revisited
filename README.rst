@@ -95,7 +95,7 @@ To build the project's libraries as static instead of shared, one can use
 
 .. code:: bash
 
-   ./build.sh -Ca -DBUILD_SHARED_LIBS=ON
+   ./build.sh -Ca -DBUILD_SHARED_LIBS=OFF
 
 ``BUILD_SHARED_LIBS`` is set by default and results in shared libraries being
 built.
