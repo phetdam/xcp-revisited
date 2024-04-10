@@ -53,7 +53,7 @@ my_function_3(int (*fruit)[3][5], const char *desc)
 int
 main(void)
 {
-  // 3D array, pointer to 2D array, and pointer to 3D array defined on p272.
+  // 3D array, pointer to 2D array, and pointer to 3D array defined on p272
   int apricot[2][3][5];
   int (*p)[3][5] = apricot;
   int (*q)[2][3][5] = &apricot;  // note &apricot and apricot are equal
