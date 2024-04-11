@@ -86,6 +86,7 @@ add_dependencies(
         arrptrcmp
         mdarrinc
         arrptrbind
+        arrptrbind++
 )
 # only add pdxcp_test if tests are being built
 if(BUILD_TESTS)
