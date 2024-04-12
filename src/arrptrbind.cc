@@ -70,9 +70,9 @@ int main()
   int (*q)[2][3][5] = &apricot;        // &apricot and apricot are equal
   // some more "interesting" types
   std::string strarr[3][3][3];
-  auto strarr_1 = strarr + 1;          // std::string (*strarr_1)[3][3]
+  auto strarr_1 = strarr + 1;          // std::string (*)[3][3]
   const volatile void* varr[4][5][7];
-  auto varr_1 = varr + 1;              // const volatile void* (*varr_1)[5][7]
+  auto varr_1 = varr + 1;              // const volatile void* (*)[5][7]
   // print information on the original input types
   mdarray_info(apricot);
   mdarray_info(*p);
