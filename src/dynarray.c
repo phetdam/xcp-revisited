@@ -199,7 +199,7 @@ int
 main(void)
 {
   // printf field with for size/capacity
-  unsigned int u_width = 8u;
+  unsigned int u_width = 4u;
   // new initialized byte_vector + print initial (zero) size and capacity
   byte_vector vec;
   byte_vector_init(&vec);
