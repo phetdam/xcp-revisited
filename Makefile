@@ -404,7 +404,8 @@ $(BUILDDIR)/zerobits \
 $(BUILDDIR)/arrptrcmp \
 $(BUILDDIR)/mdarrinc \
 $(BUILDDIR)/arrptrbind \
-$(BUILDDIR)/arrptrbind++
+$(BUILDDIR)/arrptrbind++ \
+$(BUILDDIR)/dynarray
 
 # final ls + size call for showing the segment sizes for segsize[N]. note that
 # on Windows (MinGW), we need to also add the .exe suffix. awk is used to
@@ -526,3 +527,11 @@ ifneq ($(CXX_PATH),)
 	@$(CXX) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 	@echo "Built target $@"
 endif
+
+# dynarray: dynamic array expansion
+DYNARRAY_OBJS = $(BUILDDIR)/src/dynarray.o
+-include $(DYNARRAY_OBJS:%=%.d)
+$(BUILDDIR)/dynarray: $(DYNARRAY_OBJS)
+	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
+	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@echo "Built target $@"
