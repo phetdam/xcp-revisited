@@ -87,6 +87,7 @@ add_dependencies(
         mdarrinc
         arrptrbind
         arrptrbind++
+        dynarray
 )
 # only add pdxcp_test if tests are being built
 if(BUILD_TESTS)
@@ -109,3 +110,5 @@ add_executable(arrptrbind arrptrbind.c)
 if(CMAKE_CXX_COMPILER)
     add_executable(arrptrbind++ arrptrbind.cc)
 endif()
+# dynarray: dynamic array expansion
+add_executable(dynarray dynarray.c)
