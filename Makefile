@@ -321,6 +321,7 @@ endif
 	@echo "Built target $@"
 
 # libpdxcp_fruit: C++ fruit library to support book's C++ exercises
+# if no C++ compiler available, object list is empty to prevent compilation
 ifneq ($(CXX_PATH),)
 FRUIT_LIB_OBJS = $(BUILDDIR)/src/pdxcp_fruit/fruit.$(LIBOBJCXXSUFFIX)
 -include $(FRUIT_LIB_OBJS:%=%.d)
@@ -340,7 +341,7 @@ endif
 endif
 
 # pdxcp_test: C++ Google Test executable
-# if not building tests, object list should be empty to prevent compilation
+# if not building tests, object list is empty to prevent compilation
 ifneq ($(BUILD_TESTS),)
 TEST_OBJS = \
 $(BUILDDIR)/test/cdcl_lexer_test.cc.o \
