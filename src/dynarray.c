@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "pdxcp/warnings.h"
+
 /**
  * Struct for a dynamic array managing a buffer of bytes.
  *
@@ -204,9 +206,14 @@ main(void)
   byte_vector vec;
   byte_vector_init(&vec);
   report_sizes(&vec, u_width);
+  // exit status
+  int status = EXIT_SUCCESS;
   // add message fragments. this is part of the Special Task Force A-01 creed.
+  // we also disable -Wparentheses since the assignment is clear here
+PDXCP_GNU_WARNING_PUSH()
+PDXCP_GNU_WARNING_DISABLE(-Wparentheses)
   if (
-    !add_fragment(
+    status = !add_fragment(
       &vec,
       u_width,
       'A',
@@ -216,9 +223,9 @@ main(void)
       false
     )
   )
-    return EXIT_FAILURE;
+    goto cleanup;
   if (
-    !add_fragment(
+    status = !add_fragment(
       &vec,
       u_width,
       'D',
@@ -228,9 +235,9 @@ main(void)
       false
     )
   )
-    return EXIT_FAILURE;
+    goto cleanup;
   if (
-    !add_fragment(
+    status = !add_fragment(
       &vec,
       u_width,
       'M',
@@ -240,9 +247,11 @@ main(void)
       true
     )
   )
-    return EXIT_FAILURE;
+    goto cleanup;
+PDXCP_GNU_WARNING_POP()
   // print the message, destroy, exit
   printf("%s\n", (const char *) vec.data);
+cleanup:
   byte_vector_destroy(&vec);
-  return EXIT_SUCCESS;
+  return status;
 }
