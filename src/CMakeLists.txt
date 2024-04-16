@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION ${CMAKE_MINIMUM_REQUIRED_VERSION})
 
-# add support library and C declaration parser library
+# add C support library, C declaration parser library, and C++ fruit library
 add_subdirectory(pdxcp)
 add_subdirectory(pdxcp_cdp)
+add_subdirectory(pdxcp_fruit)
 
 # rejmp: uses setjmp/longjmp to restart itself
 add_executable(rejmp rejmp.c)
@@ -115,4 +116,5 @@ add_executable(dynarray dynarray.c)
 # fruit1: compiling and running a C++ program
 if(CMAKE_CXX_COMPILER)
     add_executable(fruit1 fruit1.cc)
+    target_link_libraries(fruit1 PRIVATE pdxcp_fruit)
 endif()
