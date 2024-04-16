@@ -86,6 +86,15 @@ else
 CDCL_LIBFILE = $(CDCL_LIBSTEM).a
 endif
 
+# fruit C++ library link name, stem, file with suffix
+FRUIT_LIBNAME = $(LIBNAME)_fruit
+FRUIT_LIBSTEM = lib$(FRUIT_LIBNAME)
+ifneq ($(BUILD_SHARED),)
+FRUIT_LIBFILE = $(FRUIT_LIBSTEM).so
+else
+FRUIT_LIBFILE = $(FRUIT_LIBSTEM).a
+endif
+
 # message about libraries we're building
 $(info Libraries: $(LIBFILE) $(CDCL_LIBFILE))
 
@@ -207,11 +216,18 @@ endif
 # extra linker flags for shared libraries
 SOFLAGS = -shared -fPIC
 
-# object suffix for PIC objects (to match shared library rule)
+# object suffix for C PIC objects (to match shared library rule)
 ifneq ($(BUILD_SHARED),)
 LIBOBJSUFFIX = PIC.o
 else
 LIBOBJSUFFIX = o
+endif
+
+# object suffix for C++ PIC objects (to match shared library rule)
+ifneq ($(BUILD_SHARED),)
+LIBOBJCXXSUFFIX = PIC.cc.o
+else
+LIBOBJCXXSUFFIX = cc.o
 endif
 
 # add current location of object to rpath. needed to find shared libraries in
@@ -304,6 +320,20 @@ else
 endif
 	@echo "Built target $@"
 
+# libpdxcp_fruit: C++ fruit library to support book's C++ exercises
+FRUIT_LIB_OBJS = \
+$(BUILDDIR)/src/pdxcp_fruit/fruit.$(LIBOBJCXXSUFFIX)
+-include $(FRUIT_LIB_OBJS:%=%.d)
+$(BUILDDIR)/$(FRUIT_LIBFILE): $(FRUIT_LIB_OBJS)
+ifneq ($(BUILD_SHARED),)
+	@printf "$(TFIGREEN)Linking C++ shared library $@$(TNORMAL)\n"
+	@$(CXX) $(SOFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+else
+	@printf "$(TFIGREEN)Linking C++ static library $@$(TNORMAL)\n"
+	@$(AR) crs $@ $^
+endif
+	@echo "Built target $@"
+
 # pdxcp_test: C++ Google Test executable
 # if not building tests, object list should be empty to prevent compilation
 ifneq ($(BUILD_TESTS),)
@@ -391,6 +421,7 @@ $(BUILDDIR)/kbpoll: $(KBPOLL_OBJS) $(BUILDDIR)/$(LIBFILE)
 NON_SEGSIZE_TGTS = \
 $(BUILDDIR)/$(LIBFILE) \
 $(BUILDDIR)/$(CDCL_LIBFILE) \
+$(BUILDDIR)/$(FRUIT_LIBFILE) \
 $(BUILDDIR)/pdxcp_test \
 $(BUILDDIR)/rejmp \
 $(BUILDDIR)/sigcatch \
@@ -405,7 +436,8 @@ $(BUILDDIR)/arrptrcmp \
 $(BUILDDIR)/mdarrinc \
 $(BUILDDIR)/arrptrbind \
 $(BUILDDIR)/arrptrbind++ \
-$(BUILDDIR)/dynarray
+$(BUILDDIR)/dynarray \
+$(BUILDDIR)/fruit1
 
 # final ls + size call for showing the segment sizes for segsize[N]. note that
 # on Windows (MinGW), we need to also add the .exe suffix. awk is used to
@@ -535,3 +567,13 @@ $(BUILDDIR)/dynarray: $(DYNARRAY_OBJS)
 	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
 	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
 	@echo "Built target $@"
+
+# fruit1: compiling and running a C++ program
+FRUIT1_OBJS = $(BUILDDIR)/src/fruit1.cc.o
+-include $(FRUIT1_OBJS:%=%.d)
+$(BUILDDIR)/fruit1: $(FRUIT1_OBJS)
+ifneq ($(CXX_PATH),)
+	@printf "$(TFIGREEN)Linking C++ executable $@$(TNORMAL)\n"
+	@$(CXX) $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS) -o $@ $^ -l$(FRUIT_LIBNAME)
+	@echo "Built target $@"
+endif
