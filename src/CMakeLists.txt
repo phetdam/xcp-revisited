@@ -112,3 +112,7 @@ if(CMAKE_CXX_COMPILER)
 endif()
 # dynarray: dynamic array expansion
 add_executable(dynarray dynarray.c)
+# fruit1: compiling and running a C++ program
+if(CMAKE_CXX_COMPILER)
+    add_executable(fruit1 fruit1.cc)
+endif()
