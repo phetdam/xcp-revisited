@@ -321,10 +321,14 @@ endif
 	@echo "Built target $@"
 
 # libpdxcp_fruit: C++ fruit library to support book's C++ exercises
-FRUIT_LIB_OBJS = \
-$(BUILDDIR)/src/pdxcp_fruit/fruit.$(LIBOBJCXXSUFFIX)
+ifneq ($(CXX_PATH),)
+FRUIT_LIB_OBJS = $(BUILDDIR)/src/pdxcp_fruit/fruit.$(LIBOBJCXXSUFFIX)
 -include $(FRUIT_LIB_OBJS:%=%.d)
+else
+FRUIT_LIB_OBJS =
+endif
 $(BUILDDIR)/$(FRUIT_LIBFILE): $(FRUIT_LIB_OBJS)
+ifneq ($(CXX_PATH),)
 ifneq ($(BUILD_SHARED),)
 	@printf "$(TFIGREEN)Linking C++ shared library $@$(TNORMAL)\n"
 	@$(CXX) $(SOFLAGS) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
@@ -333,6 +337,7 @@ else
 	@$(AR) crs $@ $^
 endif
 	@echo "Built target $@"
+endif
 
 # pdxcp_test: C++ Google Test executable
 # if not building tests, object list should be empty to prevent compilation
@@ -551,8 +556,12 @@ $(BUILDDIR)/arrptrbind: $(ARRPTRBIND_OBJS)
 	@echo "Built target $@"
 
 # arrptrbind++: C++ array/pointer function argument binding
+ifneq ($(CXX_PATH),)
 ARRPTRBINDXX_OBJS = $(BUILDDIR)/src/arrptrbind.cc.o
 -include $(ARRPTRBINDXX_OBJS:%=%.d)
+else
+ARRPTRBINDXX_OBJS =
+endif
 $(BUILDDIR)/arrptrbind++: $(ARRPTRBINDXX_OBJS)
 ifneq ($(CXX_PATH),)
 	@printf "$(TFIGREEN)Linking C++ executable $@$(TNORMAL)\n"
@@ -569,9 +578,13 @@ $(BUILDDIR)/dynarray: $(DYNARRAY_OBJS)
 	@echo "Built target $@"
 
 # fruit1: compiling and running a C++ program
+ifneq ($(CXX_PATH),)
 FRUIT1_OBJS = $(BUILDDIR)/src/fruit1.cc.o
 -include $(FRUIT1_OBJS:%=%.d)
-$(BUILDDIR)/fruit1: $(FRUIT1_OBJS)
+else
+FRUIT1_OBJS =
+endif
+$(BUILDDIR)/fruit1: $(BUILDDIR)/$(FRUIT_LIBFILE) $(FRUIT1_OBJS)
 ifneq ($(CXX_PATH),)
 	@printf "$(TFIGREEN)Linking C++ executable $@$(TNORMAL)\n"
 	@$(CXX) $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS) -o $@ $^ -l$(FRUIT_LIBNAME)
