@@ -29,11 +29,19 @@ public:
   fruit() noexcept;
 
   /**
+   * Ctor.
+   *
+   * @param weight Fruit weight in oz
+   * @param kcal_per_oz kcal per oz
+   */
+  fruit(double weight, double kcal_per_oz);
+
+  /**
    * Dtor.
    *
    * Prints out a message saying the fruit at the given address is destroyed.
    */
-  ~fruit();
+  virtual ~fruit();
 
   /**
    * Return the weight of the fruit in oz.
@@ -73,9 +81,90 @@ public:
    */
   double juice() noexcept;
 
+  /**
+   * Addition operator member returning the total fruit weight in ounces.
+   *
+   * This is based on the discussion starting on p313 in Expert C Programming
+   * but the design has been improved to take `const` ref and be `noexcept`.
+   *
+   * @param op Operand fruit
+   */
+  double operator+(const fruit& op) noexcept;
+
+protected:
+  /**
+   * Update the fruit's weight in ounces and return the old weight.
+   */
+  double set_weight(double weight) noexcept;
+
 private:
-  double weight_;       // weight in oz
-  double kcal_per_oz_;  // kcals per oz
+  double weight_;
+  double kcal_per_oz_;
+};
+
+/**
+ * A candy apple class.
+ *
+ * Since a candy apple should not be considered a normal fruit is does not
+ * inherit fruit and is used only to support the `make_candy_apple` member.
+ */
+class candy_apple {
+public:
+  /**
+   * Ctor.
+   *
+   * @param weight Candy apple weight in ounces
+   */
+  candy_apple(double weight);
+
+  /**
+   * Return the weight of the candy apple in ounces.
+   */
+  double weight() const noexcept;
+
+private:
+  double weight_;
+};
+
+/**
+ * A more sensible class for an apple.
+ *
+ * This is based on the discussion on p309 in Expert C Programming but the
+ * design has been tweaked to make it more semantically correct. E.g. bobbing
+ * for a specific apple is a bit strange and candy apples require whole apples.
+ */
+class apple : public fruit {
+public:
+  /**
+   * Default ctor.
+   *
+   * The apple's weight is 5.28 oz as 0.33 lbs is average apple weight.
+   */
+  apple();
+
+  /**
+   * Dtor.
+   *
+   * Prints a message saying the apple at the given address is destroyed. Since
+   * `fruit` has a virtual dtor the `fruit` message will be printed after.
+   */
+  ~apple();
+
+  /**
+   * Ctor.
+   *
+   * The kcal per oz of an apple is 15 according to Google.
+   *
+   * @param weight Apple weight in oz
+   */
+  apple(double weight);
+
+  /**
+   * Make a candy apple out of this apple.
+   *
+   * The apple's weight will go to zero and a candy apple is returned.
+   */
+  candy_apple make_candy_apple();
 };
 
 }  // namespace pdxcp

@@ -130,4 +130,7 @@ if(CMAKE_CXX_COMPILER)
     # fruit2: calling C++ fruit member functions
     add_executable(fruit2 fruit2.cc)
     target_link_libraries(fruit2 PRIVATE pdxcp_fruit)
+    # fruit3: C++ program demonstrating fruit addition and polymorphism
+    add_executable(fruit3 fruit3.cc)
+    target_link_libraries(fruit3 PRIVATE pdxcp_fruit)
 endif()
