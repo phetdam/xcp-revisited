@@ -71,9 +71,11 @@ add_custom_target(
     VERBATIM
     COMMAND_EXPAND_LISTS
 )
-# segsizes depends on all other targets
+# segsizes depends on all other targets including libraries
 add_dependencies(
     segsizes
+        pdxcp
+        pdxcp_cdp
         rejmp
         sigcatch
         locapprox
@@ -87,12 +89,21 @@ add_dependencies(
         arrptrcmp
         mdarrinc
         arrptrbind
-        arrptrbind++
         dynarray
 )
 # only add pdxcp_test if tests are being built
 if(BUILD_TESTS)
     add_dependencies(segsizes pdxcp_test)
+endif()
+# only add pdxcp_fruit and other C++ programs if C++ compiler is available
+if(CMAKE_CXX_COMPILER)
+    add_dependencies(
+        segsizes
+            pdxcp_fruit
+            arrptrbind++
+            fruit1
+            fruit2
+    )
 endif()
 
 # filehash: hash-table based file info struct lookup program. this does not
@@ -107,14 +118,16 @@ add_executable(arrptrcmp arrptrcmp.c)
 add_executable(mdarrinc mdarrinc.c)
 # arrptrbind: array/pointer function argument binding
 add_executable(arrptrbind arrptrbind.c)
-# arrptrbind++: C++ array/pointer function argument binding
-if(CMAKE_CXX_COMPILER)
-    add_executable(arrptrbind++ arrptrbind.cc)
-endif()
 # dynarray: dynamic array expansion
 add_executable(dynarray dynarray.c)
-# fruit1: compiling and running a C++ program
+# C++ programs only compiled if compiler is available
 if(CMAKE_CXX_COMPILER)
+    # arrptrbind++: C++ array/pointer function argument binding
+    add_executable(arrptrbind++ arrptrbind.cc)
+    # fruit1: compiling and running a C++ program
     add_executable(fruit1 fruit1.cc)
     target_link_libraries(fruit1 PRIVATE pdxcp_fruit)
+    # fruit2: calling C++ fruit member functions
+    add_executable(fruit2 fruit2.cc)
+    target_link_libraries(fruit2 PRIVATE pdxcp_fruit)
 endif()

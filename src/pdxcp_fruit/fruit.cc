@@ -7,9 +7,19 @@
 
 #include "pdxcp/fruit.hh"
 
+#include <cstdio>
+
 namespace pdxcp {
 
 fruit::fruit() noexcept : weight_{2}, kcal_per_oz_{15} {}
+
+// ~fruit() written for the p307 Expert C Programming exercise
+
+fruit::~fruit()
+{
+  // using printf for exception safety
+  std::printf("fruit at %p destroyed\n", this);
+}
 
 double fruit::weight() const noexcept
 {
@@ -25,6 +35,9 @@ void fruit::peel() noexcept
 {
   weight_ *= 0.98;
 }
+
+// for the p304 Expert C Programming exercise, slice() and juice() bodies were
+// implemented. members can be accessed via this-> but this is unnecessary.
 
 void fruit::slice(unsigned int n_slices) noexcept
 {

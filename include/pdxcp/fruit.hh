@@ -22,11 +22,18 @@ public:
    * Default ctor.
    *
    * We assume that the fruit weighs 2 oz and has 15 kcal per ounce. Based on a
-   * Google Search apparently apples have around 15 kcal per ounce.
+   * Google search apparently apples have around 15 kcal per ounce.
    *
    * This ctor is mostly used to allow `fruit1.cc` to compile.
    */
   fruit() noexcept;
+
+  /**
+   * Dtor.
+   *
+   * Prints out a message saying the fruit at the given address is destroyed.
+   */
+  ~fruit();
 
   /**
    * Return the weight of the fruit in oz.
