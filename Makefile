@@ -444,7 +444,8 @@ $(BUILDDIR)/arrptrbind \
 $(BUILDDIR)/arrptrbind++ \
 $(BUILDDIR)/dynarray \
 $(BUILDDIR)/fruit1 \
-$(BUILDDIR)/fruit2
+$(BUILDDIR)/fruit2 \
+$(BUILDDIR)/fruit3
 
 # final ls + size call for showing the segment sizes for segsize[N]. note that
 # on Windows (MinGW), we need to also add the .exe suffix. awk is used to
@@ -601,6 +602,20 @@ else
 FRUIT2_OBJS =
 endif
 $(BUILDDIR)/fruit2: $(BUILDDIR)/$(FRUIT_LIBFILE) $(FRUIT2_OBJS)
+ifneq ($(CXX_PATH),)
+	@printf "$(TFIGREEN)Linking C++ executable $@$(TNORMAL)\n"
+	@$(CXX) $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS) -o $@ $^ -l$(FRUIT_LIBNAME)
+	@echo "Built target $@"
+endif
+
+# fruit3: C++ program demonstrating fruit addition and polymorphism
+ifneq ($(CXX_PATH),)
+FRUIT3_OBJS = $(BUILDDIR)/src/fruit3.cc.o
+-include $(FRUIT2_OBJS:%=%.d)
+else
+FRUIT3_OBJS =
+endif
+$(BUILDDIR)/fruit3: $(BUILDDIR)/$(FRUIT_LIBFILE) $(FRUIT3_OBJS)
 ifneq ($(CXX_PATH),)
 	@printf "$(TFIGREEN)Linking C++ executable $@$(TNORMAL)\n"
 	@$(CXX) $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS) -o $@ $^ -l$(FRUIT_LIBNAME)
