@@ -79,6 +79,16 @@ double fruit::operator+(const fruit& op) noexcept
   return weight_ + op.weight();
 }
 
+double operator+(const fruit& a, double b) noexcept
+{
+  return a.weight() + b;
+}
+
+double operator+(double a, const fruit& b) noexcept
+{
+  return a + b.weight();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // candy_apple
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,6 +120,30 @@ apple::~apple()
 candy_apple apple::make_candy_apple()
 {
   return set_weight(0);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// banana
+///////////////////////////////////////////////////////////////////////////////
+
+banana::banana() : banana{6.17} {}
+
+banana::banana(double weight) : fruit{weight, 25} {}
+
+banana::~banana()
+{
+  std::printf("banana at %p destroyed\n", this);
+}
+
+void banana::peel() noexcept
+{
+  set_weight(0.686 * weight());
+}
+
+double banana::juice() noexcept
+{
+  set_weight(0.7 * weight());
+  return 0;
 }
 
 }  // namespace pdxcp

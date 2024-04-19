@@ -58,7 +58,7 @@ public:
    *
    * This reduces the fruit's weight by 2%.
    */
-  void peel() noexcept;
+  virtual void peel() noexcept;
 
   /**
    * Slice small layers off the fruit.
@@ -79,7 +79,7 @@ public:
    *
    * N fluid ounces = M ounces / (1.0432 * K g/mL)
    */
-  double juice() noexcept;
+  virtual double juice() noexcept;
 
   /**
    * Addition operator member returning the total fruit weight in ounces.
@@ -101,6 +101,26 @@ private:
   double weight_;
   double kcal_per_oz_;
 };
+
+/**
+ * Addition operator returning the sum of a double with a fruit's weight.
+ *
+ * This allows multiple fruits' weight to be added together.
+ *
+ * @param a Fruit operand
+ * @param b Double weight in ounces
+ */
+double operator+(const fruit& a, double b) noexcept;
+
+/**
+ * Addition operator returning the sum of a fruit's weight with a double.
+ *
+ * This allows multiple fruits' weight to be added together.
+ *
+ * @param a Double weight in ounces
+ * @param b Fruit operand
+ */
+double operator+(double a, const fruit& b) noexcept;
 
 /**
  * A candy apple class.
@@ -165,6 +185,52 @@ public:
    * The apple's weight will go to zero and a candy apple is returned.
    */
   candy_apple make_candy_apple();
+};
+
+/**
+ * A banana class.
+ */
+class banana : public fruit {
+public:
+  /**
+   * Default ctor.
+   *
+   * The banana's weight is 6.17 oz which is approximatel 175 g.
+   */
+  banana();
+
+  /**
+   * Dtor.
+   *
+   * Prints a message saying the banana at the given address is destroyed. Since
+   * `fruit` has as virtual dtor the `fruit` message will be printed after.
+   */
+  ~banana();
+
+  /**
+   * Ctor.
+   *
+   * The kcal per oz of a banana is 25 according to Google.
+   *
+   * @param weight Banana weight in oz
+   */
+  banana(double weight);
+
+  /**
+   * Peel the banana.
+   *
+   * This reduces the banana's weight by 31.4%, the average percentage of the
+   * banana's weight that is contributed by the peel.
+   */
+  void peel() noexcept override;
+
+  /**
+   * Juice the banana.
+   *
+   * Bananas can't really be juiced so this function returns zero while also
+   * reducing the weight of the banana by 30% (arbitrary value).
+   */
+  double juice() noexcept override;
 };
 
 }  // namespace pdxcp
