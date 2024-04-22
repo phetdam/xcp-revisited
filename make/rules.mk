@@ -3,7 +3,7 @@
 # Brief: Makefile C/C++ object and executable pattern rules
 # Copyright: MIT License
 #
-# Note: Must include config.mk before use to define BASE_CFLAGS, BASE_CXXFLAGS,
+# Must include config.mk before use to define BASE_CFLAGS, BASE_CXXFLAGS,
 # TFGREEN, TFNORMAL, and BUILDDIR variables used in this file.
 #
 
