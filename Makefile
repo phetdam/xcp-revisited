@@ -11,10 +11,10 @@
 #
 
 # include C/C++ compile/link and testing configuration
-include make/config.mk
+include gmake/config.mk
 
 # include C/C++ object and executable pattern rules
-include make/rules.mk
+include gmake/rules.mk
 
 # phony targets
 .PHONY: clean
