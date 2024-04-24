@@ -30,7 +30,9 @@ clean:
 ###############################################################################
 
 # libpdxcp: support library with some shared utility code
-LIB_OBJS = $(BUILDDIR)/src/pdxcp/lockable.$(LIBOBJSUFFIX)
+LIB_OBJS = \
+$(BUILDDIR)/src/pdxcp/bvector.$(LIBOBJSUFFIX) \
+$(BUILDDIR)/src/pdxcp/lockable.$(LIBOBJSUFFIX)
 -include $(LIB_OBJS:%=%.d)
 $(BUILDDIR)/$(LIBFILE): $(LIB_OBJS)
 ifneq ($(BUILD_SHARED),)
@@ -312,9 +314,9 @@ endif
 # dynarray: dynamic array expansion
 DYNARRAY_OBJS = $(BUILDDIR)/src/dynarray.o
 -include $(DYNARRAY_OBJS:%=%.d)
-$(BUILDDIR)/dynarray: $(DYNARRAY_OBJS)
+$(BUILDDIR)/dynarray: $(BUILDDIR)/$(LIBFILE) $(DYNARRAY_OBJS)
 	@printf "$(TFIGREEN)Linking C executable $@$(TNORMAL)\n"
-	@$(CC) $(BASE_LDFLAGS) $(LDFLAGS) -o $@ $^
+	@$(CC) $(RPATH_LDFLAGS) $(LDFLAGS) -o $@ $(DYNARRAY_OBJS) -l$(LIBNAME)
 	@echo "Built target $@"
 
 # fruit1: compiling and running a C++ program
@@ -327,7 +329,7 @@ endif
 $(BUILDDIR)/fruit1: $(BUILDDIR)/$(FRUIT_LIBFILE) $(FRUIT1_OBJS)
 ifneq ($(CXX_PATH),)
 	@printf "$(TFIGREEN)Linking C++ executable $@$(TNORMAL)\n"
-	@$(CXX) $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS) -o $@ $^ -l$(FRUIT_LIBNAME)
+	@$(CXX) $(RPATH_LDFLAGS) $(LDFLAGS) -o $@ $(FRUIT1_OBJS) -l$(FRUIT_LIBNAME)
 	@echo "Built target $@"
 endif
 
@@ -341,7 +343,7 @@ endif
 $(BUILDDIR)/fruit2: $(BUILDDIR)/$(FRUIT_LIBFILE) $(FRUIT2_OBJS)
 ifneq ($(CXX_PATH),)
 	@printf "$(TFIGREEN)Linking C++ executable $@$(TNORMAL)\n"
-	@$(CXX) $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS) -o $@ $^ -l$(FRUIT_LIBNAME)
+	@$(CXX) $(RPATH_LDFLAGS) $(LDFLAGS) -o $@ $(FRUIT2_OBJS) -l$(FRUIT_LIBNAME)
 	@echo "Built target $@"
 endif
 
@@ -355,6 +357,6 @@ endif
 $(BUILDDIR)/fruit3: $(BUILDDIR)/$(FRUIT_LIBFILE) $(FRUIT3_OBJS)
 ifneq ($(CXX_PATH),)
 	@printf "$(TFIGREEN)Linking C++ executable $@$(TNORMAL)\n"
-	@$(CXX) $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS) -o $@ $^ -l$(FRUIT_LIBNAME)
+	@$(CXX) $(RPATH_LDFLAGS) $(LDFLAGS) -o $@ $(FRUIT3_OBJS) -l$(FRUIT_LIBNAME)
 	@echo "Built target $@"
 endif

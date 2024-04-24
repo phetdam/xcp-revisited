@@ -236,6 +236,10 @@ else
 RPATH_FLAGS =
 endif
 
+# base linker flags with rpath flags included. whenever we link against our own
+# libraries BASE_LDFLAGS and RPATH_FLAGS are almost always used together
+RPATH_LDFLAGS = $(BASE_LDFLAGS) $(RPATH_FLAGS)
+
 # check that we have color capabilities
 TERMCOLORS = $(shell tput colors)
 ifneq ($(TERMCOLORS),)
