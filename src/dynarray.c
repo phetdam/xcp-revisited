@@ -11,114 +11,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "pdxcp/bvector.h"
 #include "pdxcp/warnings.h"
 
 /**
- * Struct for a dynamic array managing a buffer of bytes.
- *
- * @note This is a more sophisticated dynamic array implementation than the
- *  simple one given in the book. setjmp/longjmp is also unnecessary here.
- *
- * @param data Pointer to byte data
- * @param size Number of bytes (elements) being managed
- * @param capacity Total number of bytes allocated, greater or equal to `size`
+ * Typedef of `pdxcp_bvector` to the original `byte_vector` type.
  */
-typedef struct {
-  unsigned char *data;
-  size_t size;
-  size_t capacity;
-} byte_vector;
+typedef pdxcp_bvector byte_vector;
 
 /**
- * Initialize a `byte_vector` structure.
- *
- * This is equivalent to performing `byte_vector v = {0}` to zero the struct.
- *
- * @param vec Byte vector to initialize
+ * Macros aliasing `pdxcp_vector` functions to `byte_vector` functions.
  */
-static inline void
-byte_vector_init(byte_vector *vec)
-{
-  vec->data = NULL;
-  vec->size = 0;
-  vec->capacity = 0;
-}
-
-/**
- * Destroy a `byte_vector` structure.
- *
- * If the struct is to be reused, `byte_vector_init` must first be called.
- *
- * @param vec Byte vector to destroy
- */
-static inline void
-byte_vector_destroy(byte_vector *vec)
-{
-  free(vec->data);
-}
-
-/**
- * Expand the `byte_vector` data buffer.
- *
- * If the `byte_vector` is newly initialized with `byte_vector_init`, the size
- * is zero, and the expansion is to 16 bytes. Otherwise, capacity is doubled.
- *
- * @param vec Byte vector to expand
- * @returns `true` on success, `false` on error (`errno` is ENOMEM)
- */
-static bool
-byte_vector_expand(byte_vector *vec)
-{
-  // expand, either to 16 bytes if empty or doubling the capacity
-  size_t new_capacity = (!vec->capacity) ? 16 : 2 * vec->capacity;
-  unsigned char *new_data = realloc(vec->data, new_capacity);
-  // error, this is ENOMEM
-  if (!new_data)
-    return false;
-  // success, update data and capacity
-  vec->data = new_data;
-  vec->capacity = new_capacity;
-  return true;
-}
-
-/**
- * Add a single byte to the `byte_vector.`
- *
- * @param vec Byte vector
- * @param c Byte to add
- * @returns `true` on success, `false` on error (`errno` is ENOMEM)
- */
-static inline bool
-byte_vector_add_1(byte_vector *vec, unsigned char c)
-{
-  // expand if necessary and report error
-  if (vec->size == vec->capacity && !byte_vector_expand(vec))
-    return false;
-  // add to buffer + increment size
-  vec->data[vec->size++] = c;
-  return true;
-}
-
-/**
- * Add a block of bytes to the `byte_vector`.
- *
- * @param vec Byte vector
- * @param buf Buffer of bytes to add
- * @param buf_size Number of bytes in the buffer
- * @returns `true` on success, `false` on error (`errno` is ENOMEM)
- */
-static bool
-byte_vector_add_n(byte_vector *vec, unsigned char *buf, size_t buf_size)
-{
-  // repeatedly expand as necessary
-  while (vec->capacity <= vec->size + buf_size)
-    if (!byte_vector_expand(vec))
-      return false;
-  // copy buf and update size
-  memcpy(vec->data + vec->size, buf, buf_size);
-  vec->size += buf_size;
-  return true;
-}
+#define byte_vector_add_1 pdxcp_bvector_add
+#define byte_vector_add_n pdxcp_bvector_add_n
+#define byte_vector_init pdxcp_bvector_init
+#define byte_vector_destroy pdxcp_bvector_destroy
 
 /**
  * Print the size and capacity of the `byte_vector` with fixed field width.

@@ -120,6 +120,7 @@ add_executable(mdarrinc mdarrinc.c)
 add_executable(arrptrbind arrptrbind.c)
 # dynarray: dynamic array expansion
 add_executable(dynarray dynarray.c)
+target_link_libraries(dynarray PRIVATE pdxcp)
 # C++ programs only compiled if compiler is available
 if(CMAKE_CXX_COMPILER)
     # arrptrbind++: C++ array/pointer function argument binding
