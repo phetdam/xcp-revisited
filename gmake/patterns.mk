@@ -1,4 +1,4 @@
-# File: make/rules.mk
+# File: make/patterns.mk
 # Author: Derek Huang
 # Brief: Makefile C/C++ object and executable pattern rules
 # Copyright: MIT License

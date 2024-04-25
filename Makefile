@@ -14,7 +14,7 @@
 include gmake/config.mk
 
 # include C/C++ object and executable pattern rules
-include gmake/rules.mk
+include gmake/patterns.mk
 
 # phony targets
 .PHONY: clean
@@ -87,12 +87,14 @@ $(BUILDDIR)/test/cdcl_lexer_test.cc.o \
 $(BUILDDIR)/test/cdcl_parser_test.cc.o \
 $(BUILDDIR)/test/lockable_test.cc.o \
 $(BUILDDIR)/test/string_test.cc.o
+TEST_LIBS = $(GTEST_MAIN_LIBS) -l$(LIBNAME) -l$(CDCL_LIBNAME)
+TEST_LDFLAGS = $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS)
 -include $(TEST_OBJS:%=%.d)
 else
 TEST_OBJS =
+TEST_LIBS =
+TEST_LDFLAGS =
 endif
-TEST_LIBS = $(GTEST_MAIN_LIBS) -l$(LIBNAME) -l$(CDCL_LIBNAME)
-TEST_LDFLAGS = $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS)
 # link only if we are building tests, otherwise do nothing
 $(BUILDDIR)/pdxcp_test: $(BUILDDIR)/$(CDCL_LIBFILE) $(TEST_OBJS)
 ifneq ($(BUILD_TESTS),)
