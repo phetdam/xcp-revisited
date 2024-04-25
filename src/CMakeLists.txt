@@ -103,6 +103,7 @@ if(CMAKE_CXX_COMPILER)
             arrptrbind++
             fruit1
             fruit2
+            fruit3
     )
 endif()
 
