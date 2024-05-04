@@ -77,6 +77,7 @@ endif
 # if not building tests, object list is empty to prevent compilation
 ifneq ($(BUILD_TESTS),)
 TEST_OBJS = \
+$(BUILDDIR)/test/bvector_test.cc.o \
 $(BUILDDIR)/test/cdcl_lexer_test.cc.o \
 $(BUILDDIR)/test/cdcl_parser_test.cc.o \
 $(BUILDDIR)/test/lockable_test.cc.o \
