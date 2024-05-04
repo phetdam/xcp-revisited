@@ -32,6 +32,11 @@ typedef struct {
 } pdxcp_bvector;
 
 /**
+ * Number of bytes in a byte vector on first expansion from zero capacity.
+ */
+#define PDXCP_BVECTOR_ZERO_EXPAND_SIZE 16
+
+/**
  * Initialize a `pdxcp_bvector` structure.
  *
  * This is equivalent to using `pdxcp_bvector v = {0}` to zero the struct.
@@ -55,7 +60,8 @@ pdxcp_bvector_destroy(pdxcp_bvector *vec) PDXCP_NOEXCEPT;
  * Expand the `pdxcp_bvector` data buffer.
  *
  * If the byte vector is newly initialized with `pdxcp_bvector_init`, the size
- * is zero and the expansion is to 16 bytes. Otherwise, capacity is doubled.
+ * is zero and the expansion is to `PDXCP_BVECTOR_ZERO_EXPAND_SIZE` bytes.
+ * Otherwise, the byte vector capacity is instead doubled.
  *
  * @param vec Byte vector to expand
  * @returns `true` on success, `false` on error (`errno` is ENOMEM)

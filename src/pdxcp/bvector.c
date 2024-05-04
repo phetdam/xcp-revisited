@@ -31,8 +31,9 @@ pdxcp_bvector_destroy(pdxcp_bvector *vec) PDXCP_NOEXCEPT
 bool
 pdxcp_bvector_expand(pdxcp_bvector *vec) PDXCP_NOEXCEPT
 {
-  // expand, either to 16 bytes if empty or doubling the capacity
-  size_t new_capacity = (!vec->capacity) ? 16 : 2 * vec->capacity;
+  // expand, either to PDXCP_BVECTOR_ZERO_EXPAND_SIZE if empty or 2 * capacity
+  size_t new_capacity = (!vec->capacity) ?
+    PDXCP_BVECTOR_ZERO_EXPAND_SIZE : 2 * vec->capacity;
   unsigned char *new_data = realloc(vec->data, new_capacity);
   // error, this is ENOMEM
   if (!new_data)
