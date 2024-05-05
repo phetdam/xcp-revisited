@@ -143,6 +143,7 @@ INSTANTIATE_TEST_SUITE_P(
         4 * PDXCP_BVECTOR_ZERO_EXPAND_SIZE
       },
       // 98 chars
+      // from Demon Hunter's "One Thousand Apologies"
       {
         "The reason gone, the damage stays\n"
         "All the delicate ways that I deepened our grave\n"
