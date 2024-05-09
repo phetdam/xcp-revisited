@@ -62,6 +62,9 @@
 
 /**
  * Project version string.
+ *
+ * @note Could be constructed by concatenating the major, minor, patch versions
+ *  and then stringifying. The requisite macros are in `common.h`.
  */
 #define PDXCP_STRING_VERSION "@PDXCP_VERSION@"
 
