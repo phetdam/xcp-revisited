@@ -1,0 +1,62 @@
+/**
+ * @file version.h
+ * @author Derek Huang
+ * @brief C/C++ header for version helpers
+ * @copyright MIT License
+ */
+
+#ifndef PDXCP_VERSION_H_
+#define PDXCP_VERSION_H_
+
+/**
+ * Project major version.
+ */
+#define PDXCP_VERSION_MAJOR @PDXCP_VERSION_MAJOR@
+
+/**
+ * Project minor version.
+ */
+#define PDXCP_VERSION_MINOR @PDXCP_VERSION_MINOR@
+
+/**
+ * Project patch version.
+ */
+#define PDXCP_VERSION_PATCH @PDXCP_VERSION_PATCH@
+
+/**
+ * Project version string.
+ */
+#define PDXCP_STRING_VERSION "@PDXCP_VERSION@"
+
+/**
+ * Project major version multiplier.
+ */
+#define PDXCP_VERSION_MAJOR_MULTIPLIER 10000
+
+/**
+ * Project minor version multiplier allowing up to 99 minor versions.
+ */
+#define PDXCP_VERSION_MINOR_MULTIPLIER 100
+
+/**
+ * Project patch version multiplier allowing up to 99 patch versions.
+ */
+#define PDXCP_VERSION_PATCH_MULTIPLIER 1
+
+/**
+ * Create an integer value from major, minor, patch versions.
+ *
+ * @note Arguments are not expanded before use.
+ *
+ * @param major Project major version
+ * @param minor Project minor version
+ * @param patch Project patch version
+ */
+#define PDXCP_MAKE_VERSION(major, minor, patch) \
+    ( \
+        PDXCP_VERSION_MAJOR_MULTIPLIER * (major) + \
+        PDXCP_VERSION_MINOR_MULTIPLIER * (minor) + \
+        PDXCP_VERSION_PATCH_MULTIPLIER * (patch) \
+    )
+
+#endif  // PDXCP_VERSION_H_

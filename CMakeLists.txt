@@ -99,7 +99,15 @@ set(CMAKE_BUILD_RPATH_USE_ORIGIN ON)
 # add compile options
 include(ConfigCompile)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+# include directories
+set(PDXCP_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${PDXCP_INCLUDE_DIR})
+
+# create version.h header from version.h.in
+configure_file(
+    ${PDXCP_INCLUDE_DIR}/pdxcp/version.h.in
+    ${PDXCP_INCLUDE_DIR}/pdxcp/version.h
+)
 
 add_subdirectory(src)
 if(BUILD_TESTS)
