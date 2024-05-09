@@ -2,3 +2,5 @@
 /build
 # ignore .vscode config
 /.vscode
+# ignore version.h (generated from version.h.in)
+/include/pdxcp/version.h
