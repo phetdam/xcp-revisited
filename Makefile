@@ -31,7 +31,7 @@ all: segsizes
 
 # cleanup
 clean:
-	@$(RM) -v include/pdxcp/version.h
+	@$(RM) -v $(VERSION_HEADER)
 	@$(RM) -rv $(BUILDDIR)
 
 ###############################################################################
@@ -41,7 +41,7 @@ clean:
 # compilation technically any target that uses version.h needs to explicitly
 # depend on this rule. however, since generation time is very fast (faster than
 # compiling at least) we omit the dependency since it requires rule rewriting.
-include/pdxcp/version.h: include/pdxcp/version.h.in
+$(VERSION_HEADER): $(VERSION_HEADER).in
 	@printf "$(TFICYAN)Generating $@\n$(TNORMAL)"
 	@cat $< | \
 sed 's/@PDXCP_VERSION_MAJOR@/$(VERSION_MAJOR)/g' | \

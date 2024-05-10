@@ -18,3 +18,5 @@ cat CMakeLists.txt | grep 'PDXCP_VERSION_PATCH' | head -1 | \
 sed -E 's/[a-zA-Z_() ]+//g')
 # version string constructed from major, minor, patch versions
 VERSION_STRING = $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
+# the generated version header (local to top-level directory)
+VERSION_HEADER = include/pdxcp/version.h
