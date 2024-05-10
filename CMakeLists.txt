@@ -105,8 +105,8 @@ include_directories(${PDXCP_INCLUDE_DIR})
 
 # create version.h header from version.h.in
 configure_file(
-    ${PDXCP_INCLUDE_DIR}/pdxcp/version.h.in
-    ${PDXCP_INCLUDE_DIR}/pdxcp/version.h
+    ${PDXCP_INCLUDE_DIR}/pdxcp/version.h.in ${PDXCP_INCLUDE_DIR}/pdxcp/version.h
+    @ONLY NEWLINE_STYLE LF
 )
 
 add_subdirectory(src)
