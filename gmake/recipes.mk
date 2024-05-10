@@ -1,4 +1,4 @@
-# File: make/recipes.mk
+# File: gmake/recipes.mk
 # Author: Derek Huang
 # Brief: Makefile recipes for C/C++ static/shared library or executable linking
 # Copyright: MIT License

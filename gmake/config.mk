@@ -1,4 +1,4 @@
-# File: make/config.mk
+# File: gmake/config.mk
 # Author: Derek Huang
 # Brief: Makefile C/C++ compile/link and testing configuration file
 # Copyright: MIT License
@@ -248,11 +248,13 @@ $(info Terminal colors: $(TERMCOLORS))
 TFGREEN = $(shell tput setaf 2)
 TFCYAN = $(shell tput setaf 6)
 TFIGREEN = $(shell tput setaf 10)
+TFICYAN = $(shell tput setaf 14)
 TNORMAL = $(shell tput sgr0)
 else
 $(info Terminal colors: None)
 TFGREEN =
 TFCYAN =
 TFIGREEN =
+TFICYAN =
 TNORMAL =
 endif

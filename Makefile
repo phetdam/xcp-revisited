@@ -19,6 +19,9 @@ include gmake/recipes.mk
 # include C/C++ object and executable pattern rules
 include gmake/patterns.mk
 
+# include version extraction
+include gmake/version.mk
+
 # phony targets
 .PHONY: clean
 
@@ -28,9 +31,24 @@ all: segsizes
 
 # cleanup
 clean:
+	@$(RM) -v include/pdxcp/version.h
 	@$(RM) -rv $(BUILDDIR)
 
 ###############################################################################
+
+# version.h: generated version header from CMakeLists.txt and version.h.in
+# note: since the .d header file rules are only generated after the first
+# compilation technically any target that uses version.h needs to explicitly
+# depend on this rule. however, since generation time is very fast (faster than
+# compiling at least) we omit the dependency since it requires rule rewriting.
+include/pdxcp/version.h: include/pdxcp/version.h.in
+	@printf "$(TFICYAN)Generating $@\n$(TNORMAL)"
+	@cat $< | \
+sed 's/@PDXCP_VERSION_MAJOR@/$(VERSION_MAJOR)/g' | \
+sed 's/@PDXCP_VERSION_MINOR@/$(VERSION_MINOR)/g' | \
+sed 's/@PDXCP_VERSION_PATCH@/$(VERSION_PATCH)/g' | \
+sed 's/@PDXCP_VERSION@/$(VERSION_STRING)/g' > $@
+	@$(target-done)
 
 # libpdxcp: support library with some shared utility code
 LIB_OBJS = \
@@ -81,7 +99,8 @@ $(BUILDDIR)/test/bvector_test.cc.o \
 $(BUILDDIR)/test/cdcl_lexer_test.cc.o \
 $(BUILDDIR)/test/cdcl_parser_test.cc.o \
 $(BUILDDIR)/test/lockable_test.cc.o \
-$(BUILDDIR)/test/string_test.cc.o
+$(BUILDDIR)/test/string_test.cc.o \
+$(BUILDDIR)/test/version_test.cc.o
 TEST_LIBS = $(GTEST_MAIN_LIBS) -l$(LIBNAME) -l$(CDCL_LIBNAME)
 TEST_LDFLAGS = $(BASE_LDFLAGS) $(RPATH_FLAGS) $(LDFLAGS)
 -include $(TEST_OBJS:%=%.d)
@@ -149,6 +168,7 @@ $(BUILDDIR)/kbpoll: $(KBPOLL_OBJS) $(BUILDDIR)/$(LIBFILE)
 
 # all targets that are not related to segsizes
 NON_SEGSIZE_TGTS = \
+include/pdxcp/version.h \
 $(BUILDDIR)/$(LIBFILE) \
 $(BUILDDIR)/$(CDCL_LIBFILE) \
 $(BUILDDIR)/$(FRUIT_LIBFILE) \
