@@ -16,3 +16,4 @@ sys.path.insert(0, str(Path.cwd() / "src"))
 from pdxcp_fruit.pprinter import pretty_printer as fruit_printer
 # register pdxcp_fruit printers
 register_pretty_printer(current_objfile(), fruit_printer())
+end
