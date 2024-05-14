@@ -123,8 +123,8 @@ pretty printers in Python.
    Writing-a-Pretty_002dPrinter.html
 
 To load the pretty printers, start GDB in the top-level directory of this repo.
-If auto-loading of ``.gdbinit`` is declined, you can source the commands
-youself with
+If auto-loading of ``.gdbinit`` is declined due to GDB auto-load safe path
+settings, you can source the commands youself with
 
 .. code::
 
@@ -146,15 +146,16 @@ off (see `GDB print settings`__):
 .. code::
 
    (gdb) print a
-   $1 = {<pdxcp::fruit> = {_vptr.fruit = 0x7fffff7aed38 <vtable for pdxcp::apple+16>,
+   $1 = {<pdxcp::fruit> = {
+       _vptr.fruit = 0x7fffff7aed38 <vtable for pdxcp::apple+16>,
        weight_ = 5.2800000000000002, kcal_per_oz_ = 15}, <No data fields>}
 
-With the ``pdxcp::apple`` printer installed by sourcing ``.gdbinit``, the raw
-print with vtable info is recovered with:
+Of course, with ``.gdbinit`` commands sourced, one can recover the raw printout
+with vtable info using:
 
 .. code::
 
-   (gdb) print a
+   (gdb) print /r a
    $2 = (pdxcp::apple) {<pdxcp::fruit> = {
        _vptr.fruit = 0x7fffff7aed38 <vtable for pdxcp::apple+16>,
        weight_ = 5.2800000000000002, kcal_per_oz_ = 15}, <No data fields>}
