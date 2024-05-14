@@ -107,3 +107,54 @@ One can also explicitly choose to disable test building with
 .. code:: bash
 
    ./build.sh -Ca -DBUILD_TESTS=OFF
+
+GDB printers
+------------
+
+This project also includes some GDB_ `pretty printers`__ for the ``pdxcp_fruit``
+C++ library that is built if a compiler with C++17 support is available. Since
+the "fruit" classes are simple, so are the pretty printer Python classes, which
+makes the printers in this project a nice and clean example of how to write GDB
+pretty printers in Python.
+
+.. _GDB: https://www.sourceware.org/gdb/
+
+.. __: https://sourceware.org/gdb/current/onlinedocs/gdb.html/
+   Writing-a-Pretty_002dPrinter.html
+
+To load the pretty printers, start GDB in the top-level directory of this repo.
+If auto-loading of ``.gdbinit`` is declined, you can source the commands
+youself with
+
+.. code::
+
+   source .gdbinit
+
+This will load the ``pdxcp_fruit`` pretty printers so that e.g. when a
+``pdxcp::apple`` is printed, one sees
+
+.. code::
+
+   (gdb) print a
+   $1 = pdxcp::apple(weight=5.2800000000000002)
+
+Contrast this with a raw printout when derived type printing using the vtable is
+off (see `GDB print settings`__):
+
+.. __: https://sourceware.org/gdb/current/onlinedocs/gdb.html/Print-Settings.html
+
+.. code::
+
+   (gdb) print a
+   $1 = {<pdxcp::fruit> = {_vptr.fruit = 0x7fffff7aed38 <vtable for pdxcp::apple+16>,
+       weight_ = 5.2800000000000002, kcal_per_oz_ = 15}, <No data fields>}
+
+With the ``pdxcp::apple`` printer installed by sourcing ``.gdbinit``, the raw
+print with vtable info is recovered with:
+
+.. code::
+
+   (gdb) print a
+   $2 = (pdxcp::apple) {<pdxcp::fruit> = {
+       _vptr.fruit = 0x7fffff7aed38 <vtable for pdxcp::apple+16>,
+       weight_ = 5.2800000000000002, kcal_per_oz_ = 15}, <No data fields>}
