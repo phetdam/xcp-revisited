@@ -4,3 +4,5 @@
 /.vscode
 # ignore version.h (generated from version.h.in)
 /include/pdxcp/version.h
+# ignore __pycache__
+**/__pycache__
