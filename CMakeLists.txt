@@ -104,10 +104,14 @@ set(PDXCP_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${PDXCP_INCLUDE_DIR})
 
 # create version.h header from version.h.in
+set(PDXCP_VERSION_HEADER ${PDXCP_INCLUDE_DIR}/pdxcp/version.h)
 configure_file(
-    ${PDXCP_INCLUDE_DIR}/pdxcp/version.h.in ${PDXCP_INCLUDE_DIR}/pdxcp/version.h
+    ${PDXCP_VERSION_HEADER}.in ${PDXCP_VERSION_HEADER}
     @ONLY NEWLINE_STYLE LF
 )
+# cmake_path new in CMake 3.20
+cmake_path(GET PDXCP_VERSION_HEADER FILENAME PDXCP_VERSION_HEADER_FILENAME)
+message(STATUS "Generated ${PDXCP_VERSION_HEADER_FILENAME}")
 
 add_subdirectory(src)
 if(BUILD_TESTS)
